@@ -1,0 +1,344 @@
+<!doctype html>
+<!-- conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if lt IE 7 ]> <html class="no-js ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]>    <html class="no-js ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]>    <html class="no-js ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+
+  <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+       Remove this if you use the .htaccess -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <title></title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- Mobile viewport optimized: j.mp/bplateviewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Place favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+  <link rel="shortcut icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+  <!-- CSS: implied media="all" -->
+  <link rel="stylesheet" href="css/style.css?v=2">
+
+  <!-- Uncomment if you are specifically targeting less enabled mobile browsers
+  <link rel="stylesheet" media="handheld" href="css/handheld.css?v=2">  -->
+
+  <!-- All JavaScript at the bottom, except for Modernizr which enables HTML5 elements & feature detects -->
+  <script src="js/libs/modernizr-1.7.min.js"></script>
+
+</head>
+
+<body class="fr">
+<!-- page fadein effect if javascript ok -->
+<script type="text/javascript">
+<!--//--><![CDATA[//><!--
+document.write( '<div id="content-wrapper">' );
+//--><!]]>
+</script>
+
+  <div id="container">
+  	<div id="col-gauche">
+  	    <header>
+			<a class="logo bg" href="/integration/index.html" title="Retour à la page d'accueil">home</a>
+			<div id="top-menu" class="bg">
+				<ul class="menu-secondaire">
+					<li><a href="#" title="partenaires">Partenaires</a></li>
+					<li><a href="#" title="questions-réponses">Questions-Réponses</a></li>
+					<li><a href="#" title="actualités">Actualités</a></li>
+					<li><a href="#" title="publications">Publications</a></li>
+				</ul>
+				<ul class="lang-switcher">
+					<li><a href="#" class="active" title="Version Française">FR</a></li> |
+					<li><a href="#" title="English version">EN</a></li>
+				</ul>
+				<ul class="tools">
+					<li><a href="#" title="Abonnement newsletter" class="newsletter bg">Lettre de la </a></li>
+					<!-- bloc newsletter -->
+					<div class="tools-form newsletter">
+						<h2>Restez informés !</h2>
+						<p>Abonnez-vous à la newsletter du MAB France :</p>
+						<form method="post" action="" enctype="multipart/form-data">
+						  <input name="MAX_FILE_SIZE" type="hidden" value="5242880" />
+						  <label>Nom</label>
+						    <input class="radius" name="fields[votre-nom]" type="text" value="Nom" />
+						  
+						  <label>Prénom</label>
+						    <input class="radius" name="fields[votre-prenom]" type="text" value="Prénom" />
+						  
+						  <label>Courriel</label>
+						    <input class="radius" name="fields[votre-email]" type="text" value="Courriel" />
+						  
+						  <label>Àge</label>
+						    <input class="radius" name="fields[votre-age]" type="text" value="Àge" />
+						  
+						  <label>Activité</label>
+						    <input class="radius" name="fields[votre-activite]" type="text" value="Activité" />
+						  
+						  <input name="action[save-newsletter]" type="submit" value="Ok" />
+						</form>
+					</div>
+					
+					<li><a href="#" title="Contact" class="contact bg">Contact</a></li>
+					<!-- bloc contact -->
+					<div class="tools-form contact">
+						<h2>Contact</h2>	
+						<p>Une question ? Contactez-nous !</p>
+						<form method="post" action="" enctype="multipart/form-data">
+						  <input name="MAX_FILE_SIZE" type="hidden" value="5242880" />
+						  <label>Courriel</label>
+						    <input class="radius" name="fields[votre-email]" type="text" value="Courriel" />
+						  
+						  <label>Message</label>
+						    <textarea class="radius" name="fields[votre-message]" rows="15" cols="50">Message</textarea>
+						    
+						  <input name="action[save-contact]" type="submit" value="Ok" />
+						</form>
+					</div>
+					<li><a href="#" title="Recherche" class="recherche bg">Recherche</a></li>
+					<!-- bloc recherche -->
+					<div class="tools-form recherche">
+						<form method="post" action="" enctype="multipart/form-data">
+						  <input name="MAX_FILE_SIZE" type="hidden" value="5242880" />
+						  <label>Chercher un contenu</label>
+						    <input class="radius" name="fields[votre-recherche]" type="text" value="Chercher un contenu" />
+						  	<input name="action[search]" type="submit" value="Ok" />
+						</form>
+					</div>
+				</ul>
+			</div>
+			<div id="titre-menu" class="bg">
+				<ul>
+					<li><a class="bouton-vert bg developper" href="#">Développer le réseau</a>	
+						<ul>
+							<li><a href="#">Démarche d'accompagnement</a></li>
+							<li><a href="#">Projets de création</a></li>
+							<li><a href="#">Renouvellement</a></li>
+						</ul>
+					</li>	
+					<li><a class="bouton-vert bg concilier" href="#">Concilier activité & environnement</a>	
+						<ul>
+							<li><a href="#">Charte d'engagement</a></li>
+							<li><a href="#">Biodiversité et gestion</a></li>
+						</ul>
+					</li>	
+					<li><a class="bouton-vert bg dialoguer" href="#">Dialoguer pour mieux gérer</a>	
+						<ul>
+							<li><a href="#">Démarche d'accompagnement</a></li>
+							<li><a href="/integration/action.html">Marteloscope</a></li>
+							<li><a href="#">Groupe Forêt</a></li>
+							<li><a href="#">Sciences participatives</a></li>
+						</ul>
+					</li>	
+					<li><a class="bouton-vert bg acquerir" href="#">Acquérir des connaissances</a></li>	
+					<li><a class="bouton-vert bg transmettre" href="#">Transmettre les savoirs</a>
+						<ul>
+							<li><a href="#">Jumelages interclasses</a></li>
+							<li><a href="#">Ressources pédagogiques</a></li>
+							<li><a href="#">Partenariats éducatifs</a></li>
+							<li><a href="#">Liens universitaires</a></li>
+							<li><a href="#">Master MAB</a></li>
+						</ul>
+					</li>	
+				</ul>
+			</div>
+    	</header>
+    	<div id="main" role="main">
+  			<!-- diaporama -->
+  			<div id="diaporama" class="scrollable">
+	  			<div class="items">
+	  				<div class="item">
+		  				<!-- lien rubrique x5 -->
+		  				<a class="lien-action" href="#">Éducation au développement durable</a>
+		  				<!-- caption x10 -->
+		  				<a class="lien-biosphere" href="#">Réserve de biosphère des Vosges du Nord - Pfäzerwald</a>
+		  				<!-- image x10 -->
+		  				<img src="img/diaporama/diapo-vosges-01.jpg" alt="diapo-vosges" width="500" height="190" />
+					</div>
+	  				<div class="item">
+		  				<!-- lien rubrique x5 -->
+		  				<a class="lien-action" href="#">Éducation au développement durable</a>
+		  				<!-- caption x10 -->
+		  				<a class="lien-biosphere" href="#">Réserve de biosphère du Ventoux</a>
+		  				<!-- image x10 -->
+		  				<img src="img/diaporama/diapo-vosges-02.jpg" alt="diapo-vosges" width="500" height="190" />
+					</div>
+	  				<div class="item">
+		  				<!-- lien rubrique x5 -->
+		  				<a class="lien-action" href="#">Gestion concertée et participative des territoires</a>
+		  				<!-- caption x10 -->
+		  				<a class="lien-biosphere" href="#">Réserve de biosphère de Fontainebleau et du Gâtinais</a>
+		  				<!-- image x10 -->
+		  				<img src="img/diaporama/diapo-vosges-03.jpg" alt="diapo-vosges" width="500" height="190" />
+					</div>
+	  				<div class="item">
+		  				<!-- lien rubrique x5 -->
+		  				<a class="lien-action" href="#">Gestion concertée et participative des territoires</a>
+		  				<!-- caption x10 -->
+		  				<a class="lien-biosphere" href="#">Réserve de biosphère de la vallée du Fango</a>
+		  				<!-- image x10 -->
+		  				<img src="img/diaporama/diapo-vosges-04.jpg" alt="diapo-vosges" width="500" height="190" />
+					</div>
+	  				<div class="item">
+		  				<!-- lien rubrique x5 -->
+		  				<a class="lien-action" href="#">Développement humain construit sur des ressources biologiques préservées</a>
+		  				<!-- caption x10 -->
+		  				<a class="lien-biosphere" href="#">Réserve de biosphère des Cévennes</a>
+		  				<!-- image x10 -->
+		  				<img src="img/diaporama/diapo-vosges-05.jpg" alt="diapo-vosges" width="500" height="190" />
+					</div>
+	  				<div class="item">
+		  				<!-- lien rubrique x5 -->
+		  				<a class="lien-action" href="#">Développement humain construit sur des ressources biologiques préservées</a>
+		  				<!-- caption x10 -->
+		  				<a class="lien-biosphere" href="#">Réserve de biosphère de Camargue</a>
+		  				<!-- image x10 -->
+		  				<img src="img/diaporama/diapo-vosges-06.jpg" alt="diapo-vosges" width="500" height="190" />
+					</div>
+	  				<div class="item">
+		  				<!-- lien rubrique x5 -->
+		  				<a class="lien-action" href="#">Accompagner l'évolution du réseau des Réserves de biosphère</a>
+		  				<!-- caption x10 -->
+		  				<a class="lien-biosphere" href="#">Réserve de biosphère de Fakarava</a>
+		  				<!-- image x10 -->
+		  				<img src="img/diaporama/diapo-vosges-07.jpg" alt="diapo-vosges" width="500" height="190" />
+					</div>
+	  				<div class="item">
+		  				<!-- lien rubrique x5 -->
+		  				<a class="lien-action" href="#">Accompagner l'évolution du réseau des Réserves de biosphère</a>
+		  				<!-- caption x10 -->
+		  				<a class="lien-biosphere" href="#">Réserve de biosphère de Guadeloupe</a>
+		  				<!-- image x10 -->
+		  				<img src="img/diaporama/diapo-vosges-08.jpg" alt="diapo-vosges" width="500" height="190" />
+					</div>
+	  				<div class="item">
+		  				<!-- lien rubrique x5 -->
+		  				<a class="lien-action" href="#">Mieux connaître pour mieux protéger</a>
+		  				<!-- caption x10 -->
+		  				<a class="lien-biosphere" href="#">Réserve de biosphère d'Iroise</a>
+		  				<!-- image x10 -->
+		  				<img src="img/diaporama/diapo-vosges-09.jpg" alt="diapo-vosges" width="500" height="190" />
+					</div>
+	  				<div class="item">
+		  				<!-- lien rubrique x5 -->
+		  				<a class="lien-action" href="#">Mieux connaître pour mieux protéger</a>
+		  				<!-- caption x10 -->
+		  				<a class="lien-biosphere" href="#">Réserve de biosphère du Luberon</a>
+		  				<!-- image x10 -->
+		  				<img src="img/diaporama/diapo-vosges-10.jpg" alt="diapo-vosges" width="500" height="190" />
+					</div>
+				</div><!-- end items -->	
+  				<div class="masque bg"></div>
+  				<a class="prev browse left bg"></a>
+  				<a class="next browse right bg"></a>
+  			</div><!-- end diaporama scrollable -->
+  			
+  			<!-- flag qu'est ce que le mab france ? -->
+  			<div class="flag-about bg"></div>
+  			<a href="#" class="point bg reserve"></a>
+  			<div class="info reserve-info bg">
+  				<h2>Les réserves de biosphère</h2>
+  				<p>des sites pour mettre en œuvre le programme MAB</p><p><b class="black">Le + :</b> un réseau unique de territoires aux objectifs communs à l’échelle planétaire<br /><a class="lien_vert" href="#">En savoir plus</a></p>
+  			</div>
+  			<a href="#" class="point bg comite"></a>
+  			<div class="info comite-info bg">
+  				<h2>Le comité français</h2>
+  				<p>anime, fédère et développe le réseau français de réserves de biosphère</p><p><b class="black">Le + :</b> une plateforme d’échange avec le réseau mondial<br /><a class="lien_vert" href="#">En savoir plus</a></p>
+  			</div>
+  			<a href="#" class="point bg programme"></a>
+	  			<div class="info programme-info bg">
+	  				<h2>Le programme<br/>l'homme et la biosphère </h2>
+	  				<p>Expérimente des formes de développement économique et social durables</p><p><b class="black">Le + :</b> une approche intégrée : implication des populations / gestion / recherche / éducation<br /><a class="lien_vert" href="#">En savoir plus</a></p>
+	  			</div>
+	  		<div class="ptit-mab"><a href="#" title="La bande des p'tits MAB">Clique ici !</a></div>	
+  		</div>
+  	</div>
+  	<!-- COLONNE DE DROITE -->
+    <div id="col-droite">
+	    <ul id="top-col-droite" class="bg">
+	    	<li class="bg active"><a href="#" class="liste-mab">MAB FRANCE</a></li>
+	    	<div class="top-mab-content bg">
+	    	<p>Le comité MAB France anime le réseau national de réserves de biosphère, assure la liaison entre les équipes et organismes français, le MAB international à l'UNESCO. <a href="#" class="lien_vert">En savoir plus</a></p></div>
+	    	<li class="bg"><a href="#" class="liste-bio">RÉSERVES DE BIOSPHÈRE</a></li>
+	    	<div class="top-biosphere-content">
+	    		<a href="/integration/biosphere.html" class="bg">Voir les réserves de biosphère en France</a>
+	    	</div>
+	    </ul>
+	    <div id="blocs-col-droite" class="bg">
+	    	<!-- actualités -->
+	    	<a href="#" class="btn-rss bg" title="fil rss">Abonnez-vous au fil rss de nos actulités</a>
+	    	<!-- remonté des deux dernières actus -->
+	    	<div class="content-actu">
+	    		<p><span class="date-actu">05/04/2011</span><a href="#">Lorem ipsum dolor sit amet, consectetur adipisicing elit dolor sit amet</a><br /><a class="lien_vert" href="#">En savoir plus</a></p>
+	    		<p><span class="date-actu">01/04/2011</span><a href="#">Lorem ipsum dolor sit amet, consectetur adipisicing elit dolor sit amet</a><br /><a class="lien_vert" href="#">En savoir plus</a></p>
+	    	</div>
+
+  	    	<!-- remonté des trois dernières publications -->
+	    	<ul class="publications">
+	    		<li><a href="#">La science en Questions : "Changement climatique et biodiversité" / 2011</a></li>
+	    		<li><a href="#">Programme de l'UNESCO : "l'Homme et la Biosphère" / 2011</a></li>
+	    		<li><a href="#">Entre l'Homme et la nature, une démarche pour des relations durables / 2008</a></li>
+	    	</ul>
+	    </div>
+    </div>
+    
+  </div> <!--! end of #container -->
+    <footer>
+		<ul>
+			<li><a href="#" title="intranet">Intranet</a></li> -
+			<li><a href="#" title="Plan du site">Plan du site</a></li> -
+			<li><a href="#" title="Mentions légales">Mentions légales</a></li> -
+			<li><a href="#" title="Crédits">Crédits</a></li>
+		</ul>
+   </footer>
+  
+<!-- page fadein effect if javascript ok -->
+<script type="text/javascript">
+<!--//--><![CDATA[//><!--
+document.write( '</div><!-- content-wrapper -->' );
+//--><!]]>
+</script>
+  <!-- JavaScript at the bottom for fast page loading -->
+
+  <!-- Grab Google CDN's jQuery, with a protocol relative URL; fall back to local if necessary -->
+  <script src="http://cdn.jquerytools.org/1.2.5/full/jquery.tools.min.js"></script>
+  <script>window.jQuery || document.write("<script src='js/libs/jquery.tools.min.js'>\x3C/script>")</script>
+
+
+  <!-- scripts concatenated and minified via ant build script-->
+  <script src="js/plugins.js"></script>
+  <script src="js/main.js"></script>
+  <!-- end scripts-->
+
+
+  <!--[if lt IE 7 ]>
+    <script src="js/libs/dd_belatedpng.js"></script>
+    <script>DD_belatedPNG.fix("img, .png_bg"); // Fix any <img> or .png_bg bg-images. Also, please read goo.gl/mZiyb </script>
+  <![endif]-->
+
+
+  <!-- mathiasbynens.be/notes/async-analytics-snippet Change UA-XXXXX-X to be your site's ID -->
+  <script>
+    var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-XXXXX-X']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script');
+    ga.type = 'text/javascript';
+    ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(ga, s);
+  })();
+  </script>
+<script>
+$('#content-wrapper').hide();
+$('#content-wrapper').fadeIn(3000);
+</script>
+</body>
+</html>

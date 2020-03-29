@@ -1,0 +1,70 @@
+============================================
+Log Created: 2011-05-23T18:45:25+02:00
+============================================
+Symphony Installer Log
+Opened: 2011-05-23T18:45:25+02:00
+Version: 2.2.1
+Domain: http://mab-france.valactive.net
+--------------------------------------------
+
+============================================
+INSTALLATION PROCESS STARTED (2011-05-23T18:45:25+02:00)
+============================================
+2011/05/23 18:45:25 > Notice: MYSQL: Establishing Connection...Done
+2011/05/23 18:45:25 > Notice: MYSQL: Selecting Database 'mab-france'...Done
+2011/05/23 18:45:25 > Notice: MYSQL: Importing Table Schema...Done
+2011/05/23 18:45:25 > Notice: MYSQL: Creating Default Author...Done
+2011/05/23 18:45:25 > Notice: WRITING: Creating 'manifest' folder (/manifest)
+2011/05/23 18:45:25 > Notice: WRITING: Creating 'logs' folder (/manifest/logs)
+2011/05/23 18:45:25 > Error: ERROR: Creation of 'logs' folder failed.
+2011/05/23 18:45:25 > Error: Could not create 'logs' directory. Check permission on /manifest.
+============================================
+INSTALLATION ABORTED: Execution Time - 1 sec (23.05.11 18:45:25)
+============================================
+
+
+
+2011/05/23 18:46:02 > Notice: Configuration - Database table prefix clash with 'mab-france'
+
+============================================
+INSTALLATION PROCESS STARTED (2011-05-23T18:46:17+02:00)
+============================================
+2011/05/23 18:46:17 > Notice: MYSQL: Establishing Connection...Done
+2011/05/23 18:46:17 > Notice: MYSQL: Selecting Database 'mab-france'...Done
+2011/05/23 18:46:17 > Notice: MYSQL: Importing Table Schema...Done
+2011/05/23 18:46:17 > Notice: MYSQL: Creating Default Author...Done
+2011/05/23 18:46:17 > Notice: WRITING: Creating 'manifest' folder (/manifest)
+2011/05/23 18:46:17 > Notice: WRITING: Creating 'logs' folder (/manifest/logs)
+2011/05/23 18:46:17 > Error: ERROR: Creation of 'logs' folder failed.
+2011/05/23 18:46:17 > Error: Could not create 'logs' directory. Check permission on /manifest.
+============================================
+INSTALLATION ABORTED: Execution Time - 1 sec (23.05.11 18:46:17)
+============================================
+
+
+
+2011/05/23 18:47:58 > Notice: Configuration - Database table prefix clash with 'mab-france'
+
+============================================
+INSTALLATION PROCESS STARTED (2011-05-23T18:48:12+02:00)
+============================================
+2011/05/23 18:48:12 > Notice: MYSQL: Establishing Connection...Done
+2011/05/23 18:48:12 > Notice: MYSQL: Selecting Database 'mab-france'...Done
+2011/05/23 18:48:12 > Notice: MYSQL: Importing Table Schema...Done
+2011/05/23 18:48:12 > Notice: MYSQL: Creating Default Author...Done
+2011/05/23 18:48:12 > Notice: WRITING: Creating 'manifest' folder (/manifest)
+2011/05/23 18:48:12 > Notice: WRITING: Creating 'logs' folder (/manifest/logs)
+2011/05/23 18:48:12 > Notice: WRITING: Creating 'cache' folder (/manifest/cache)
+2011/05/23 18:48:12 > Notice: WRITING: Creating 'tmp' folder (/manifest/tmp)
+2011/05/23 18:48:12 > Notice: WRITING: Configuration File
+2011/05/23 18:48:12 > Notice: CONFIGURING: Frontend
+2011/05/23 18:48:12 > Notice: WRITING: Creating 'workspace' folder (/workspace)
+2011/05/23 18:48:12 > Notice: WRITING: Creating 'data-sources' folder (/workspace/data-sources)
+2011/05/23 18:48:12 > Error: ERROR: Creation of 'workspace/data-sources' folder failed.
+2011/05/23 18:48:12 > Error: Could not create 'workspace/data-sources' directory. Check permission on the root folder.
+============================================
+INSTALLATION ABORTED: Execution Time - 1 sec (23.05.11 18:48:12)
+============================================
+
+
+

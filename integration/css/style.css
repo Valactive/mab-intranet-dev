@@ -1,0 +1,635 @@
+/**
+ * HTML5 ✰ Boilerplate
+ *
+ * style.css contains a reset, font normalization and some base styles.
+ *
+ * Credit is left where credit is due.
+ * Much inspiration was taken from these projects:
+ * - yui.yahooapis.com/2.8.1/build/base/base.css
+ * - camendesign.com/design/
+ * - praegnanz.de/weblog/htmlcssjs-kickstart
+ */
+
+
+/**
+ * html5doctor.com Reset Stylesheet (Eric Meyer's Reset Reloaded + HTML5 baseline)
+ * v1.6.1 2010-09-17 | Authors: Eric Meyer & Richard Clark
+ * html5doctor.com/html-5-reset-stylesheet/
+ */
+
+html, body, div, span, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp,
+small, strong, sub, sup, var, b, i, dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+  color: #666;
+}
+
+a { text-decoration: none; }
+
+b { font-weight: bold; }
+
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+
+blockquote, q { quotes: none; }
+
+blockquote:before, blockquote:after,
+q:before, q:after { content: ""; content: none; }
+
+ins { background-color: #ff9; color: #000; text-decoration: none; }
+
+mark { background-color: #ff9; color: #000; font-style: italic; font-weight: bold; }
+
+del { text-decoration: line-through; }
+
+abbr[title], dfn[title] { border-bottom: 1px dotted; cursor: help; }
+
+table { border-collapse: collapse; border-spacing: 0; }
+
+hr { display: block; height: 1px; border: 0; border-top: 1px solid #ccc; margin: 1em 0; padding: 0; }
+
+input, select { vertical-align: middle; }
+
+
+/**
+ * Font normalization inspired by YUI Library's fonts.css: developer.yahoo.com/yui/
+ */
+
+body { font:13px/1.231 sans-serif; *font-size:small; } /* Hack retained to preserve specificity */
+select, input, textarea, button { font:99% sans-serif; }
+
+/* Normalize monospace sizing:
+   en.wikipedia.org/wiki/MediaWiki_talk:Common.css/Archive_11#Teletype_style_fix_for_Chrome */
+pre, code, kbd, samp { font-family: monospace, sans-serif; }
+
+
+/**
+ * Minimal base styles.
+ */
+
+/* Always force a scrollbar in non-IE */
+html { overflow-y: scroll; }
+
+/* Accessible focus treatment: people.opera.com/patrickl/experiments/keyboard/test */
+a:hover, a:active { outline: none; }
+
+ul, ol { margin-left: 2em; }
+ol { list-style-type: decimal; }
+
+/* Remove margins for navigation lists */
+nav ul, nav li { margin: 0; list-style:none; list-style-image: none; }
+
+small { font-size: 85%; }
+strong, th { font-weight: bold; }
+
+td { vertical-align: top; }
+
+/* Set sub, sup without affecting line-height: gist.github.com/413930 */
+sub, sup { font-size: 75%; line-height: 0; position: relative; }
+sup { top: -0.5em; }
+sub { bottom: -0.25em; }
+
+pre {
+  /* www.pathf.com/blogs/2008/05/formatting-quoted-code-in-blog-posts-css21-white-space-pre-wrap/ */
+  white-space: pre; white-space: pre-wrap; word-wrap: break-word;
+  padding: 15px;
+}
+
+textarea { overflow: auto; } /* www.sitepoint.com/blogs/2010/08/20/ie-remove-textarea-scrollbars/ */
+
+.ie6 legend, .ie7 legend { margin-left: -7px; } 
+
+/* Align checkboxes, radios, text inputs with their label by: Thierry Koblentz tjkdesign.com/ez-css/css/base.css  */
+input[type="radio"] { vertical-align: text-bottom; }
+input[type="checkbox"] { vertical-align: bottom; }
+.ie7 input[type="checkbox"] { vertical-align: baseline; }
+.ie6 input { vertical-align: text-bottom; }
+
+/* Hand cursor on clickable input elements */
+label, input[type="button"], input[type="submit"], input[type="image"], button { cursor: pointer; }
+
+/* Webkit browsers add a 2px margin outside the chrome of form elements */
+button, input, select, textarea { margin: 0; }
+
+/* Colors for form validity */
+input:valid, textarea:valid   {  }
+input:invalid, textarea:invalid {
+   border-radius: 1px; -moz-box-shadow: 0px 0px 5px red; -webkit-box-shadow: 0px 0px 5px red; box-shadow: 0px 0px 5px red;
+}
+.no-boxshadow input:invalid, .no-boxshadow textarea:invalid { background-color: #f0dddd; }
+
+
+/* These selection declarations have to be separate
+   No text-shadow: twitter.com/miketaylr/status/12228805301
+   Also: hot pink! */
+::-moz-selection{ background: #FF5E99; color:#fff; text-shadow: none; }
+/*::selection { background:#FF5E99; color:#fff; text-shadow: none; } */
+
+/* j.mp/webkit-tap-highlight-color */
+a:link { -webkit-tap-highlight-color: #FF5E99; }
+
+/* Make buttons play nice in IE:
+   www.viget.com/inspire/styling-the-button-element-in-internet-explorer/ */
+button {  width: auto; overflow: visible; }
+
+/* Bicubic resizing for non-native sized IMG:
+   code.flickr.com/blog/2008/11/12/on-ui-quality-the-little-things-client-side-image-resizing/ */
+.ie7 img { -ms-interpolation-mode: bicubic; }
+
+/**
+ * You might tweak these..
+ */
+
+body, select, input, textarea {
+  /* #444 looks better than black: twitter.com/H_FJ/statuses/11800719859 */
+  color: #444;
+  /* Set your base font here, to apply evenly */
+  /* font-family: Georgia, serif;  */
+}
+
+/* Headers (h1, h2, etc) have no default font-size or margin; define those yourself */
+h1, h2, h3, h4, h5, h6 { font-weight: bold; }
+
+a, a:active, a:visited { color: #607890; }
+a:hover, a.plus:hover { color: #036; text-decoration: underline; }
+
+.black { color: black; }
+/**
+ * Primary styles
+ *
+ * Author: Valery Frisch
+ */
+ #content-wrapper { display: none; }
+ html { background-color: #F4FAFF; width: 100%; }
+ #container {width: 980px; height: auto; margin: 0 auto 0 auto;}
+ #col-gauche {width: 785px; height: auto; float: left; }
+ #col-droite {width: 195px; height: 450px; float: left; }
+ 
+ body.fr .bg { background: url('../img/sprite.png') no-repeat; }
+ 
+ a.lien_vert { text-decoration: none; font-weight: bold; color: #62BA00; }
+ a.lien_vert:hover { text-decoration: underline; }
+ 
+ /**
+ * header
+ */
+ header { }
+ header a.logo { width: 108px; height: 123px; display: block; float: left; background-position: 0 0; text-indent: -999em;} 
+ header a.logo:hover { background-position: 0 -140px; }
+ header div#top-menu { width: 677px; height: 24px; float: left; background-position: -122px 0; background-color: #F4FAFF; position: relative;}
+ header div#titre-menu { width: 677px; height: 99px; float: left; background-position: -120px -39px;}
+
+ /**
+ * menus
+ */
+ /* menu-top */
+ header div#top-menu a { text-decoration: none; }
+ 
+ header div#top-menu ul.menu-secondaire { float: left; margin-left:53px; margin-top: 5px; width: 369px; }
+ header div#top-menu ul.menu-secondaire li {display: inline; padding: 0 3px;}
+ header div#top-menu ul.menu-secondaire li a { color:#808080; font-size: 11px; font-family: Arial;}
+ header div#top-menu ul.menu-secondaire li a:hover { text-decoration: underline; }
+ 
+ /* langues */
+ header div#top-menu ul.lang-switcher { float: left; margin-top: 5px; width: 100px; color: #BDCCD4; font-size: 14px; font-family: Trebuchet MS; font-weight: bold; }
+ header div#top-menu ul.lang-switcher li { display: inline;  }
+ header div#top-menu ul.lang-switcher li a { color: #BDCCD4; }
+ header div#top-menu ul.lang-switcher li a:hover, header div#top-menu ul.lang-switcher li a.active {color: #F16E00; }
+ 
+ /* tools */
+ header div#top-menu ul.tools { float: left; text-indent: -9999px; width: 90px; margin-left: 2.4em; background-color: #F4FAFF; }
+ header div#top-menu ul.tools li { display: inline; width: 27px; height: 24px; float: left; }
+ header div#top-menu ul.tools li a.newsletter { display: block; width: 27px; height: 24px; background-position: -120px -170px;}
+ header div#top-menu ul.tools li a.contact { display: block; width: 27px; height: 24px;  background-position: -225px -170px;}
+ header div#top-menu ul.tools li a.recherche { display: block; width: 27px; height: 24px;background-position: -170px -170px;}
+
+ header div#top-menu ul.tools li a.newsletter:hover,  header div#top-menu ul.tools li a.newsletter.active { background-position: -120px -227px;}
+ header div#top-menu ul.tools li a.contact:hover,  header div#top-menu ul.tools li a.contact.active { background-position: -225px -227px; }
+ header div#top-menu ul.tools li a.recherche:hover,  header div#top-menu ul.tools li a.recherche.active {background-position: -170px -227px; }
+
+ /* blocs header -newsletter - contact - recherche */
+ div.tools-form { display: none; position: absolute; padding: 5px 10px; z-index: 15; top:24px; right: 15px; width: 235px; height: 220px; background-color: #DCECFA; text-indent: 0; }
+ div.tools-form h2 { font-family: Trebuchet MS; font-weight: bold; font-size: 15px; border-bottom: 1px dashed #7D8D9B; color: #7D8D9B; padding-bottom: 8px; margin-bottom: 8px; }
+ div.tools-form label {display:block; text-indent: -999em; height: 7px;}
+ div.tools-form input[type='text'] { padding: 3px 5px; background: white; border: none; width: 185px;}
+ div.tools-form input[type='submit'] { border: none; width: 24px; height: 24px; margin-left: 10px; padding: 1px; 
+  -moz-border-radius: 12px;
+-webkit-border-radius: 12px;
+-o-border-radius: 12px;
+-ms-border-radius: 12px;
+-khtml-border-radius: 12px;
+border-radius: 12px; background-color: #7D8D9B; color: white;}
+div.tools-form input[type='submit']:hover { background-color: #62BA00; }
+div.recherche { height: 35px; }
+div.contact { height: 225px; }
+div.contact textarea { padding: 3px 5px; background: white; border: none; width: 185px; height: 85px;}
+ 
+ 
+ /********************************************************************************************/
+ /* MENU PRINCIPAL    site + biosphere                                                       */
+ /********************************************************************************************/
+ header div#titre-menu ul, ul.menu-princ { width: 660px; height: 38px; margin:62px 0 0 50px; list-style-type: none;}
+ header div#titre-menu ul li, ul.menu-princ li { float:left; position: relative; }
+ header div#titre-menu ul li a, ul.menu-princ li a { text-indent: -9998px; display: block; width: 160px; height: 38px; position:relative;}
+ 
+ header div#titre-menu ul li a.developper { width: 111px; background-position: 0 -952px;}
+ header div#titre-menu ul li a.concilier { width: 150px; background-position: -111px -952px;}
+ header div#titre-menu ul li a.dialoguer { width: 121px; background-position: -261px -952px;}
+ header div#titre-menu ul li a.acquerir { width: 111px; background-position: -382px -952px;}
+ header div#titre-menu ul li a.transmettre { width: 107px; background-position: -493px -952px;}
+
+ header div#titre-menu ul li a.developper:hover, header div#titre-menu ul li a.developper.active { background-position: 0 -990px;  z-index: 8;}
+ header div#titre-menu ul li a.concilier:hover, header div#titre-menu ul li a.concilier.active { background-position: -111px -990px;  z-index: 8;}
+ header div#titre-menu ul li a.dialoguer:hover, header div#titre-menu ul li a.dialoguer.active { background-position: -261px -990px;  z-index: 8;}
+ header div#titre-menu ul li a.acquerir:hover, header div#titre-menu ul li a.acquerir.active { background-position: -382px -990px;  z-index: 8;}
+ header div#titre-menu ul li a.transmettre:hover, header div#titre-menu ul li a.transmettre.active { background-position: -493px -990px;  z-index: 8;}
+ 
+ /* specific biosphere */
+ ul.menu-princ { width: 400px; float: left; margin-top:0px; margin-left:190px; }
+ ul.menu-princ li a.pres { width: 108px; background-position: -800px -376px;}
+ ul.menu-princ li a.ter { width: 90px; background-position: -910px -376px;}
+ ul.menu-princ li a.act { width: 81px; background-position: -1003px -376px;}
+ ul.menu-princ li a.dia { width: 96px; background-position: -1085px -376px;}
+
+ ul.menu-princ li a:hover, ul.menu-princ li a.active { background-position-y: -414px; z-index: 25;}
+
+
+ /* SUBMENU */
+ header div#titre-menu ul ul { display: none; width: auto; position: absolute; z-index:45; margin: 0; padding: 0; top:37px; left:3px; height: auto; }
+ header div#titre-menu ul ul li { background: white; opacity: 0.9; position: relative; }
+ header div#titre-menu ul ul li a { text-indent: 0; height: auto; padding: 5px 15px; width: auto; min-width: 110px; }
+ header div#titre-menu ul ul li a:hover { text-decoration: none; }
+ header div#titre-menu ul ul li:hover { background-color: #bde323; }
+ header div#titre-menu ul li:hover ul { display: block; }
+ 
+ 
+ /* COLONNE DROITE */
+ ul#top-col-droite { width: 192px; height: 143px; background-position: 0 -280px; list-style-type: none; font-family: Arial; font-size: 12px; margin-left: 0; }
+ ul#top-col-droite li { width: 161px; height: 19px; background-position: -227px -280px; padding-left: 8px; margin-left: 16px; }
+ ul#top-col-droite li.active, ul#top-col-droite li:hover { background-position: -227px -256px;}
+ ul#top-col-droite li a {display:block; width: 161px; height: 16px; color: #8A9BAB; padding: 3px 0 0 5px; text-decoration: none; background-color: #FFF; }
+ ul#top-col-droite li.active a,  ul#top-col-droite li a:hover { background-color: #DCECFA; }
+ 
+ ul#top-col-droite div.top-mab-content { margin-left: 17px; width: 173px; height: 93px; background-color: #DCECFA; background-position: -270px -376px; font-family: Arial; font-size: 11px; color: #666666; padding: 0px; } 
+ ul#top-col-droite div.top-mab-content p { padding: 5px 5px 0 5px;}
+ 
+ ul#top-col-droite div.top-biosphere-content { margin-left: 19px; display:none;}
+ ul#top-col-droite div.top-biosphere-content a { display: block; width: 171px; height: 90px; background-position: -270px -266px; text-indent: -999em;}
+ ul#top-col-droite div.top-biosphere-content a:hover { background-position: -270px -170px; } 
+ 
+ div#blocs-col-droite { position: relative; width: 194px; height: 424px; margin-top: 15px; background-position: -328px -504px;}
+ .fr a.btn-rss { display: block; width: 28px; height: 22px; margin-left:135px; background-position: -536px -500px; text-indent: -999em; }
+ 
+ /* CARTOUCHE ACTUALITES */
+ div.content-actu { width: 170px; height: 175px; margin: 0 0 0 23px; padding-top: 5px;}
+ div.content-actu p { margin: 0; padding: 0; }
+ span.date-actu { display:block; font-size: 14px; color: #F15A24; margin-top: 5px;}
+
+/* CARTOUCHE PUBLICATIONS */
+ ul.publications { width: 170px; height: 142px; margin: 60px 0 0 23px; list-style-position: inside; list-style-image: url(../images/puce-orange_07.png); font-size: 11px; font-weight: bold; }
+ ul.publications li { margin: 3px 0px;}
+
+ /* CONTENU PRINCIPAL */
+ div#main { position: relative; float: left; z-index: 3; width: 785px; height:457px; margin-left: -7px; margin-top: -8px; background: url(../img/bg-content-home.png) no-repeat; } 
+ div#main.action {height: auto;}
+ div#diaporama { position: relative; margin-left: 155px; margin-top: 21px; }
+ div#diaporama div.masque { position: absolute; z-index: 10; width: 607px; height: 188px; background-position: -472px -170px;}
+ div#diaporama img { position: absolute; top: 0; left: 107px; z-index: 5; }
+ div#diaporama a {  text-decoration: none; display: block; font-family: Trebuchet MS; font-size: 14px; color: #7D8D9B; font-weight: bold; z-index: 20; position: relative;}
+ div#diaporama a.lien-action { float: left; width: 138px; height: 85px; margin-top:85px; margin-left: 40px; }
+ div#diaporama a.lien-biosphere { float: right; text-align: right; width: 370px; margin-right: 40px; margin-top: 173px; font-size: 12px; z-index: 30; color: #374349; }
+ div#diaporama a:hover { text-decoration: underline; }
+
+ div#diaporama div.items div { position: relative; width: 607px; height: 188px;}
+
+ .fr div.flag-about { width: 193px; height: 51px; margin-left: 28px; margin-top: 220px; background-position: -472px -376px;}
+
+ div.info { position: absolute; font-family: "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif; }
+ div.info h2 { font-size: 15px; margin-bottom: 8px; }
+ div.info p { font-size: 12px; margin: 0 0 5px 0; padding: 0; }
+ div.info a { color: #62BA00; text-decoration: none; }
+ div.info a:hover { text-decoration: underline; }
+ div.info.reserve-info { display: none; width: 320px; height: 95px; left: 150px; top:258px; background-position: 0 -490px;}
+ div.info.reserve-info h2, div.info.reserve-info p { padding-left: 25px; }
+ div.info.comite-info { display: none; width: 200px; height: 134px; top:310px; left:50px; background-position: 0 -600px;}
+ div.info.comite-info h2, div.info.comite-info p { margin-left: 30px; }
+ div.info.programme-info { display: none; width: 275px; height: 148px; top:283px; left:284px; background-position: 0 -745px;}
+ div.info.programme-info h2 { margin-top: 10px;}
+ div.info.programme-info h2, div.info.programme-info p { margin-left: 30px; }
+ 
+ /**************************************************************************************/
+ /** LA BANDE DES PETITS MAB 														  **/
+ /**************************************************************************************/
+ div.ptit-mab { width: 242px; height: 186px; position: absolute; bottom: 20px; right: 15px; background: url(../img/ptit-mab.jpg) top left no-repeat; }
+ div.ptit-mab a { display: inline-block; margin-top: 154px; margin-left: 110px; font-size: 18px; color: white; }
+ div.ptit-mab a:hover { text-decoration: underline; }
+  
+ /**
+ * Non-semantic helper classes: please define your styles before this section.
+ */
+body.fr a.point {display:block; width:32px; height: 31px; background-position: -472px -472px; position:absolute;}
+a.point:hover, a.point.active { background-position: -472px -439px;}
+
+a.point.comite {top:359px; left:18px;}
+a.point.programme {top:399px; left:250px;}
+a.point.reserve {top:275px; left:115px;}
+
+.radius {
+-moz-border-radius: 5px;
+-webkit-border-radius: 5px;
+-o-border-radius: 5px;
+-ms-border-radius: 5px;
+-khtml-border-radius: 5px;
+border-radius: 5px;
+}
+/**
+*	scrollable DIAPORAMA
+**/
+.scrollable {
+
+	/* required settings */
+	position:relative;
+	overflow:hidden;
+
+	/* vertical scrollables have typically larger height than width but not now */
+	height: 188px;
+	width: 607px;
+}
+
+/* root element for scrollable items */
+.scrollable .items {
+	position:absolute;
+
+	/* this time we have very large space for the height */
+	height:20000em;
+}
+/***********************************************************************************/
+
+/****** BUTTON FOR DIAPORAMA *******************************************************/
+
+/***********************************************************************************/
+/* this makes it possible to add next button beside scrollable */
+.scrollable {
+	float:left;	
+}
+
+/* prev, next, prevPage and nextPage buttons */
+a.browse {
+	display:block;
+	width:16px;
+	height:15px;
+	float:left;
+	/*margin:40px 10px;*/
+	cursor:pointer;
+	font-size:1px;
+}
+
+/* right */
+.fr a.right 		{ background-position: -551px -528px; clear:right; margin: 172px 0px 0px 0px;}
+.fr a.right:hover 	{ background-position:-551px -543px; }
+/* a.right:active 	{ background-position:-60px -30px; }  */
+
+
+/* left */
+.fr a.left				{ background-position: -535px -528px; margin: 172px 0px 0px 575px; } 
+.fr a.left:hover  		{ background-position:-535px -543px; }
+/* a.left:active  	{ background-position:-60px 0; } */
+
+/* up and down */
+a.up, a.down		{ 
+	background:url(../img/scrollable/arrow/vert_large.png) no-repeat; 
+	float: none;
+	margin: 10px 50px;
+}
+
+/* up */
+a.up:hover  		{ background-position:-30px 0; }
+a.up:active  		{ background-position:-60px 0; }
+
+/* down */
+a.down 				{ background-position: 0 -30px; }
+a.down:hover  		{ background-position:-30px -30px; }
+a.down:active  		{ background-position:-60px -30px; } 
+
+/*********************************************************************************************/
+/** DIVS ACTION
+/*********************************************************************************************/
+ #main.action { background: none; margin-top:-9px; }
+ #main.action div.t-main { float: left; width: 100%; height: 20px; background-position: 0 -1062px;}
+ #main.action div.c-main { float: left; width: 100%; background: url(../img/bg-body-col-gauche_05.png) top left repeat-y; }
+ #main.action div.b-main { float: left; width: 100%; height: 23px; background-position: 0 -1088px;}
+ div.i-action, div.c-action, div.mono { float: left; width: 580px; padding: 0 0 0 25px; }
+ div.i-action { border-left: 1px dashed #7D8D9B; margin-bottom: 0px; }
+ div.c-action { margin-left:155px; color: #808080; }
+ #main div.c-main div.mono { margin: 5px 65px;}
+
+/*********************************************************************************************/
+/** DIVS ACTION - SUB MENU
+/*********************************************************************************************/
+ ul.sub-menu { font-family: Trebuchet MS, Arial, Helvetica, Sans-Serif; font-size: 14px; color: #7D8D9B; width: 150px; float: left; list-style-type: none; margin-left: 5px; }
+ ul.sub-menu li { padding: 8px 0; line-height: 1.3em; }
+ ul.sub-menu a { margin-left: 20px; display: inline-block; font-size: 14px; width: 105px; }
+ ul.sub-menu a:hover { text-decoration: none; }
+ ul.sub-menu li:hover { background: #C3E926; color: #7D8D9B;}
+ ul.sub-menu li.active a { color: #62BA00; }
+ 
+ /*******************************************************************************************/
+ /** LISTES
+ /*******************************************************************************************/
+ div.i-action ul {margin-left: 0px; float: left;}
+ div.i-action ul li { 
+ 	list-style-type: none; /* on annule la puce par défaut */
+    background-image: url(../img/puce_ronde_grise_08.png); /* on affiche l'image souhaitée */
+    background-repeat: no-repeat;
+    background-position: 0 10px; /* on positionne où l'on veut */
+    padding: 8px 0 8px 20px; /* pour éviter la superposition du contenu */}
+ 
+ span.puce-orange { 
+    background-image: url(../img/puce-orange_12.png); /* on affiche l'image souhaitée */
+    background-repeat: no-repeat;
+    background-position: 0px 12px; /* on positionne où l'on veut */
+    padding: 10px 0 10px 20px; /* pour éviter la superposition du contenu */
+    display:inline-block;
+    }
+   
+ 
+ #main.action h1 { font-family: Trebuchet MS, Arial, Helvetica, Sans-Serif;  color: #9EB8C7; font-size: 27px; margin-bottom: 20px; width: 550px; float: left; }
+ #main.action h2 { font-family: Trebuchet MS, Arial, Helvetica, Sans-Serif;  color: #F16E00; font-size: 17px; margin-top:2em; margin-bottom: 2em; border-bottom: 2px solid; display: inline-block; }
+ #main.action h3 { font-family: Trebuchet MS, Arial, Helvetica, Sans-Serif;  color: #9EB8C7; font-size: 27px; margin-bottom: 20px; }
+ #main.action h4 { font-family: Trebuchet MS, Arial, Helvetica, Sans-Serif;  color: #9EB8C7; font-size: 27px; margin-bottom: 20px; }
+ #main.action p { float: left; line-height: 1.4em; margin-bottom: 8px; color: #808080, }
+ 
+/*********************************************************************************************/
+/** FOOTER
+/*********************************************************************************************/
+footer { clear: both; width: 980px; height: 30px; margin: 0 auto; }
+footer ul { list-style-type: none; margin: 0; text-align: center;}
+footer ul li { display: inline; padding: 5px 5px; }
+footer ul li a { text-indent: 0; color: gray; font-size: 11px; }
+footer ul li a:hover { text-indent: 0; color: gray; text-decoration: underline; }
+
+
+/*********************************************************************************************/
+/** SITE BIOSPHERES	
+/*********************************************************************************************/
+ body.biosphere { margin-left: auto; margin-right: auto; position: relative; width: 1040px; z-index: 0;}
+ body.biosphere #col-gauche { width: 775px; }
+ body.biosphere #col-droite { width: 205px; }
+
+ body.cevennes { background: url(../img/biospheres/visuel-bio-cevennes_01.jpg) top right no-repeat; }
+ body.camargues { background: url(../img/biospheres/fond-camargues.jpg) top right no-repeat; }
+ body.biosphere #titre-menu { width: 660px;}
+ body.biosphere #titre-menu div.titre { width: 600px; float: left; padding-top: 15px; }
+ body.biosphere #titre-menu div.titre h1.nom-part1,
+ body.biosphere #titre-menu div.titre h1.nom-part2  { font-family: 'OFL Sorts Mill Goudy TT', arial, serif; color: #9EB8C7; text-indent: 0; font-size: 20px; text-align: left; padding-left: 45px; }
+ body.biosphere #titre-menu div.titre h1.nom-part2 { color: #7D8D9B; font-size: 40px; padding-left: 70px; }
+ 
+ 
+ body.biosphere #titre-menu ul.lang-switcher { float: left; margin-left: 0px; margin-top:0px; font-size: 13px; background: white; opacity: 0.7; padding: 3px; width: 48px; height: 14px; text-indent: 0; }
+ body.biosphere #titre-menu ul.lang-switcher li { float: none; display:inline; }
+ body.biosphere #titre-menu ul.lang-switcher li a { color: #BDCCD4; text-indent: 0; width: auto; height: 20px; display:inline; }
+ body.biosphere #titre-menu ul.lang-switcher li a:hover, body.biosphere #titre-menu ul.lang-switcher li a.active {color: #F16E00; text-decoration: none; font-weight: bold; }
+  
+ 
+ body.biosphere ul#top-col-droite { background-position: -800px 0; height: 40px; }
+ body.biosphere ul#top-col-droite li { margin-left: 5px; margin-top: 1px; }
+ body.biosphere ul#top-col-droite li a { width: 162px; }
+
+ body.biosphere #main div.b-main { height: 248px; background-position: 0 -1140px;	 }
+ body.biosphere #main div.c-main { width: 760px; border: none; padding-left: 25px; }
+ body.biosphere #main div.text-c-main { width:730px; }
+ body.biosphere #main h1 { width: 700px;}
+
+ body.biosphere #main table.i-table { margin: 55px 0 0 180px; font-size: 13px; font-weight: bold; line-height: 25px;}
+ body.biosphere #main table.i-table td.c-gauche { width: 185px; color: #7D8D9B; text-align: right; padding-right: 30px;}
+ body.biosphere #main table.i-table td.c-droite { width: 375px; color: #666; }
+
+ body.biosphere div.bot-col-droite { margin-top: 218px; background-position: -800px -1140px; height: 363px; font-family: Arial, Helvetica, Sans-serif; font-size: 12px; }
+ body.biosphere ul#infos-bio { padding-top:50px; list-style-type: none; }
+ body.biosphere ul#infos-bio div { margin: 5px 0px 12px 7px; height: 205px; overflow-y: auto; width: 170px; }
+ body.biosphere ul#infos-bio p { line-height: 16px; padding: 0 0 5px 0; }
+ body.biosphere ul#infos-bio li { margin-bottom: 5px; }
+ body.biosphere ul#infos-bio li a { text-indent: -999em; display: inline-block; height: 18px; width: 181px; }
+ body.biosphere ul#infos-bio li ul { margin: 0; }
+ body.biosphere ul#infos-bio li ul a { text-indent: 0; display: inline; }
+ body.biosphere ul#infos-bio li ul.publications { margin: 0 0 0 7px; width: 175px;}
+ 
+ body.biosphere ul#infos-bio li a.web { background-position: -705px -543px; }
+ body.biosphere ul#infos-bio li a.actu { background-position: -705px -579px; }
+ body.biosphere ul#infos-bio li a.coor { background-position: -705px -615px; }
+ body.biosphere ul#infos-bio li a.publi { background-position: -705px -651px; }
+
+ body.biosphere ul#infos-bio ul.web-content li { margin: 10px 0 0 7px; }
+
+ body.biosphere ul#infos-bio li a.web:hover, body.biosphere ul#infos-bio li a.web.opened { background-position: -705px -561px; }
+ body.biosphere ul#infos-bio li a.actu:hover, body.biosphere ul#infos-bio li a.actu.opened { background-position: -705px -597px; }
+ body.biosphere ul#infos-bio li a.coor:hover, body.biosphere ul#infos-bio li a.coor.opened { background-position: -705px -634px; }
+ body.biosphere ul#infos-bio li a.publi:hover, body.biosphere ul#infos-bio li a.publi.opened { background-position: -705px -670px; }
+ 
+ body.biosphere .picto { width: 16px; height: 16px; display: inline-block; padding-left: 4px; }
+ body.biosphere .home { background-position:-565px -607px; }
+ body.biosphere .tel { background-position: -565px -622px; }
+ body.biosphere .fax { background-position: -565px -638px; }
+ body.biosphere .mail { background-position: -565px -653px; }
+ body.biosphere .man { background-position: -565px -591px; }
+
+ body.biosphere div#col-droite div.logos-col-droite { margin-left: 35px; width: 180px; }
+ body.biosphere div#col-droite div.logos-col-droite a { border: 3px solid transparent; display: inline-block; line-height: 10px; }
+ body.biosphere div#col-droite div.logos-col-droite a:hover { border: 3px solid #B6D1E9; }
+  
+/* disabled navigational button */
+a.disabled {
+	visibility:hidden !important;		
+} 	
+
+
+
+
+/* For image replacement */
+.ir { display: block; text-indent: -999em; overflow: hidden; background-repeat: no-repeat; text-align: left; direction: ltr; }
+
+/* Hide for both screenreaders and browsers:
+   css-discuss.incutio.com/wiki/Screenreader_Visibility */
+.hidden { display: none; visibility: hidden; }
+
+/* Hide only visually, but have it available for screenreaders: by Jon Neal.
+  www.webaim.org/techniques/css/invisiblecontent/  &  j.mp/visuallyhidden */
+.visuallyhidden { border: 0; clip: rect(0 0 0 0); height: 1px; margin: -1px; overflow: hidden; padding: 0; position: absolute; width: 1px; }
+/* Extends the .visuallyhidden class to allow the element to be focusable when navigated to via the keyboard: drupal.org/node/897638 */
+.visuallyhidden.focusable:active,
+.visuallyhidden.focusable:focus { clip: auto; height: auto; margin: 0; overflow: visible; position: static; width: auto; }
+
+/* Hide visually and from screenreaders, but maintain layout */
+.invisible { visibility: hidden; }
+
+/* The Magnificent Clearfix: Updated to prevent margin-collapsing on child elements.
+   j.mp/bestclearfix */
+.clearfix:before, .clearfix:after { content: "\0020"; display: block; height: 0; overflow: hidden; }
+.clearfix:after { clear: both; }
+/* Fix clearfix: blueprintcss.lighthouseapp.com/projects/15318/tickets/5-extra-margin-padding-bottom-of-page */
+.clearfix { zoom: 1; }
+
+
+
+/**
+ * Media queries for responsive design.
+ *
+ * These follow after primary styles so they will successfully override.
+ */
+
+@media all and (orientation:portrait) {
+  /* Style adjustments for portrait mode goes here */
+
+}
+
+@media all and (orientation:landscape) {
+  /* Style adjustments for landscape mode goes here */
+
+}
+
+/* Grade-A Mobile Browsers (Opera Mobile, Mobile Safari, Android Chrome)
+   consider this: www.cloudfour.com/css-media-query-for-mobile-is-fools-gold/ */
+@media screen and (max-device-width: 480px) {
+
+
+  /* Uncomment if you don't want iOS and WinMobile to mobile-optimize the text for you: j.mp/textsizeadjust */
+  /* html { -webkit-text-size-adjust:none; -ms-text-size-adjust:none; } */
+}
+
+
+/**
+ * Print styles.
+ *
+ * Inlined to avoid required HTTP connection: www.phpied.com/delay-loading-your-print-css/
+ */
+body.fr a.imprimer, body.en a.imprimer { display: inline-block; width: 25px; height: 25px; text-indent: -999em; background-position: -536px -592px; margin-top: 3px;}
+body.fr a.imprimer:hover, body.en a.imprimer:hover { background-position: -536px -624px; }
+ 
+@media print {
+  * { background: transparent !important; color: black !important; text-shadow: none !important; filter:none !important;
+  -ms-filter: none !important; } /* Black prints faster: sanbeiji.com/archives/953 */
+  a, a:visited { color: #444 !important; text-decoration: underline; }
+  a[href]:after { content: " (" attr(href) ")"; }
+  abbr[title]:after { content: " (" attr(title) ")"; }
+  .ir a:after, a[href^="javascript:"]:after, a[href^="#"]:after { content: ""; }  /* Don't show links for images, or javascript/internal links */
+  pre, blockquote { border: 1px solid #999; page-break-inside: avoid; }
+  thead { display: table-header-group; } /* css-discuss.incutio.com/wiki/Printing_Tables */
+  tr, img { page-break-inside: avoid; }
+  @page { margin: 0.5cm; }
+  p, h2, h3 { orphans: 3; widows: 3; }
+  h2, h3{ page-break-after: avoid; }
+}
+

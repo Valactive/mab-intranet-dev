@@ -1,0 +1,283 @@
+/*-----------------------------------------------------------------------------
+	Stylesheet for 'Admin CSS Override' extension;
+	CSS rules placed here will override Symphony Admin styles;
+-----------------------------------------------------------------------------*/
+body {background: #8BA7C1 url('/workspace/admin/images/granular.png?v=1') repeat top left; }
+
+#notice {
+position: relative;
+z-index: 2;
+margin: 0;
+border-top: 3px solid #0069CC;
+border-bottom: 2px solid black;
+padding: 0.5em 0.83em;
+background-color: white;
+color: #555;
+font-size: 90.91%;
+line-height: 1.6;
+}
+
+#wrapper {
+position: ;
+}
+#footer {
+position: relative ;
+}
+#header {
+	background: transparent;
+}
+#header h1 {
+padding: 20px 0 20px 53px;
+text-shadow: -1px 2px 3px #111;
+font-weight: bold;
+line-height: 1;
+background: #171A1C;
+}
+#nav, ul#nav li.documenter-button {
+z-index: 1003;
+position: relative;
+top: -15px;
+margin: 0 25px;
+padding: 5px 19px;
+background: #22262A;
+color: #646464;
+white-space: nowrap;
+list-style: none;
+text-transform: uppercase;
+font: bold 90.91%/0 Lucida Grande, Leelawadee, Tahoma, Verdana, sans-serif;
+	-moz-box-shadow: #22262A 0px 1px 5px 0;
+	-webkit-box-shadow: #22262A 0px 1px 5px 0;
+	-o-box-shadow: #22262A 0px 1px 5px 0;
+	box-shadow: #22262A 0px 1px 5px 0;
+	
+	border: 1px solid;
+	border-top-color: #454D54;
+	border-bottom-color: #454D54;
+	border-left-color: #454D54;
+	border-right-color: #454D54;
+	-moz-border-radius: 6px;
+	-webkit-border-radius: 6px;
+	-o-border-radius: 6px;
+	-ms-border-radius: 6px;
+	-khtml-border-radius: 6px;
+	border-radius: 6px;
+
+
+}
+ul#nav li.documenter-button {
+position: absolute;
+right: 0;
+margin: 0;
+padding: 0;
+top:4px;
+right: 4px;
+}
+ul#nav li.documenter-button a {
+padding: 0 5px;
+background: #ff9900;
+color:black;
+border-color: #FDFDFD #F1F1F1 #D2D2D2 #ECECEC;
+  -moz-border-radius-bottomleft: 6px;
+  -webkit-border-bottom-left-radius: 6px;
+  -o-border-bottom-left-radius: 6px;
+  -ms-border-bottom-left-radius: 6px;
+  -khtml-border-bottom-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+
+  -moz-border-radius-bottomright: 6px;
+  -webkit-border-bottom-right-radius: 6px;
+  -o-border-bottom-right-radius: 6px;
+  -ms-border-bottom-right-radius: 6px;
+  -khtml-border-bottom-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+ 
+ -moz-border-radius-topright: 6px;
+  -webkit-border-top-right-radius: 6px;
+  -o-border-top-right-radius: 6px;
+  -ms-border-top-right-radius: 6px;
+  -khtml-border-top-right-radius: 6px;
+  border-top-right-radius: 6px;
+}
+ul#nav li.documenter-button a:hover {
+	color:white;
+	background: #22262A;
+}
+#contents {
+	margin: 0 25px 15px 25px;
+	padding: 0px;
+	-moz-box-shadow: #22262A 0px 1px 5px 0;
+	-webkit-box-shadow: #22262A 0px 1px 5px 0;
+	-o-box-shadow: #22262A 0px 1px 5px 0;
+	box-shadow: #22262A 0px 1px 5px 0;
+	-moz-border-radius: 6px;
+	-webkit-border-radius: 6px;
+	-o-border-radius: 6px;
+	-ms-border-radius: 6px;
+	-khtml-border-radius: 6px;
+	border-radius: 6px;
+	background: white;
+}
+#contents .top-content {
+	background: #22262A;
+	width: 100%;
+	-moz-box-shadow: #22262A 0px 1px 5px 0;
+	-webkit-box-shadow: #22262A 0px 1px 5px 0;
+	-o-box-shadow: #22262A 0px 1px 5px 0;
+	box-shadow: #22262A 0px 1px 5px 0;
+	-moz-border-top-left-radius: 6px;
+	-webkit-border-top-right-radius: 6px;
+	-o-border-top-right-radius: 6px;
+	-ms-border-top-right-radius: 6px;
+	-khtml-border-top-right-radius: 6px;
+	border-top-right-radius: 6px;
+
+	-moz-border-top-left-radius: 6px;
+	-webkit-border-top-left-radius: 6px;
+	-o-border-top-left-radius: 6px;
+	-ms-border-top-left-radius: 6px;
+	-khtml-border-top-left-radius: 6px;
+	border-top-left-radius: 6px;
+	
+	border-bottom: none;
+
+}
+#contents h2, #contents h2 span { 
+
+	padding: 5px 0 5px 14px; 
+	color: #3E576F;
+	font-size: 24px;
+	line-height: 40px;
+	font-weight: normal;
+	text-shadow: #ccc 0px -1px 1px;
+	border-bottom: none;
+}
+#contents h2 span {
+	padding: 0;
+}
+
+#contents h2 .button {
+float: right;
+margin: 10px 25px 0 0;;
+}
+#contents form {
+	margin: 25px;
+}
+#contents form table tbody {
+	margin: 0px 25px;
+}
+#nav > li {
+float: left;
+position: relative;
+padding: 0 1em;
+margin: 0 5px;
+height: 30px;
+line-height: 32px;
+cursor: pointer;
+-moz-border-radius: 4px;
+-webkit-border-radius: 4px;
+-o-border-radius: 4px;
+-ms-border-radius: 4px;
+-khtml-border-radius: 4px;
+border-radius: 4px;
+border: 1px solid transparent;
+color: #E3E6E8;
+font-weight: bold;
+text-decoration: none;
+text-shadow: #0B0C0E 0px 1px 1px;
+}
+#nav > li.active, #nav > li:hover {
+background: #0B83F4;
+/*border-top-color: #171A1C;
+border-bottom-color: #454D54;*/
+}
+
+#nav ul {
+position: absolute;
+z-index: 3;
+top: 30px;
+left: -9999px;
+margin: 0;
+min-width: 120px;
+border: none;
+padding-left: 0;
+background-color: #171A1C;
+list-style: none;
+text-transform: none;
+font-weight: normal;
+font-size: 130%;
+line-height: 2.5;
+-moz-box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+-webkit-box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+border-color: #FDFDFD #F1F1F1 #D2D2D2 #ECECEC;
+  -moz-border-radius-bottomleft: 6px;
+  -webkit-border-bottom-left-radius: 6px;
+  -o-border-bottom-left-radius: 6px;
+  -ms-border-bottom-left-radius: 6px;
+  -khtml-border-bottom-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+
+  -moz-border-radius-bottomright: 6px;
+  -webkit-border-bottom-right-radius: 6px;
+  -o-border-bottom-right-radius: 6px;
+  -ms-border-bottom-right-radius: 6px;
+  -khtml-border-bottom-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+ 
+ -moz-border-radius-topright: 6px;
+  -webkit-border-top-right-radius: 6px;
+  -o-border-top-right-radius: 6px;
+  -ms-border-top-right-radius: 6px;
+  -khtml-border-top-right-radius: 6px;
+  border-top-right-radius: 6px;
+}
+#nav ul li {
+border: 1px solid;
+background: #22262A url('/workspace/admin/images/bg_nav_hover.png?v=1') top left repeat-x;
+border-top-color: #171A1C;
+border-bottom-color: #22262A;
+border-left-color: #22262A;
+border-right-color: #22262A;
+text-shadow: 0 1px 1px #48627A;
+}
+#nav a {
+display: block;
+padding: 10px 30px 10px 30px;
+color: white;
+text-decoration: none;
+}
+#nav li:hover ul,
+#nav li.current ul {
+    left: 0px;
+}
+#nav a:hover {
+	color: #fff;
+	background-color: #0069CC;
+}
+thead tr th {
+	padding: 8px 0 8px 0px;
+	font-size: 14px;
+}
+thead tr th#field-1 { padding-left: 15px; }
+#footer {background: #22262A; }
+
+.index .actions {
+text-align: right;
+padding: 1.75em 1.75em 4em 2em;
+height: 38px;
+}
+.field-datetime span input {
+margin: 0;
+width: 74%;
+}
+.field-datetime .calendar {
+background: #353533;
+border-top: none;
+min-width: 23em;
+padding: 20px 0 25px 25px;
+}
+/****************************************************/
+/* EXTENSIONS                                       */
+/****************************************************/
+body.inline.subsection form label, body.inline.subsection form p {
+color: gray;
+}

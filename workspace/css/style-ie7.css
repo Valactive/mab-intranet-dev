@@ -1,0 +1,2 @@
+body { background: red; }
+ body.biosphere ul#infos-bio li a.titre { text-indent: -999px; display: inline-block; height: 18px; width: 181px; /* hack for text-indent in ie7 */ font-size:0; display:block; line-height:0; }

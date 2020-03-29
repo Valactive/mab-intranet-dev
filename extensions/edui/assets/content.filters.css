@@ -1,0 +1,129 @@
+.filters {
+	overflow: hidden;
+	clear: both;
+	background: #353530 url(../../../symphony/assets/images/navigation.png) repeat-x 0px -95px;
+	margin: 0 0 1.75em 0;
+	padding: 1em 19px;
+	vertical-align: middle;
+	border-top: 1px solid #e6e6e5;
+	border-bottom: 1px solid #e6e6e5;
+	-webkit-box-shadow: 0px 3px 8px #E9E9E9;
+	-moz-box-shadow: 0px 3px 8px #E9E9E9;
+}
+
+.filters h3 {
+	font: 127.28%/2 'Lucida Grande', Leelawadee, Tahoma, Verdana, sans-serif;
+	background: #353530;
+	color: #f2f2f2;
+	text-shadow: #2B2B27 -1px 2px 2px;
+	margin-bottom: 0.5em;
+}
+
+.filters .filter {
+	float: left;
+	clear: left;
+	height: 28px;
+	margin-bottom: 1.2em;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	background: -webkit-gradient(
+		linear,
+		left bottom,
+		left top,
+		color-stop(0.00, rgb(222, 222, 222)),
+		color-stop(0.39, rgb(245, 245, 245))
+	);
+	background: -moz-linear-gradient(
+		center bottom,
+		rgb(222, 222, 222) 0%,
+		rgb(245, 245, 245) 39%
+	);
+	-webkit-box-shadow: 1px 0 8px #2E2E2A, 1px 1px 8px #2E2E2A, 0 1px 8px #2E2E2A;
+	-moz-box-shadow: 1px 0 8px #2E2E2A, 1px 1px 8px #2E2E2A, 0 1px 8px #2E2E2A;
+	line-height: 30px;
+	white-space: nowrap;
+}
+
+.filters .filter select {
+	margin: 0 0 0 10px;
+	display: inline-block;
+	width: auto;
+}
+
+.filters .filter select.mode {
+	margin: 0 8px 0 7px;
+}
+
+.filters .filter select.value {
+	width: 335px;
+	margin-left: 0;
+	margin-right: 4px;
+}
+
+.filters .filter input.value {
+	width: 324px;
+	height: 22px;
+	margin: 2px 3px 2px 0;
+	padding: 0 5px;
+	border: 1px solid #CACACA;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	line-height: 22px;
+}
+
+.filters .filter input.value:focus {
+	outline: none;
+	border: 1px solid #666;
+}
+
+.filters .default input.value {
+	width: 350px;
+	margin-right: 3px;
+}
+
+.filters .default select.value {
+	width: 360px;
+	margin-right: 5px;
+}
+
+.filters input.button {
+	border: none;
+	width: auto;
+	height: 1.8em;
+	padding: 0px 1em 0.2em;
+	-webkit-border-radius: 1em 1em;
+	-moz-border-radius: 1em 1em;
+	border-radius: 1em 1em;
+	background: #887;
+	color: #f2f2f2;
+	font-size: 1em;
+	line-height: 1.8em;
+}
+
+.filters .button:hover {
+	background: #a1a18c;
+	cursor: pointer;
+}
+
+.filters .filter input.button {
+	position: relative;
+	top: 1px;
+	width: 17px;
+	height: 16px;
+	margin: 5px 6px 0 0;
+	padding: 0;
+	background: transparent url(images/delete.png) 0 0 no-repeat;
+	text-indent: -999px;
+}
+
+.filters .filter .button:hover {
+	background: transparent url(images/delete.png) 0 -16px no-repeat;
+}
+
+.filters input.apply {
+	clear: left;
+	display: block;
+	margin: 0.8em 0;
+}
