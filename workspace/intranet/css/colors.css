@@ -7,11 +7,19 @@
 */
 
 /*  Text Color  */
+
 a, #main-nav ul li.current a, #main-nav ul li.current li.current a, #main-nav ul li.current a:hover, .wizard-steps li a.done,
 #main-nav ul li a:hover, #main-nav ul li li a:hover, #main-nav ul li.current li a:hover, .wizard-steps li a:hover, .wizard-steps li a.current,
 .tab-switch li a.current, .sidetab-switch li a.current, .tab-switch li a:hover, .sidetab-switch li a:hover,
 .widget.decrease strong, .jq-datepicker.datepick a, #user-info div > a:hover, .contacts li a.contacts-user:hover, .tickets .ticket-data .ticket-details h4
-{ color:#718B9A; }
+{ color:#659113; }
+
+/* refonte
+{ color:#718B9A; }*/
+.showMembers
+{ color:#718B9A;}
+.sidetab-switch li a.current,#main-nav ul li.current li.current a
+{ font-weight:bold;}
 #main-nav ul li a, #main-nav ul li.current li a, #main-nav ul li span, .wizard-steps li a,
 .sidebar h2, .jq-datepicker .datepick-month-header select, .jq-datepicker .datepick-month th,
 .jq-datepicker .datepick-month th a, .tab-switch li a, .sidetab-switch li a
