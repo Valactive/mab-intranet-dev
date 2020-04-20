@@ -164,40 +164,13 @@
 
 		###### CKEDITOR ######
 		'ckeditor' => array(
-			'sections' => '33,8,30,12',
+			'sections' => '8,30,12',
 		),
 		########
 
 
 		###### DOCUMENTATION ######
 		'documentation' => array(
-		),
-		########
-
-
-		###### SEARCH_INDEX ######
-		'search_index' => array(
-			're-index-per-page' => '20',
-			're-index-refresh-rate' => '0.5',
-			'get-param-prefix' => null,
-			'get-param-keywords' => 'keywords',
-			'get-param-per-page' => 'per-page',
-			'get-param-sort' => 'sort',
-			'get-param-direction' => 'direction',
-			'get-param-sections' => 'sections',
-			'get-param-page' => 'page',
-			'default-sections' => null,
-			'default-per-page' => '20',
-			'default-sort' => 'score',
-			'default-direction' => 'desc',
-			'excerpt-length' => '250',
-			'min-word-length' => '3',
-			'max-word-length' => '30',
-			'stem-words' => 'yes',
-			'build-entries' => 'no',
-			'mode' => 'like',
-			'log-keywords' => 'yes',
-			'indexes' => 'a:8:{i:11;a:3:{s:6:\"fields\";a:2:{i:0;s:5:\"titre\";i:1;s:5:\"texte\";}s:9:\"weighting\";s:1:\"0\";s:7:\"filters\";a:0:{}}i:15;a:3:{s:6:\"fields\";a:4:{i:0;s:9:\"biosphere\";i:1;s:7:\"adresse\";i:2;s:6:\"auteur\";i:3;s:14:\"liens-internet\";}s:9:\"weighting\";s:1:\"2\";s:7:\"filters\";a:0:{}}i:17;a:3:{s:6:\"fields\";a:6:{i:0;s:9:\"biosphere\";i:1;s:18:\"nombre-de-communes\";i:2;s:17:\"nombre-dhabitants\";i:3;s:16:\"superficie-en-ha\";i:4;s:7:\"regions\";i:5;s:12:\"departements\";}s:9:\"weighting\";s:1:\"2\";s:7:\"filters\";a:0:{}}i:9;a:3:{s:6:\"fields\";a:4:{i:0;s:3:\"nom\";i:1;s:7:\"contenu\";i:2;s:16:\"rubrique-parente\";i:3;s:12:\"type-de-page\";}s:9:\"weighting\";s:1:\"0\";s:7:\"filters\";a:0:{}}i:16;a:3:{s:6:\"fields\";a:1:{i:0;s:7:\"contenu\";}s:9:\"weighting\";s:1:\"2\";s:7:\"filters\";a:0:{}}i:12;a:3:{s:6:\"fields\";a:4:{i:0;s:5:\"titre\";i:1;s:13:\"fichier-joint\";i:2;s:24:\"auteur-de-la-publication\";i:3;s:7:\"editeur\";}s:9:\"weighting\";s:1:\"2\";s:7:\"filters\";a:0:{}}i:18;a:3:{s:6:\"fields\";a:1:{i:0;s:10:\"territoire\";}s:9:\"weighting\";s:1:\"2\";s:7:\"filters\";a:0:{}}i:23;a:3:{s:6:\"fields\";a:1:{i:0;s:7:\"actions\";}s:9:\"weighting\";s:1:\"2\";s:7:\"filters\";a:0:{}}}',
 		),
 		########
 
@@ -216,24 +189,6 @@
 			'primary_type' => 'primary',
 			'utilities_type' => 'global',
 			'exclude_type' => null,
-		),
-		########
-
-
-		###### SITEMAP_XML ######
-		'sitemap_xml' => array(
-			'index_type' => 'index',
-			'global' => 'sitemap',
-			'lastmod' => '2013-06-05T08:59:16+02:00',
-			'changefreq' => 'daily',
-		),
-		########
-
-
-		###### RECAPTCHA ######
-		'recaptcha' => array(
-			'public-key' => '6LeFIhQUAAAAACZTFrrkbVEpEkCdbi3aeo4bNQJU',
-			'private-key' => '6LeFIhQUAAAAACOIdgPlHcXfGhL8d_o_GbOuZM4r',
 		),
 		########
 	);
