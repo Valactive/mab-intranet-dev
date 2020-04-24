@@ -23,6 +23,8 @@
 									<th>Nom</th>
 									<th>Date</th>
 									<th>Auteur(s)</th>
+									<th>rubrique</th>
+									<th>Sous-rubrique</th>
 									<th>Catégorie</th>
 									<th class="text-center">Statut</th>
 									<th>Actions</th>
@@ -33,13 +35,16 @@
 									<xsl:variable name="publie"><xsl:value-of select="publie"/></xsl:variable>
 									<xsl:variable name="current-categorie-id"><xsl:value-of select="/data/intra-last-documents/entry[@id=@id]/categorie/item/@id"/></xsl:variable>
 									<xsl:variable name="current-sous-rubrique-id"><xsl:value-of select="/data/intra-categories-filtre-par-sous-rubrique/entry[@id = $current-categorie-id]/sous-rubrique-parente/item/@id"/></xsl:variable>
+									<xsl:variable name="current-rubrique-parente"><xsl:value-of select="/data/intra-sous-rubriques/entry[@id = $current-sous-rubrique-id]/rubrique-parente/item"/></xsl:variable>
 									<xsl:variable name="cat-handle"><xsl:value-of select="categorie/item/@handle"/></xsl:variable>
 
-									<xsl:variable name="sous-rub"><xsl:value-of select="/data/intra-categories-filtre-par-sous-rubrique/entry[nom/@handle = $cat-handle]/sous-rubrique-parente/item/@id"/></xsl:variable>
+									<xsl:variable name="id-sous-rub">
+										<xsl:value-of select="/data/intra-categories-filtre-par-sous-rubrique/entry[nom/@handle = $cat-handle]/sous-rubrique-parente/item/@id"/>
+									</xsl:variable>
 									<tr>
 										<td>
 											<xsl:choose>
-												<xsl:when test="count(/data/intranet-sous-rubriques-handle-par-membre/entry[@id = $sous-rub]) = 0 and $member-role !='Administrateur'">
+												<xsl:when test="count(/data/intranet-sous-rubriques-handle-par-membre/entry[@id = $id-sous-rub]) = 0 and $member-role !='Administrateur'">
 													<xsl:value-of select="nom-du-document"/>
 												</xsl:when>
 												<xsl:otherwise>
@@ -61,7 +66,13 @@
 										</xsl:call-template>
 									</td>
 									<td><xsl:value-of select="auteur"/></td>
-									<td><xsl:value-of select="categorie/item"/></td>
+									<xsl:variable name="id-categorie"><xsl:value-of select="categorie/item/@id"/> </xsl:variable>
+									<xsl:variable name="id-sous-rubrique"><xsl:value-of select="/data/intra-categories-filtre-par-sous-rubrique/entry[@id = $id-categorie]/sous-rubrique-parente/item/@id"/> </xsl:variable>
+									<td> <xsl:value-of select="/data/intra-sous-rubriques/entry[@id = $id-sous-rubrique]/rubrique-parente"/> </td>
+									<td><xsl:value-of select="/data/intra-categories-filtre-par-sous-rubrique/entry[@id = $id-categorie]/sous-rubrique-parente"/> 
+										
+									</td>
+									<td><xsl:value-of select="categorie/item/@handle"/></td>
 									<td><xsl:choose>
 										<xsl:when test="$publie='Yes'"><span class="tag green">Publié</span>
 									</xsl:when>
