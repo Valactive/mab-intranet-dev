@@ -142,7 +142,7 @@
 			'secure' => 'ssl',
 			'auth' => '1',
 			'username' => 'mab@mab-france.org',
-			'password' => 'France2020MAB?',
+			'password' => 'MABFrance2020?',
 		),
 		########
 
