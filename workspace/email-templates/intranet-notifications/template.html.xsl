@@ -48,7 +48,7 @@
 						<tbody>
 						<tr><td height="50"></td></tr>
 						<tr>
-							<td valign="bottom" height="50"><img src="http://mab-france.org/workspace/intranet/img/logo-mab-intranet.png" style="display:block;" height="31" width="148"/></td>
+							<td valign="bottom" height="50"><img src="https://intranet.mab-france.org/workspace/intranet/img/logo-mab-intranet.png" style="display:block;" height="31" width="148"/></td>
 						</tr>
 						</tbody>
         			</table>
