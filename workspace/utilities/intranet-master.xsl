@@ -3,7 +3,7 @@
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-<xsl:import href="page-title.xsl"/>
+<!-- STM <xsl:import href="page-title.xsl"/> -->
 
 
 <xsl:output method="xml"
@@ -22,10 +22,10 @@
 	<xsl:comment><![CDATA[[if IE 8]> <html lang="en" class="no-js ie8 lte-ie9 lte-ie8 gte-ie8 gte-ie7 gte-ie6"> <![endif]]]></xsl:comment>
 	<xsl:comment><![CDATA[[if IE 9]> <html lang="en" class="no-js ie9 lte-ie9 gte-ie9 gte-ie8 gte-ie7 gte-ie6"> <![endif]]]></xsl:comment>
 	<xsl:comment><![CDATA[[if !(lte IE 9)]><!]]></xsl:comment> <html lang="en" class="no-js"> <xsl:comment><![CDATA[<![endif]]]></xsl:comment>
-<head>
+<head> <!-- STM 
 		<title>
-			<xsl:call-template name="page-title"/>
-		</title>
+			 <xsl:call-template name="page-title"/>
+		</title>-->
 	<meta charset="UTF-8"/>
 	<title>Intranet | Mab France</title>
 	<meta name="description" content=""/>
