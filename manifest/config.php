@@ -147,13 +147,6 @@
 		########
 
 
-		###### LANGUAGE_REDIRECT ######
-		'language_redirect' => array(
-			'language_codes' => 'fr,en',
-		),
-		########
-
-
 		###### MEMBERS ######
 		'members' => array(
 			'cookie-prefix' => 'sym-members',

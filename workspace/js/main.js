@@ -7,42 +7,22 @@
 var myMAB = {
 
 	getLang:function(){
-		var lang ='';
-		if(language == 'fr')
-			{
-				lang = 'fr';
-			} else if (language == 'en')
-				{
-				lang = 'en';
-			}
-		return lang;
+
 	},
 
 	getNewsletterSuccessMessage:function(){
 		var msg = '';
-		if(language == 'fr'){
-			msg = 'Parfait ! Un email vient de vous être envoyé afin de vérifier votre adresse email. Merci de cliquer sur le lien se trouvant dans celui-ci afin de confirmer votre inscription.';
-		} else if (language == 'en'){
-			msg='Perfect! You\'ve just been sent an email to confirm your email address. Please click on the link in this email to confirm your subscription.';
-		}
+		msg = 'Parfait ! Un email vient de vous être envoyé afin de vérifier votre adresse email. Merci de cliquer sur le lien se trouvant dans celui-ci afin de confirmer votre inscription.';
 		return msg;
 	},
 	getContactSuccessMessage:function(){
 		var msg = '';
-		if(language == 'fr'){
-			msg = 'Parfait ! Votre message nous est bien parvenu. Nous prendrons connaissance de celui-ci très prochainement.';
-		} else if (language == 'en'){
-			msg='Perfect! We just receive your message. We will know it soon.';
-		}
+		msg = 'Parfait ! Votre message nous est bien parvenu. Nous prendrons connaissance de celui-ci très prochainement.';
 		return msg;
 	},
 	getContactErrorMessage:function(){
 		var msg = '';
-		if(language == 'fr'){
-			msg = 'Tous les champs sont obligatoires, merci de vérifier et recommencez.';
-		} else {
-			msg = 'All fields are mandatory, please check and try again.';
-		}
+		msg = 'Tous les champs sont obligatoires, merci de vérifier et recommencez.';
 		return msg;
 	},
 	clear_form_elements:function(ele) {

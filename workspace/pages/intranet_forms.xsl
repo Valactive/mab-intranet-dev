@@ -133,7 +133,7 @@
 	<script type="text/javascript">
 
 	var root = "<xsl:value-of select='$root'/>";
-	var language = "<xsl:value-of select='$url-language'/>";
+	<!-- STM var language = "<xsl:value-of select='$url-language'/>";-->
 	var form_id = "<xsl:value-of select='$tmp_form_id'/>";
 	var form_id_selector = '#'+ form_id;
 	var form_id_class='.'+ form_id;
@@ -178,7 +178,7 @@ $('a.button-close').live('click',function(){
         success:       showResponse,  // post-submit callback 
  
         // other available options: 
-        url:       root+'/'+language+'/form-traitement-xml/',        // override for form's 'action' attribute 
+        url:       root+'/form-traitement-xml/',        // override for form's 'action' attribute 
         type:      'post',        // 'get' or 'post', override for form's 'method' attribute 
         dataType:  'xml',       // 'xml', 'script', or 'json' (expected server response type) 
         clearForm: false,        // clear all form fields after successful submit 
@@ -291,7 +291,7 @@ function showResponse(responseXML)  {
 <script type="text/javascript">
 
 	var root = "<xsl:value-of select='$root'/>";
-	var language = "<xsl:value-of select='$url-language'/>";
+	<!-- STM var language = "<xsl:value-of select='$url-language'/>";-->
 	var form_id = "<xsl:value-of select='$tmp_form_id'/>";
 	var form_id_selector = '#'+ form_id;
 	var form_id_class='.'+ form_id;
@@ -306,7 +306,7 @@ function showResponse(responseXML)  {
         success:       showResponse,  // post-submit callback 
  
         // other available options: 
-        url:       root+'/'+language+'/form-traitement-xml/',        // override for form's 'action' attribute 
+        url:       root+'/form-traitement-xml/',        // override for form's 'action' attribute 
         type:      'post',        // 'get' or 'post', override for form's 'method' attribute 
         dataType:  'xml',       // 'xml', 'script', or 'json' (expected server response type) 
         clearForm: false,        // clear all form fields after successful submit 
@@ -399,7 +399,7 @@ function showResponse(responseXML)  {
 			$('.fileupload').customFileInput();
 		$('.datepicker').datepick({ pickerClass: 'jq-datepicker' });
 	var root = "<xsl:value-of select='$root'/>";
-	var language = "<xsl:value-of select='$url-language'/>";
+	<!--var language = "<xsl:value-of select='$url-language'/>";-->
 	var form_id = "<xsl:value-of select='$tmp_form_id'/>";
 	var form_id_selector = '#'+ form_id;
 	var form_id_class='.'+ form_id;
@@ -411,7 +411,7 @@ function showResponse(responseXML)  {
         success:       showResponse,  // post-submit callback 
  
         // other available options: 
-        url:       root+'/'+language+'/form-traitement-xml/',        // override for form's 'action' attribute 
+        url:       root+'/form-traitement-xml/',        // override for form's 'action' attribute 
         type:      'post',        // 'get' or 'post', override for form's 'method' attribute 
         dataType:  'xml',       // 'xml', 'script', or 'json' (expected server response type) 
         clearForm: false,        // clear all form fields after successful submit 
@@ -508,7 +508,7 @@ function showResponse(responseXML)  {
 			$('.fileupload').customFileInput();
 		$('.datepicker').datepick({ pickerClass: 'jq-datepicker' });
 	var root = "<xsl:value-of select='$root'/>";
-	var language = "<xsl:value-of select='$url-language'/>";
+	<!-- STM var language = "<xsl:value-of select='$url-language'/>";-->
 	var form_id = "<xsl:value-of select='$tmp_form_id'/>";
 	var form_id_selector = '#'+ form_id;
 	var form_id_class='.'+ form_id;
@@ -520,7 +520,7 @@ function showResponse(responseXML)  {
         success:       showResponse,  // post-submit callback 
  
         // other available options: 
-        url:       root+'/'+language+'/form-traitement-xml/',        // override for form's 'action' attribute 
+        url:       root+'/form-traitement-xml/',        // override for form's 'action' attribute 
         type:      'post',        // 'get' or 'post', override for form's 'method' attribute 
         dataType:  'xml',       // 'xml', 'script', or 'json' (expected server response type) 
         clearForm: false,        // clear all form fields after successful submit 
@@ -626,7 +626,7 @@ function showResponse(responseXML)  {
 			}
 		);
 	var root = "<xsl:value-of select='$root'/>";
-	var language = "<xsl:value-of select='$url-language'/>";
+	<!-- STM var language = "<xsl:value-of select='$url-language'/>";-->
 	var form_id = "<xsl:value-of select='$tmp_form_id'/>";
 	var form_id_selector = '#'+ form_id;
 	var form_id_class='.'+ form_id;
@@ -638,7 +638,7 @@ function showResponse(responseXML)  {
         success:       showResponse,  // post-submit callback 
  
         // other available options: 
-        url:       root+'/'+language+'/form-traitement-xml/',        // override for form's 'action' attribute 
+        url:       root+'/form-traitement-xml/',        // override for form's 'action' attribute 
         type:      'post',        // 'get' or 'post', override for form's 'method' attribute 
         dataType:  'xml',       // 'xml', 'script', or 'json' (expected server response type) 
         clearForm: false,        // clear all form fields after successful submit 

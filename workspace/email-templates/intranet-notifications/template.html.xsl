@@ -63,7 +63,7 @@
 								<h3 style="color:#718b9a;">Du nouveau sur votre intranet !</h3>
 								<p  style="font-size:14px;">Le document "<xsl:value-of select='/data/intranet-notification/entry/nom-du-document'/>" vient d'être mis en ligne par <span style="color:#718b9a"><xsl:value-of select='/data/intranet-notification/entry/auteur'/></span> dans la catégorie : "<xsl:value-of select='/data/intranet-notification/entry/categorie'/>".</p>
 								<p  style="font-size:14px;">Vous pouvez consulter celui-ci directement en vous rendant sur votre <a href="http://mab-france.org/intranet" style="color:#607890;">intranet</a>.</p><br />
-								<p style="font-size:12px; color:#666666;">N'oubliez pas de vous munir de vos identifiants pour pouvoir vous connecter.<br/>Si vous avez oublié votre mot de passe, vous pouvez vous rendre sur cette <a href="http://mab-france.org/fr/intranet/membres/mot-de-passe-oublie/" style="color:#607890;">page</a> pour en créer un nouveau.</p><br />
+								<p style="font-size:12px; color:#666666;">N'oubliez pas de vous munir de vos identifiants pour pouvoir vous connecter.<br/>Si vous avez oublié votre mot de passe, vous pouvez vous rendre sur cette <a href="http://mab-france.org/intranet/membres/mot-de-passe-oublie/" style="color:#607890;">page</a> pour en créer un nouveau.</p><br />
 								<p style="font-size:14px; color:#7db827; text-align:right;">L'équipe du Mab France</p>
 
 							</td>

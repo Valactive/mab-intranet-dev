@@ -80,11 +80,10 @@
   &lt;input name="fields[reserve]" type="hidden" value="..." />
   &lt;label>Actions
     &lt;!-- Modify just current language value -->
-    &lt;input name="fields[actions][value-{$url-language}]" type="text" /> 
+    &lt;input name="fields[actions]" type="text" /> 
     
     &lt;!-- Modify all values -->
-    &lt;input name="fields[actions][value-fr]" type="text" />
-    &lt;input name="fields[actions][value-en]" type="text" />
+  
   &lt;/label>
   &lt;input name="action[members-notifications]" type="submit" value="Envoyer" />
 &lt;/form></code></pre>

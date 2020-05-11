@@ -5,9 +5,9 @@
 <xsl:template match="/">
 	<xsl:copy-of select="/data/events" >
 	</xsl:copy-of>
-<!--
+
 	<xsl:copy-of select="/data" >
 	</xsl:copy-of>
--->
+
 </xsl:template>
 </xsl:stylesheet>

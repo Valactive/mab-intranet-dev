@@ -12,7 +12,7 @@ Bonjour,
 
 Un nouveau document vient d'être mis en ligne sur l'intranet.
 
-Vous pouvez dès à présent vous rendre sur votre intranet à l'adresse suivante : www.intranet.mab-france.org/fr/ pour consulter celui-ci.
+Vous pouvez dès à présent vous rendre sur votre intranet à l'adresse suivante : www.intranet.mab-france.org/ pour consulter celui-ci.
 
 L'équipe du Mab France
 </xsl:template>

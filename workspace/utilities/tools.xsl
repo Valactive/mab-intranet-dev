@@ -50,8 +50,7 @@
 	</form>
 -->
 
-
-<form method="get" action="{$root}/{$url-language}/search/" id="form-search">
+<form method="get" action="{$root}/search/" id="form-search">
 
 	<label><xsl:value-of select="$labels[nom/@handle='chercher-un-contenu']/texte"/></label>
 	<input id="champRech" class="radius" name="keywords" type="text" required="required" />

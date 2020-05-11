@@ -137,59 +137,35 @@ d/n/y t => 21/09/81 6:30pm
 	<xsl:param name="format" select="'m'"/>
 	<xsl:param name="month-word">
 		<xsl:choose>
-			<xsl:when test="$month = 01 and $url-language = 'en'">January</xsl:when>
-			<xsl:when test="$month = 02 and $url-language = 'en'">February</xsl:when>
-			<xsl:when test="$month = 03 and $url-language = 'en'">March</xsl:when>
-			<xsl:when test="$month = 04 and $url-language = 'en'">April</xsl:when>
-			<xsl:when test="$month = 05 and $url-language = 'en'">May</xsl:when>
-			<xsl:when test="$month = 06 and $url-language = 'en'">Jun</xsl:when>
-			<xsl:when test="$month = 07 and $url-language = 'en'">July</xsl:when>
-			<xsl:when test="$month = 08 and $url-language = 'en'">August</xsl:when>
-			<xsl:when test="$month = 09 and $url-language = 'en'">September</xsl:when>
-			<xsl:when test="$month = 10 and $url-language = 'en'">October</xsl:when>
-			<xsl:when test="$month = 11 and $url-language = 'en'">November</xsl:when>
-			<xsl:when test="$month = 12 and $url-language = 'en'">December</xsl:when>
-			<xsl:when test="$month = 01 and $url-language = 'fr'">Janvier</xsl:when>
-			<xsl:when test="$month = 02 and $url-language = 'fr'">Février</xsl:when>
-			<xsl:when test="$month = 03 and $url-language = 'fr'">Mars</xsl:when>
-			<xsl:when test="$month = 04 and $url-language = 'fr'">Avril</xsl:when>
-			<xsl:when test="$month = 05 and $url-language = 'fr'">Mai</xsl:when>
-			<xsl:when test="$month = 06 and $url-language = 'fr'">Juin</xsl:when>
-			<xsl:when test="$month = 07 and $url-language = 'fr'">Juillet</xsl:when>
-			<xsl:when test="$month = 08 and $url-language = 'fr'">Août</xsl:when>
-			<xsl:when test="$month = 09 and $url-language = 'fr'">Septembre</xsl:when>
-			<xsl:when test="$month = 10 and $url-language = 'fr'">Octobre</xsl:when>
-			<xsl:when test="$month = 11 and $url-language = 'fr'">Novembre</xsl:when>
-			<xsl:when test="$month = 12 and $url-language = 'fr'">Décembre</xsl:when>
+			<xsl:when test="$month = 01">Janvier</xsl:when>
+			<xsl:when test="$month = 02">Février</xsl:when>
+			<xsl:when test="$month = 03">Mars</xsl:when>
+			<xsl:when test="$month = 04">Avril</xsl:when>
+			<xsl:when test="$month = 05">Mai</xsl:when>
+			<xsl:when test="$month = 06">Juin</xsl:when>
+			<xsl:when test="$month = 07">Juillet</xsl:when>
+			<xsl:when test="$month = 08">Août</xsl:when>
+			<xsl:when test="$month = 09">Septembre</xsl:when>
+			<xsl:when test="$month = 10">Octobre</xsl:when>
+			<xsl:when test="$month = 11">Novembre</xsl:when>
+			<xsl:when test="$month = 12">Décembre</xsl:when>
 		</xsl:choose>
 	</xsl:param>
 
 	<xsl:param name="month-abbr">
 		<xsl:choose>
-			<xsl:when test="$month = 01 and $url-language = 'en'">Jan</xsl:when>
-			<xsl:when test="$month = 02 and $url-language = 'en'">Feb</xsl:when>
-			<xsl:when test="$month = 03 and $url-language = 'en'">Mar</xsl:when>
-			<xsl:when test="$month = 04 and $url-language = 'en'">Apr</xsl:when>
-			<xsl:when test="$month = 05 and $url-language = 'en'">May</xsl:when>
-			<xsl:when test="$month = 06 and $url-language = 'en'">Jun</xsl:when>
-			<xsl:when test="$month = 07 and $url-language = 'en'">Jul</xsl:when>
-			<xsl:when test="$month = 08 and $url-language = 'en'">Aug</xsl:when>
-			<xsl:when test="$month = 09 and $url-language = 'en'">Sep</xsl:when>
-			<xsl:when test="$month = 10 and $url-language = 'en'">Oct</xsl:when>
-			<xsl:when test="$month = 11 and $url-language = 'en'">Nov</xsl:when>
-			<xsl:when test="$month = 12 and $url-language = 'en'">Dec</xsl:when>
-			<xsl:when test="$month = 01 and $url-language = 'fr'">Jan.</xsl:when>
-			<xsl:when test="$month = 02 and $url-language = 'fr'">Fév.</xsl:when>
-			<xsl:when test="$month = 03 and $url-language = 'fr'">Mars</xsl:when>
-			<xsl:when test="$month = 04 and $url-language = 'fr'">Avr.</xsl:when>
-			<xsl:when test="$month = 05 and $url-language = 'fr'">Mai</xsl:when>
-			<xsl:when test="$month = 06 and $url-language = 'fr'">Juin</xsl:when>
-			<xsl:when test="$month = 07 and $url-language = 'fr'">Juil</xsl:when>
-			<xsl:when test="$month = 08 and $url-language = 'fr'">Août</xsl:when>
-			<xsl:when test="$month = 09 and $url-language = 'fr'">Sept.</xsl:when>
-			<xsl:when test="$month = 10 and $url-language = 'fr'">Oct.</xsl:when>
-			<xsl:when test="$month = 11 and $url-language = 'fr'">Nov.</xsl:when>
-			<xsl:when test="$month = 12 and $url-language = 'fr'">Déc.</xsl:when>
+			<xsl:when test="$month = 01">Jan.</xsl:when>
+			<xsl:when test="$month = 02">Fév.</xsl:when>
+			<xsl:when test="$month = 03">Mars</xsl:when>
+			<xsl:when test="$month = 04">Avr.</xsl:when>
+			<xsl:when test="$month = 05">Mai</xsl:when>
+			<xsl:when test="$month = 06">Juin</xsl:when>
+			<xsl:when test="$month = 07">Juil</xsl:when>
+			<xsl:when test="$month = 08">Août</xsl:when>
+			<xsl:when test="$month = 09">Sept.</xsl:when>
+			<xsl:when test="$month = 10">Oct.</xsl:when>
+			<xsl:when test="$month = 11">Nov.</xsl:when>
+			<xsl:when test="$month = 12">Déc.</xsl:when>
 		</xsl:choose>
 	</xsl:param>
 	<xsl:choose>
@@ -262,20 +238,13 @@ d/n/y t => 21/09/81 6:30pm
 	<xsl:param name="format" select="'w'"/>
 	<xsl:param name="result">
 	<xsl:choose>
-		<xsl:when test="$weekday = 1 and $url-language = 'en'">Monday</xsl:when>
-		<xsl:when test="$weekday = 2 and $url-language = 'en'">Tuesday</xsl:when>
-		<xsl:when test="$weekday = 3 and $url-language = 'en'">Wednesday</xsl:when>
-		<xsl:when test="$weekday = 4 and $url-language = 'en'">Thursday</xsl:when>
-		<xsl:when test="$weekday = 5 and $url-language = 'en'">Friday</xsl:when>
-		<xsl:when test="$weekday = 6 and $url-language = 'en'">Saturday</xsl:when>
-		<xsl:when test="$weekday = 7 and $url-language = 'en'">Sunday</xsl:when>
-		<xsl:when test="$weekday = 1 and $url-language = 'fr'">Lundi</xsl:when>
-		<xsl:when test="$weekday = 2 and $url-language = 'fr'">Mardi</xsl:when>
-		<xsl:when test="$weekday = 3 and $url-language = 'fr'">Mercredi</xsl:when>
-		<xsl:when test="$weekday = 4 and $url-language = 'fr'">Jeudi</xsl:when>
-		<xsl:when test="$weekday = 5 and $url-language = 'fr'">Vendredi</xsl:when>
-		<xsl:when test="$weekday = 6 and $url-language = 'fr'">Samedi</xsl:when>
-		<xsl:when test="$weekday = 7 and $url-language = 'fr'">Dimanche</xsl:when>
+		<xsl:when test="$weekday = 1">Lundi</xsl:when>
+		<xsl:when test="$weekday = 2">Mardi</xsl:when>
+		<xsl:when test="$weekday = 3">Mercredi</xsl:when>
+		<xsl:when test="$weekday = 4">Jeudi</xsl:when>
+		<xsl:when test="$weekday = 5">Vendredi</xsl:when>
+		<xsl:when test="$weekday = 6">Samedi</xsl:when>
+		<xsl:when test="$weekday = 7">Dimanche</xsl:when>
 	</xsl:choose>
 	</xsl:param>
 	<xsl:choose>

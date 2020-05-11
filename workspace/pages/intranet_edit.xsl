@@ -74,14 +74,6 @@
 				  		<dd class="file text">
 				  		<a href="{$workspace}{/data/intra-document/entry/fichier-joint/@path}/{data/intra-document/entry/fichier-joint/filename}" title="supprimer" class="text">
 				  			<xsl:value-of select="/data/intra-document/entry/fichier-joint/filename"/></a>
-				  			
-				  		<!--
-	<input type="hidden" name="fields[fichier-joint]" value="{/data/intra-document/entry/fichier-joint/@path}/{data/intra-document/entry/fichier-joint/filename}">
-					  			<xsl:attribute name="value">
-					  				<xsl:value-of select="data/intra-document/entry/fichier-joint/@path"/>/<xsl:value-of select="data/intra-document/entry/fichier-joint/filename"/>
-					  			</xsl:attribute>
-				  			</input>
--->
 				  			<a href="#" class="button-link switch left-25">Supprimer</a></dd>
 				  		<dd style="display:none" class="cfile"><input class="fileupload" name="fields[fichier-joint]" type="file" /></dd>
 	
