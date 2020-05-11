@@ -74,7 +74,7 @@
 
 		###### PUBLIC ######
 		'public' => array(
-			'display_event_xml_in_source' => 'yes',
+			'display_event_xml_in_source' => 'no',
 		),
 		########
 
