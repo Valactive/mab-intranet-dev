@@ -40,7 +40,7 @@
 &lt;/add-documents-with-notifications></code></pre>
         <p>Si une erreur survient durant l’enregistrement, liée à un champ manquant ou invalide, le XML suivant sera retourné:</p>
         <pre class="XML"><code>&lt;add-documents-with-notifications result="error">
-  &lt;message>Des erreurs ont été rencontrées lors de l’enregistrement de l’entrée.&lt;/message>
+  &lt;message>champs manquant ou invalide lors de l’enregistrement de l’entrée.&lt;/message>
   &lt;field-name type="invalid | missing" />
   ...
 &lt;/add-documents-with-notifications></code></pre>
@@ -75,8 +75,7 @@
   &lt;label>Notifications
     &lt;select name="fields[notifications][]" multiple="multiple">
       &lt;option value="catherine.cibien@mab-france.org">catherine.cibien@mab-france.org&lt;/option>
-      &lt;option value="contact@valactive.com">contact@valactive.com&lt;/option>
-      &lt;option value="laurence@nektarine-conseil.fr">laurence@nektarine-conseil.fr&lt;/option>
+      &lt;option value="staminh@valactive.com">staminh@valactive.com&lt;/option>
       &lt;option value="martine.atramentowicz@mab-france.org">martine.atramentowicz@mab-france.org&lt;/option>
     &lt;/select>
   &lt;/label>

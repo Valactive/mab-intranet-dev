@@ -34,10 +34,10 @@
 				'name' => 'intra-all-catégories',
 				'author' => array(
 					'name' => 'Valéry Frisch',
-					'website' => 'http://mab-france.org',
-					'email' => 'valery@valactive.com'),
-				'version' => 'Symphony 2.2.4',
-				'release-date' => '2012-01-23T21:14:21+00:00'
+					'website' => 'http://mab-intranet.localhost',
+					'email' => 'valery.frisch@gmail.com'),
+				'version' => 'Symphony 2.2.5',
+				'release-date' => '2020-05-07T13:01:31+00:00'
 			);
 		}
 

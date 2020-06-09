@@ -175,8 +175,9 @@ section[role=navigation] header h1 {
 #main-nav ul li li a:hover, #main-nav ul li.current li a:hover {}
 #main-nav > ul, #main-nav > ul li, #main-nav > ul li.current, #main-nav ul li li { background-repeat:no-repeat; }
 #main-nav > ul { background-position:bottom; }
-#main-nav > ul li, #main-nav > ul li.current { background-position:0 0; }
+#main-nav > ul li, #main-nav > ul li.current { background-position:0 0; position:relative;}
 #main-nav > ul li:last-child { padding-bottom:2px; } /* Proper background rendering */
+/* #main-nav > ul li { position: relative; } */
 #main-nav ul li a {
 	display:block;
 	font-weight:bold;
@@ -222,7 +223,7 @@ section[role=navigation] header h1 {
 /*  Sample Icons  */
 #main-nav ul li a.dashboard { background-image:url('../img/icons/icon_nav_dashboard.png'); }
 #main-nav ul li a.projects { background-image:url('../img/icons/icon_nav_projects.png'); }
-#main-nav ul li a.products { background-image:url('../img/icons/icon_nav_products.png'); }
+#main-nav ul li a.products { background-image:url('../img/icons/icon_nav_products.png'); z-index: 0; position:relative; }
 #main-nav ul li a.events { background-image:url('../img/icons/icon_nav_events.png'); }
 #main-nav ul li a.articles { background-image:url('../img/icons/icon_nav_articles.png'); }
 #main-nav ul li a.gallery { background-image:url('../img/icons/icon_nav_gallery.png'); }
@@ -647,15 +648,14 @@ article section p a.button {
 	border-color:#d1d1d1;
 }
 .notification.edit strong { color:#737373; }
-
 .notification {
-display: table-cell;
-opacity: 1;
-position: absolute;
-width: 100%;
-text-align: center;
-}
-/* login notification */
+	display: table-cell;
+	opacity: 1;
+	position: absolute;
+	width: 100%;
+	text-align: center;
+	}
+	
 .login .notification, #login-box .notification {
 	position: relative;
 	display: block;
@@ -1416,9 +1416,11 @@ nav.sidetab-switch li a.pen:hover { background-position: left top;}
 nav.sidetab-switch li a.sup:hover { background-position: left bottom; }
 
 table .actions li:last-child { margin-right:0; }
-table .actions .view { background:url('../img/icons/icon_table_view.png') no-repeat 0 0; }
+/* STM */
+/*table .actions .view { background:url('../img/icons/icon_table_view.png') no-repeat 0 0; }*/
 table .actions .edit, li .edit { background:url('../img/icons/icon_table_edit.png') no-repeat 0 0; }
 table .actions .delete { background:url('../img/icons/icon_table_delete.png') no-repeat 0 0; }
+table .actions .deplace { background:url('../img/icons/icon_table_deplace.png') no-repeat 0 0; }
 
 /*  Table Mini Actions  */
 .toggle-table-switch {
@@ -1643,11 +1645,36 @@ tr.black fieldset, div.black {
 }
 div.new-cat form {
 	margin:0;
-	padding;0;
+	padding:0;
+}
+a.new-sous-rubrique {
+	display: block !important;
+    width: 7px;
+    height: 7px !important;
+    position: absolute;
+    right: 50px;
+    top: 4px;
+    padding: 10px 10px 10px 10px !important;
+    margin: 0;
+    font-size: 1.8em;
+    border-radius: 50%;
+    color: #699911 !important;
+    text-align: left;
+	line-height: 10px;
+	z-index: 3;
+}
+a.new-sous-rubrique:hover strong {
+	font-weight: bold;
+}
+a.new-sous-rubrique strong {
+	padding: 0;
+    margin: 0;
+    font-size: 28px;
 }
 div.picto-edit-cat { display: none; }
 div.picto-sup-doc { position: relative;}
-div.edit-cat, div.sup-cat {
+div.picto-deplace-doc { position: relative;}
+div.edit-cat, div.sup-cat ,div.new-sous-rubrique {
 	position: absolute;
 	top: 0;
 	left: 0px;
@@ -1671,8 +1698,15 @@ div.sup-doc {
 	border-radius: 3px;
 	z-index: 600;
 }
+div.new-sous-rubrique {
+	left: 224px;
+    top: 0px;
+    width: 449px;
+}
+#main-nav ul li div.new-sous-rubrique .button-link.close{ display: inline-block;
+	text-shadow:none}
 div.sup-doc form a { display: inline;}
-div.edit-cat form, div.sup-cat form, div.sup-doc form { margin: 0px; padding: 5px;}
-div.edit-cat .button-link, div.sup-cat .button-link { padding: 2px 6px; color: white;}
-div.liste-notifie { margin-top:8px;}
+div.edit-cat form, div.sup-cat form, div.sup-doc form, div.new-sous-rubrique form { margin: 0px; padding: 5px;}
+div.edit-cat .button-link, div.sup-cat .button-link ,  #main-nav ul li div.new-sous-rubrique a.button-link { padding: 2px 6px; color: white;}
+div.liste-notifie , div.rubrique-notifie { margin-top:8px;}
 ul.members { display: none;}

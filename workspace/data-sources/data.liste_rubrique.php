@@ -2,22 +2,21 @@
 
 	require_once(TOOLKIT . '/class.datasource.php');
 
-	Class datasourceintra_sous_rubriques extends Datasource{
+	Class datasourceliste_rubrique extends Datasource{
 
-		public $dsParamROOTELEMENT = 'intra-sous-rubriques';
-		public $dsParamORDER = 'asc';
+		public $dsParamROOTELEMENT = 'liste-rubrique';
+		public $dsParamORDER = 'desc';
 		public $dsParamPAGINATERESULTS = 'yes';
-		public $dsParamLIMIT = '100';
+		public $dsParamLIMIT = '20';
 		public $dsParamSTARTPAGE = '1';
 		public $dsParamREDIRECTONEMPTY = 'no';
-		public $dsParamSORT = 'nom';
+		public $dsParamSORT = 'system:id';
 		public $dsParamASSOCIATEDENTRYCOUNTS = 'no';
 
 		
 
 		public $dsParamINCLUDEDELEMENTS = array(
-				'nom',
-				'rubrique-parente'
+				'nom'
 		);
 
 
@@ -28,18 +27,18 @@
 
 		public function about(){
 			return array(
-				'name' => 'Intra sous rubriques',
+				'name' => 'liste-rubrique',
 				'author' => array(
 					'name' => 'Valéry Frisch',
 					'website' => 'http://mab-intranet.localhost',
 					'email' => 'valery.frisch@gmail.com'),
 				'version' => 'Symphony 2.2.5',
-				'release-date' => '2020-06-09T12:03:51+00:00'
+				'release-date' => '2020-06-02T19:09:56+00:00'
 			);
 		}
 
 		public function getSource(){
-			return '25';
+			return '26';
 		}
 
 		public function allowEditorToParse(){

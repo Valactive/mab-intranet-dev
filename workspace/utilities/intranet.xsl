@@ -40,104 +40,63 @@
 				<!-- /User Info -->
 
 				<!-- Main Navigation -->
-				<xsl:choose>
-					<xsl:when test="$member-role = 'Administrateur'">
 						<nav id="main-nav">
 							<ul>
 								<li>
 									<xsl:if test="$rubrique =''"><xsl:attribute name="class">current</xsl:attribute></xsl:if>
 									<a href="/intranet/" title="Tableau de bord" class="dashboard no-submenu">Tableau de bord</a>
 								</li>
-
-
 								<xsl:for-each select="/data/intranet-admin-menu/rubrique-parente">
+									<xsl:variable name="id_rub"> <xsl:value-of select="@link-id"/> </xsl:variable>
 									<xsl:variable name="nsr"><xsl:value-of select="count(entry)"/></xsl:variable>
 									<xsl:variable name="rub-handle"><xsl:value-of select="@link-handle"/></xsl:variable>
 									<li>
+										<xsl:if test="$member-role = 'Administrateur'">
 										<xsl:attribute name="class"><xsl:if test="$rub-handle = $rubrique">current</xsl:if></xsl:attribute>
-										<a href="intranet/{link-handle}" class="products"><xsl:value-of select="@value"/></a><span original-title="Il y a {$nsr} sous-rubrique(s)"><xsl:value-of select="$nsr"/></span>
+										<a class="ajax-form new-sous-rubrique" rel="tooltip" title="Ajouter une sous-rubrique">
+											<xsl:attribute name="href">new-sous-rubrique/no/a<xsl:value-of select="floor(math:random() * 1000000)"/>/sous_rub_id/doc_id/<xsl:value-of select="$id_rub"/>
+											</xsl:attribute>
+											<strong>+</strong>
+										</a>
+										</xsl:if>
+										<a href="intranet/{link-handle}" class="products"><xsl:value-of select="@value"/></a> <!-- nom de la rubrique-->
+										<span title="Il y a {$nsr} sous-rubrique(s)"><xsl:value-of select="$nsr"/></span>
+
 										<ul>
-											<xsl:for-each select="entry">
+											<xsl:for-each select="entry"> <!-- liste des sous-rubriques -->
 												<li>
 													<xsl:if test="nom/@handle = $sous-rubrique"><xsl:attribute name="class">current</xsl:attribute></xsl:if>
 													<a href="{$root}/intranet/{$rub-handle}/{nom/@handle}/#sidetab1" title="{nom}"><xsl:value-of select="nom"/></a>
 												</li>
-											</xsl:for-each>
+											</xsl:for-each>  <!-- fin liste des sous-rubriques -->
 										</ul>
 									</li>
 								</xsl:for-each>
 							</ul>
 						</nav>
 						<!-- /Main Navigation -->
-					</xsl:when>
-					<xsl:otherwise>
-
-						<nav id="main-nav">
-
-							<ul>
-								<li>
-									<xsl:if test="$rubrique =''"><xsl:attribute name="class">current</xsl:attribute></xsl:if>
-									<a href="/intranet/" title="Tableau de bord" class="dashboard no-submenu">Tableau de bord</a>
-								</li>
-
-
-								<xsl:for-each select="/data/intranet-rubriques-par-membre/rubrique-parente">
-									<xsl:variable name="nsr"><xsl:value-of select="count(entry)"/></xsl:variable>
-									<xsl:variable name="rub-handle"><xsl:value-of select="@link-handle"/></xsl:variable>
-									<li>
-										<xsl:attribute name="class"><xsl:if test="$rub-handle = $rubrique">current</xsl:if></xsl:attribute>
-										<a href="intranet/{link-handle}" class="products"><xsl:value-of select="@value"/></a><span original-title="Il y a {$nsr} sous-rubrique(s)"><xsl:value-of select="$nsr"/></span>
-										<ul>
-											<xsl:for-each select="entry">
-												<li>
-													<xsl:if test="nom/@handle = $sous-rubrique"><xsl:attribute name="class">current</xsl:attribute></xsl:if>
-													<a href="{$root}/intranet/{$rub-handle}/{nom/@handle}/#sidetab1" title="{nom}"><xsl:value-of select="nom"/></a>
-												</li>
-											</xsl:for-each>
-										</ul>
-									</li>
-								</xsl:for-each>
-							</ul>
-						</nav>
-						<!-- /Main Navigation -->
-					</xsl:otherwise>
-				</xsl:choose>
 				<!-- bloc info members -->
 				<section class="sidebar nested">
 					<h2>Membres (<xsl:value-of select="count(/data/intranet-membres/entry)" />)</h2><a href="#" class="showMembers">
 					Voir la liste
-				</a>
-				<ul class="members">
-					<xsl:for-each select="/data/intranet-membres/entry">
-						<li><xsl:value-of select="identifiant"/></li>
-					</xsl:for-each>
-				</ul>
+					</a>
+					<ul class="members">
+						<xsl:for-each select="/data/intranet-membres/entry">
+							<li><xsl:value-of select="identifiant"/></li>
+						</xsl:for-each>
+					</ul>
+				</section>
 			</section>
-		</section>
 		<!-- /Aside Block -->
 
 		<!-- Main Content -->
 		<section role="main">
 
-			<!-- Breadcumbs -->
-<!--
-		<ul id="breadcrumbs">
-			<li><a href="/" title="Retour à l'accueil">Retour à l'accueil</a></li>
-			<xsl:if test="$rubrique !=''">
-				<li><a href="#"><xsl:value-of select="$rubrique"/></a></li>
-			</xsl:if>
-
-			<xsl:if test="$sous-rubrique !=''">
-				<li><xsl:value-of select="$sous-rubrique"/></li>
-			</xsl:if>
-		</ul>
-	-->
-	<!-- /Breadcumbs -->
-
-	<!-- Full Content Block -->
-	<!-- Note that only 1st article need clearfix class for clearing -->
-	<xsl:choose>
+		<!-- Full Content Block -->
+		<!-- Note that only 1st article need clearfix class for clearing -->
+		<xsl:choose>
 		<!-- Tableau de bord -->
+		<!-- STM ???????? -->
 		<xsl:when test="$rubrique ='' or $member-role != 'Administrateur' and $is_authorized = 'false'">
 			<xsl:call-template name="tableau-de-bord"/>
 		</xsl:when>
@@ -147,22 +106,22 @@
 
 				<!-- Article Container for safe floating -->
 				<div class="article-container">
-
 					<!-- Sous-rubrique Header -->
 					<header>
 						<h2><xsl:value-of select="/data/intra-sous-rubriques/entry[nom/@handle = $sous-rubrique]/nom"/></h2>
-						<xsl:if test="count(/data/intra-categories-filtre-par-sous-rubrique/entry)>0">
+						<!--<xsl:if test="count(/data/intra-categories-filtre-par-sous-rubrique/entry)>0">-->
 							<nav>
 								<ul class="button-switch">
 									<!-- url : action/form_id/sous_rubrique_id -->
+									<!-- paramètres url : type/cat_id/tmp_form_id/sous_rub_id/doc_id/rub_id -->
 									<a class="button green ajax-form new-cat" rel="tooltip" title="Ajouter une catégorie dans cette rubrique">
 										<xsl:attribute name="href">new-cat/no/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="/data/intra-sous-rubriques/entry[nom/@handle = $sous-rubrique]/@id"/></xsl:attribute><span>Ajouter une </span><strong>Catégorie</strong></a>
-									</ul>
-								</nav>
-							</xsl:if>
+								</ul>
+							</nav>
+						<!--</xsl:if>-->
 
 							<!-- /Article Header Tab Navigation -->
-						</header>
+					</header>
 						<!-- /Article Header -->
 
 
@@ -175,10 +134,16 @@
 									<div class="notification information">
 										<ul class="button-switch">
 											<h2>Ooops !</h2>
-											<p>Il n'y a aucune catégorie pour cette sous-rubrique, il est temps de <a class="button-link green ajax-form new-cat" rel="tooltip" title="Ajouter une catégorie dans cette rubrique"><xsl:attribute name="href">new-cat/no/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="/data/intra-sous-rubriques/entry[nom/@handle = $sous-rubrique]/@id"/></xsl:attribute><span>cliquer sur ce bouton</span></a> pour en créer une.</p>
+											<p>Il n'y a aucune catégorie pour cette sous-rubrique, il est temps de 
+												<!--<a class="button-link green ajax-form new-cat" rel="tooltip" >
+													<xsl:attribute name="href">new-cat/no/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="/data/intra-sous-rubriques/entry[nom/@handle = $sous-rubrique]/@id"/></xsl:attribute
+													><span>cliquer sur ce bouton</span>
+												</a> pour en créer une.-->
+												la créer.
+											</p>
 										</ul>
 									</div>
-								</article>
+								</article> 
 							</xsl:when>
 							<!-- au moins une catégorie -->
 							<xsl:otherwise>
@@ -198,25 +163,24 @@
 															<xsl:text>#sidetab</xsl:text><xsl:value-of select="position()"/>
 														</xsl:attribute>
 														<xsl:value-of select="nom"/>
-													</a>
+														</a>
 													<!-- edit categorie -->
 
-													<xsl:if test="($member-role = 'Administrateur' or $member-id = auteur/item/@id)">
+														<xsl:if test="($member-role = 'Administrateur' or $member-id = auteur/item/@id)">
 
-														<div class="picto-edit-cat">
-															<a class="pen ajax-form edit-cat" rel="tooltip" title="Editer cette catégorie">
-																<xsl:attribute name="href">edit-cat/no/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="@id"/>/no/<xsl:value-of select="/data/intra-categories-filtre-par-sous-rubrique/entry[@id=@id]/sous-rubrique-parente/item/@id"/></xsl:attribute>Editer cette catégorie</a>
+															<div class="picto-edit-cat">
+																<a class="pen ajax-form edit-cat" rel="tooltip" title="Editer cette catégorie">
+																	<xsl:attribute name="href">edit-cat/no/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="@id"/>/no/<xsl:value-of select="/data/intra-categories-filtre-par-sous-rubrique/entry[@id=@id]/sous-rubrique-parente/item/@id"/></xsl:attribute>Editer cette catégorie</a>
 
 																<a class="sup ajax-form sup-cat" rel="tooltip" title="Supprimer cette catégorie">
 																	<xsl:attribute name="href">sup-cat/no/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="@id"/>/no/<xsl:value-of select="/data/intra-categories-filtre-par-sous-rubrique/entry[@id=@id]/sous-rubrique-parente/item/@id"/></xsl:attribute>Supprimer cette catégorie</a>
-																</div>
-															</xsl:if>
+															</div>
+														</xsl:if>
 
-
-														</li>
-													</xsl:for-each>
-												</ul>
-											</nav>
+													</li>
+												</xsl:for-each>
+											</ul>
+										</nav>
 											<!-- /Side Tab Navigation -->
 
 											<!-- Side Tab Content #sidetab1++ -->
@@ -327,9 +291,6 @@
 
 				<!-- Article Footer -->
 				<footer>
-<!--
-						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse et <a href="#sample" class="open-modal">open modal!</a> Maecenas id augue ac metus tempus aliquam. Sed pharetra placerat suscipit sagittis.</p>
-					-->
 				</footer>
 				<!-- /Article Footer -->
 

@@ -44,7 +44,7 @@
 	<link rel="stylesheet" href="{$workspace}/intranet/css/jquery.visualize.css"/>
 
 	<!-- Google WebFonts -->
-	<link href='http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic' rel='stylesheet' type='text/css'/>
+	<link href='//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic' rel='stylesheet' type='text/css'/>
 
   	<!-- All JavaScript at the bottom, except for Modernizr which enables HTML5 elements & feature detects -->
   	<script src="{$workspace}/js/libs/modernizr-2.0.6.min.js"></script>

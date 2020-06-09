@@ -98,10 +98,15 @@ $(function () {
 	$('#main-nav li ul').hide(); //Hide all sub menus
 	$('#main-nav li.current a').parent().find('ul').slideToggle('slow'); // Slide down the current sub menu
 	$('#main-nav li a').click(
-		function () {
-			$(this).parent().siblings().find('ul').slideUp('normal'); // Slide up all menus except the one clicked
-			$(this).parent().find('ul').slideToggle('normal'); // Slide down the clicked sub menu
-			return false;
+		function (e) {
+			if($(e.target).attr('class') === 'products') {
+				$(this).parent().siblings().find('ul').slideUp('normal'); // Slide up all menus except the one clicked
+				$(this).parent().find('ul').slideToggle('normal'); // Slide down the clicked sub menu
+				return false;
+			} else {
+				//console.log($(this).attr('href'));
+				// nothing to do, the normal function is played in order to display the right form.
+			}
 		}
 	);
 	$('#main-nav li a.no-submenu, #main-nav li li a').click(
@@ -332,9 +337,11 @@ $(function () {
 	
 	//ajax form process
 	//injection du formulaire en ajax dans le dom
-	$('a.ajax-form,a.ajax-form.edit-cat,a.ajax-form.sup-cat,a.ajax-form.sup-doc').live('click', function(evt){
-
+	$('a.ajax-form, #main-nav li a.ajax-form.new-sous-rubrique,a.ajax-form.edit-cat,a.ajax-form.sup-cat,a.ajax-form.sup-doc').live('click', function(evt){
 		evt.preventDefault();
+		console.log("--------ligne 342 -- ")
+		console.log("this et href : "+$(this).attr('href'));
+		
 		var form_url = '/intranet/forms/' + $(this).attr('href')+'/';
 		var ref_segments = $(this).attr('href').split('/');
 		var type = '.'+ref_segments[0];
@@ -342,6 +349,9 @@ $(function () {
 		var tmp_form_id_class = '.'+ref_segments[2];
 		var is_table = $(this).is(".table");
 		var current_selector = this;
+
+		console.log("type : "+type);
+		console.log($(type).length);
 
 		var is_Sidetab = $(this).parents('div.sidetab').attr('id');
 		var currentSidetab;
@@ -354,13 +364,21 @@ $(function () {
 
 		aTabIndex = $(this).parents('li').index();
 
+		switch ( type ) {
+				// STM creation sous-rubrique
+				 case '.new-sous-rubrique':
+					$.get(form_url,
+						function(data){
+							$(data).insertAfter( $('#main-nav a.new-sous-rubrique').eq( aTabIndex -1 ) );
+						})
+				break;
+				// STM fin creation sous-rubrique
 
-			switch ( type ) {
 				case '.new-cat':
 					$.get(form_url,
 						function(data){
 							$('a.button.new-cat, a.button-link.new-cat').hide();
-							$(data).insertBefore( $('a.button.new-cat, a.button-link.new-cat') );	
+							$(data).insertAfter( $('a.button.new-cat, a.button-link.new-cat') );	
 						})
 				break;
 			
@@ -370,16 +388,23 @@ $(function () {
 							$(data).insertAfter( $('div.picto-edit-cat').eq( aTabIndex ) );	
 						})
 				break;
+
 				case '.sup-cat' :
 					$.get(form_url,
 						function(data){
 							$(data).insertAfter( $('div.picto-edit-cat').eq( aTabIndex ) );	
 						})
 				break;
+				
 				case '.edit-doc' :
+					console.log("case edit-doc");
+					console.log($(type));
+					console.log($(type).length);
 					if( $(type).length ){ 	
+						console.log(" edit-doc  : if");
 						$(type).slideDown('slow').css('display', 'none').fadeIn('fast').css('opacity',100); 
 					} else {
+						console.log(" edit-doc  : else");
 						$('.container').slideUp('fast').remove();
 						$.get(form_url, 
 							function(data){
@@ -394,6 +419,32 @@ $(function () {
 							});
 					}
 				break;
+
+			//STM deplace doc			
+				case '.deplace-doc' :
+					console.log("case deplace-doc");
+					console.log($(type).length);
+					if( $(type).length ){ 	
+						console.log("if");
+						$(type).slideDown('slow').css('display', 'none').fadeIn('fast').css('opacity',100); 
+					} else {
+						console.log("else");
+						$('.container').slideUp('fast').remove();
+						$.get(form_url, 
+							function(data){
+								if( is_table ){
+									data = '<tr class="'+ ref_segments[2] +' black"><td colspan="8">'+ data +'</td></tr>';
+									$(data).insertAfter( $('tr',currentSidetab).eq(currentIndex+1) );
+									$('container_'+tmp_form_id_class).slideDown('slow').css('display', 'none').fadeIn('fast').css('display', 'block');				
+								} else {
+									$(data).insertAfter(current_categorie_id,currentSidetab);
+									$('container_'+tmp_form_id_class).slideDown('slow').css('display', 'none').fadeIn('fast').css('display', 'block');				
+								}	
+							});
+					}
+				break;
+			//STM fin deplace doc	
+
 			
 				case '.new-doc' :
 					if( $(type).length ){ 	
@@ -412,7 +463,8 @@ $(function () {
 					$.get(form_url,
 						function(data){
 							$(data).insertAfter( current_selector );
-console.log(current_selector);
+							console.log("current_selector");
+							console.log(current_selector);
 						});	
 				break;	
 				} //end switch	

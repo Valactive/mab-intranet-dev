@@ -41,7 +41,7 @@
 			$result = new XMLElement($this->dsParamROOTELEMENT);
 
 			try{
-				include(EXTENSIONS . '/page_lhandles/lib/datasource.navigation.php');//PLH-COMM//include(EXTENSIONS . '/page_lhandles/lib/datasource.navigation.php');//PLH-COMM//include(TOOLKIT . '/data-sources/datasource.navigation.php');
+				include(TOOLKIT . '/data-sources/datasource.navigation.php');
 			}
 			catch(FrontendPageNotFoundException $e){
 				// Work around. This ensures the 404 page is displayed and
