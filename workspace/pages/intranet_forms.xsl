@@ -980,7 +980,7 @@ function showResponse(responseXML)  {
 
 		  		<input name="MAX_FILE_SIZE" type="hidden" value="62914560" />
 		  		
-				  	<label>Voulez-vous vraiment supprimer la catégorie "<xsl:value-of select="/data/intra-all-categories/entry[@id=$sous_rub_id]/nom"/>" et tous ses documents ?</label>
+				  	<label>Voulez-vous vraiment supprimer la catégorie "<xsl:value-of select="/data/intra-all-categories/entry[@id=$sous_rub_id]/nom"/>" ? <br/>Et rendre tous ses documents orphelins ?</label>
 					<input name="fields[nom]" type="hidden" value="{/data/intra-all-categories/entry[@id=$sous_rub_id]/nom}" />
 					
 					<input name="fields[sous-rubrique-parente]" type="hidden" value="{$rub_id}" />
