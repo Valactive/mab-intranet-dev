@@ -15,6 +15,7 @@
 
 		public $dsParamFILTERS = array(
 				'id' => '{$ds-authorized-member}',
+				'187' => 'yes',
 		);
 
 		public $dsParamINCLUDEDELEMENTS = array(
@@ -32,11 +33,11 @@
 			return array(
 				'name' => 'Intra sous rubrique par membre',
 				'author' => array(
-					'name' => 'Valéry Frisch',
-					'website' => 'http://mab-france.valactive.net',
-					'email' => 'valery@valactive.com'),
-				'version' => '1.0',
-				'release-date' => '2011-09-20T07:30:06+00:00'
+					'name' => 'Sophie STMadmin',
+					'website' => 'http://mab-intranet.localhost',
+					'email' => 'staminh@valactive.com'),
+				'version' => 'Symphony 2.2.5',
+				'release-date' => '2020-07-15T12:45:19+00:00'
 			);
 		}
 

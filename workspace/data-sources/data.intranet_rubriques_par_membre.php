@@ -16,6 +16,7 @@
 
 		public $dsParamFILTERS = array(
 				'id' => '{$ds-intranet-sous-rubriques-par-membre}',
+				'187' => 'yes',
 		);
 
 		public $dsParamINCLUDEDELEMENTS = array(
@@ -33,11 +34,11 @@
 			return array(
 				'name' => 'Intranet Rubriques par Membre',
 				'author' => array(
-					'name' => 'Valéry Frisch',
-					'website' => 'http://mab-france.dev',
-					'email' => 'valery@valactive.com'),
+					'name' => 'Sophie STMadmin',
+					'website' => 'http://mab-intranet.localhost',
+					'email' => 'staminh@valactive.com'),
 				'version' => 'Symphony 2.2.5',
-				'release-date' => '2013-11-22T14:16:46+00:00'
+				'release-date' => '2020-07-15T12:46:18+00:00'
 			);
 		}
 

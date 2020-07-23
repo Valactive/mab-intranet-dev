@@ -109,7 +109,7 @@ $(function () {
 			}
 		}
 	);
-	$('#main-nav li a.no-submenu, #main-nav li li a').click(
+	$('#main-nav li a.no-submenu').click(
 		function () {
 			window.location.href=(this.href); // Open link instead of a sub menu
 			return false;
@@ -337,10 +337,9 @@ $(function () {
 	
 	//ajax form process
 	//injection du formulaire en ajax dans le dom
-	$('a.ajax-form, #main-nav li a.ajax-form.new-sous-rubrique,a.ajax-form.edit-cat,a.ajax-form.sup-cat,a.ajax-form.sup-doc').live('click', function(evt){
+	$('a.ajax-form, a.ajax-form.edit-cat, a.ajax-form.sup-cat, a.ajax-form.sup-doc').live('click', function(evt){
 		evt.preventDefault();
-		console.log("--------ligne 342 -- ")
-		console.log("this et href : "+$(this).attr('href'));
+		//console.log("this et href : "+$(this).attr('href'));
 		
 		var form_url = '/intranet/forms/' + $(this).attr('href')+'/';
 		var ref_segments = $(this).attr('href').split('/');
@@ -350,8 +349,7 @@ $(function () {
 		var is_table = $(this).is(".table");
 		var current_selector = this;
 
-		console.log("type : "+type);
-		console.log($(type).length);
+		
 
 		var is_Sidetab = $(this).parents('div.sidetab').attr('id');
 		var currentSidetab;
@@ -363,6 +361,11 @@ $(function () {
 		var currentIndex = $(this).parents('tr').index();
 
 		aTabIndex = $(this).parents('li').index();
+	
+	//	console.log("is_Sidetab : "+is_Sidetab);
+	//	console.log("currentSidetab : "+currentSidetab);
+	//	console.log("currentIndex : "+currentIndex);
+	//	console.log("aTabIndex : "+aTabIndex);
 
 		switch ( type ) {
 				// STM creation sous-rubrique
@@ -372,7 +375,22 @@ $(function () {
 							$(data).insertAfter( $('#main-nav a.new-sous-rubrique').eq( aTabIndex -1 ) );
 						})
 				break;
-				// STM fin creation sous-rubrique
+				
+				// STM edit sous-rubrique
+				// STM suppression sous-rubrique
+				// ICI
+				case '.edit-sous-rubrique':
+				case '.sup-sous-rubrique':
+					console.log("sous-rubrique : " + type );
+					var rubriqueIndex = $(this).parents('li').parents('li').index();
+					var rubriqueNav = $('#main-nav li').not('#main-nav ul li ul li').eq(rubriqueIndex);
+			
+					$.get(form_url,
+						function(data){		 
+							$(data).insertAfter( $('li',rubriqueNav).eq(aTabIndex-3));
+						})
+				break;
+				// STM fin sous-rubrique
 
 				case '.new-cat':
 					$.get(form_url,
@@ -419,8 +437,19 @@ $(function () {
 							});
 					}
 				break;
-
-			//STM deplace doc			
+				case '.new-doc' :
+					if( $(type).length ){ 	
+						return;
+					} else {
+						$('.container').slideUp('fast').remove();
+						$.get(form_url, 
+							function(data){
+									$(data).insertAfter( $(current_categorie_id,currentSidetab) );
+									$('container_'+tmp_form_id_class).slideDown('slow').css('display', 'none').fadeIn('fast').css('display', 'block');				
+							});
+					}
+				break;
+				//STM deplace doc			
 				case '.deplace-doc' :
 					console.log("case deplace-doc");
 					console.log($(type).length);
@@ -443,25 +472,12 @@ $(function () {
 							});
 					}
 				break;
-			//STM fin deplace doc	
-
-			
-				case '.new-doc' :
-					if( $(type).length ){ 	
-						return;
-//						$(type).slideDown('slow').css('display', 'none').fadeIn('fast').css('opacity',100); 
-					} else {
-						$('.container').slideUp('fast').remove();
-						$.get(form_url, 
-							function(data){
-									$(data).insertAfter( $(current_categorie_id,currentSidetab) );
-									$('container_'+tmp_form_id_class).slideDown('slow').css('display', 'none').fadeIn('fast').css('display', 'block');				
-							});
-					}
-				break;	
+				//STM fin deplace doc	
 				case '.sup-doc' :
 					$.get(form_url,
 						function(data){
+							console.log("current_selector");
+							console.log(current_selector);
 							$(data).insertAfter( current_selector );
 							console.log("current_selector");
 							console.log(current_selector);
@@ -507,7 +523,9 @@ $(function () {
 		);
 
 // survol li
-$('nav.sidetab-switch li').mouseover(function(){ $(this).find('div.picto-edit-cat').show(); }).mouseleave( function(){ $(this).find('div.picto-edit-cat').hide(); })		
+$('nav.sidetab-switch li').mouseover(function(){ $(this).find('div.picto-edit-cat').show(); }).mouseleave( function(){ $(this).find('div.picto-edit-cat').hide(); })
+$('#main-nav ul li ul li').mouseover(function(){ $(this).find('div.pen-sous-rubrique').show(); }).mouseleave( function(){ $(this).find('div.pen-sous-rubrique').hide(); })		
+
 });
 
 // show members list

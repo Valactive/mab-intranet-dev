@@ -2,9 +2,9 @@
 
 	require_once(TOOLKIT . '/class.datasource.php');
 
-	Class datasourceintranet_sous_rubriques_handle_par_membre extends Datasource{
+	Class datasourcesous_rubrique_par_id extends Datasource{
 
-		public $dsParamROOTELEMENT = 'intranet-sous-rubriques-handle-par-membre';
+		public $dsParamROOTELEMENT = 'sous-rubrique-par-id';
 		public $dsParamORDER = 'desc';
 		public $dsParamPAGINATERESULTS = 'no';
 		public $dsParamLIMIT = '20';
@@ -14,8 +14,8 @@
 		public $dsParamASSOCIATEDENTRYCOUNTS = 'no';
 
 		public $dsParamFILTERS = array(
-				'id' => '{$ds-intranet-sous-rubriques-par-membre}',
 				'187' => 'yes',
+				'id' => '{$sous-rub-id}',
 		);
 
 		public $dsParamINCLUDEDELEMENTS = array(
@@ -26,18 +26,18 @@
 
 		public function __construct(&$parent, $env=NULL, $process_params=true){
 			parent::__construct($parent, $env, $process_params);
-			$this->_dependencies = array('$ds-intranet-sous-rubriques-par-membre');
+			$this->_dependencies = array();
 		}
 
 		public function about(){
 			return array(
-				'name' => 'Intranet Sous-rubriques Handle par Membre',
+				'name' => 'sous-rubrique-par-id',
 				'author' => array(
 					'name' => 'Sophie STMadmin',
 					'website' => 'http://mab-intranet.localhost',
 					'email' => 'staminh@valactive.com'),
 				'version' => 'Symphony 2.2.5',
-				'release-date' => '2020-07-15T12:46:39+00:00'
+				'release-date' => '2020-07-23T06:29:05+00:00'
 			);
 		}
 

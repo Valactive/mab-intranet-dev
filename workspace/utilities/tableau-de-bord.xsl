@@ -97,11 +97,11 @@
 														<a class="edit open ajax-form table" title="Editer" rel="tooltip" target="_blank">
 															<xsl:attribute name="href">edit-doc/<xsl:value-of select="$current-categorie-id"/>/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="$current-sous-rubrique-id"/>/<xsl:value-of select="@id"/>/</xsl:attribute>Editer</a>
 													</li>
-												<!--	<li>
+													<li>
 														<a class=" deplace open ajax-form table" title="Deplacer" rel="tooltip" target="_blank">
-															paramètres url : type/cat_id/tmp_form_id/sous_rub_id/doc_id/rub_id 
+															<!-- paramètres url : type/cat_id/tmp_form_id/sous_rub_id/doc_id/rub_id -->
 															<xsl:attribute name="href">deplace-doc/<xsl:value-of select="$current-categorie-id"/>/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="$current-sous-rubrique-id"/>/<xsl:value-of select="@id"/>/id-rubrique</xsl:attribute>Déplacer</a>
-													</li>-->
+													</li>
 												</xsl:if>
 												<xsl:if test="($member-role = 'Administrateur' or $member-id = auteur/item/@id)">	
 													<li><a class="delete sup-doc ajax-form picto-sup-doc" title="Supprimer" rel="tooltip"><xsl:attribute name="href">sup-doc/<xsl:value-of select="$current-categorie-id"/>/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="$current-sous-rubrique-id"/>/<xsl:value-of select="@id"/>/</xsl:attribute>Supprimer</a></li>

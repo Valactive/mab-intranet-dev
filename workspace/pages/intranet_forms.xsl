@@ -13,7 +13,6 @@
 
 <xsl:variable name="id_auteur"><xsl:value-of select="/data/intranet-document/entry[@id=$doc_id]/auteur/item/@id"/></xsl:variable>
 
-
 <xsl:if test="($type = 'new-doc' or $type = 'edit-doc')">
 
 <!-- new document -->
@@ -270,7 +269,7 @@ function showResponse(responseXML)  {
 
 		  		<input name="MAX_FILE_SIZE" type="hidden" value="62914560" />
 		  		
-				  	<label>Voulez-vous vraiment supprimer le document : "<xsl:value-of select="/data/intranet-document/entry[@id=$doc_id]/nom-du-document"/>" ?</label>
+				  	<label>Voulez-vous vraiment supprimer le document "<xsl:value-of select="/data/intranet-document/entry[@id=$doc_id]/nom-du-document"/>" ?</label>
 					<input name="fields[nom-du-document]" type="hidden" value="{/data/intranet-document/entry[@id=$doc_id]/nom-du-document}" />
 					<input name="fields[auteur]" type="hidden" value="{/data/intranet-membres/entry[@id = $id_auteur]/@id}"/>
 					<xsl:variable name="current-date">
@@ -483,6 +482,284 @@ function showResponse(responseXML)  {
 
 </xsl:if> <!-- STM fin creation nouvelle sous-rubrique -->
 
+<!-- STM edit sous-rubrique -->
+<xsl:if test="$type = 'edit-sous-rubrique'">
+	<div class="{$type} container_{$tmp_form_id}">
+			<form id="{$tmp_form_id}" method="post" action="/ajaxvalidate/" enctype="multipart/form-data">
+			<xsl:if test="$sous_rub_id">
+				<input name="id" value="{$sous_rub_id}" type="hidden"/>
+			</xsl:if>	
+
+		  		<input name="MAX_FILE_SIZE" type="hidden" value="62914560" />
+		  		
+				  	<label>Sous-rubrique</label>
+					<input name="fields[nom]" type="text" value="{/data/intra-sous-rubriques/entry[@id=$sous_rub_id]/nom}" />
+					
+			  	<!-- this will be added to the submit url as an additional url param -->
+            		<input type="hidden" value="hello-world" name="fields[entry]"/>
+            		<input type="hidden" name="fields[actif]" value="Yes"/>
+			  		<input class="button green" name="action[add-sous-rubrique]" type="submit" value="Envoyer" />
+					 <!-- fermeture du formulaire -->
+					<a href="#" class="button-link close {$tmp_form_id}" title="Fermer le formulaire">Annuler</a>	
+			</form>
+	</div>
+	
+		<script>
+
+		$('.fileupload').customFileInput();
+		$('.datepicker').datepick({ pickerClass: 'jq-datepicker' });
+	var root = "<xsl:value-of select='$root'/>";
+	var form_id = "<xsl:value-of select='$tmp_form_id'/>";
+	var form_id_selector = '#'+ form_id;
+	var form_id_class='.'+ form_id;
+	var type = "<xsl:value-of select='$type'/>";
+	var cat_id = "<xsl:value-of select='$cat_id'/>";
+	var rub_id = "<xsl:value-of select='$rub_id'/>";
+	var rub_name = "????";
+	<xsl:for-each select='/data/liste-rubrique/entry'>
+		 <xsl:variable name="current_rub_id" select="@id"/>
+		var rub_id_test = 	"<xsl:value-of select='$current_rub_id'/>";
+		if (rub_id == rub_id_test){
+			 <xsl:variable name="current_rub_name" select="nom/@handle"/>
+			rub_name = 	"<xsl:value-of select='$current_rub_name'/>";
+		 }
+  	</xsl:for-each>
+
+	var sous_rub_id = "<xsl:value-of select='$sous_rub_id'/>";
+
+
+	// il faut rediriger sur la nouvelle sous rubrique
+	// le chemin est $root et à partir de $sous_rub_id  (1)
+	// il faut lire intra-sous-rubrique/entry_id = $sous_rub_id/nom/handle (2)
+	// et intra-sous-rubrique/entry_id = $sous_rub_id/rubrique-parente/handle (3)
+	// pour construire le chemin avec ces trois parties
+
+	//ajaxForm solution
+ 	var options = { 
+        beforeSubmit:  showRequest,  // pre-submit callback 
+        success:       showResponse,  // post-submit callback 
+ 
+        // other available options: 
+        url:       root+'/form-traitement-xml/',        // override for form's 'action' attribute 
+        type:      'post',        // 'get' or 'post', override for form's 'method' attribute 
+        dataType:  'xml',       // 'xml', 'script', or 'json' (expected server response type) 
+        clearForm: false,        // clear all form fields after successful submit 
+        resetForm: false        // reset the form after successful submit 
+     }; 
+ 
+    // bind form using 'ajaxForm' 
+    $(form_id_selector).ajaxForm(options); 
+
+// pre-submit callback 
+function showRequest(formData, jqForm, options) { 
+
+ 	jqForm.validate();
+   
+ 	//show overlay loader	
+ 	$('#overLoader').show();
+    return XMLHttpRequest; 
+} 
+ 
+// post-submit callback 
+function showResponse(responseXML)  { 
+ 
+    var message = $( responseXML ).find( 'message' ).text()+"<br/>";
+				
+		$( responseXML ).find( 'add-sous-rubrique' ).children()
+												.each(function (){
+					   							if ( $(this).attr('message') )
+					   							{
+					   								message+=$(this).attr('message')+"<br/>";
+						   								
+									   			}
+									   		});
+
+    var result=$( responseXML ).find( 'add-sous-rubrique' ).attr('result');
+
+		if(result=='success')
+		{
+		 	// acces a la page cachee sous-rubrique-par-id
+			// pour recuperer le nouveau nom de la sous-rubrique par id et recharger sur la nouvelle sous rubrique
+			var new_nom_sous_rub = getSRName(sous_rub_id, message);
+		}
+		else if(result=='error')
+		{
+		 	var result = '<a class="close-notification" rel="tooltip" title="Fermer">X</a><p>Attention !<br />'+message+'</p>';
+			$('.notification').addClass('error')
+								.empty()
+								.html(result)
+								.fadeIn('slow')
+								.animate({opacity:1.0},3000)
+								.fadeOut('slow', function(){ $('#overLoader').hide(); });
+ 	
+		} 
+}
+function getSousRubName(sous_rub_id, message) {
+		return $.ajax({
+						type: "GET",
+						dataType: "xml",
+						url: root + '/sous-rubrique-par-id/'+ sous_rub_id +'/',
+						success: function(xml){
+							res = $(xml).find("nom").attr("handle");
+							console.log(res);
+							$(form_id_class).hide();
+						$('.notification.edit').slideUp(100).remove();
+						$('.notification.information').remove();
+						$('div.edit-sous-rubrique').remove();
+						var redirectToRubrique = root + '/intranet/' + rub_name + '/' + res + '/#sidetab1';
+						var result = '<a class="close-notification" rel="tooltip" title="Fermer">X</a><p>Félicitation !<br />'+message+'</p>';
+							$('.notification').addClass('success')
+												.empty()
+												.html(result)
+												.fadeIn('slow')
+												.animate({opacity:1.0},3000)
+												.fadeOut('slow', function () {
+												$(this).slideUp(600);
+												//location.reload();
+												window.location.replace(redirectToRubrique);
+											});
+									}
+								});
+}  
+async function getSRName(sous_rub_id) {
+	try {
+		const res = await getSousRubName(sous_rub_id);
+		console.log(res);
+	} catch(err) {
+		console.log(err);
+	}
+}
+	</script>
+</xsl:if> <!-- STM fin edit sous-rubrique -->
+
+<!-- STM supression sous-rubrique ICI -->
+<xsl:if test="$type = 'sup-sous-rubrique'"> 
+	<div class="{$type} container_{$tmp_form_id}">
+			<form id="{$tmp_form_id}" method="post" action="/ajaxvalidate/" enctype="multipart/form-data">
+				<xsl:if test="$sous_rub_id">
+					<input name="id" value="{$sous_rub_id}" type="hidden"/>
+				</xsl:if>	
+
+		  		<input name="MAX_FILE_SIZE" type="hidden" value="33554432" />
+				<label>Voulez-vous vraiment supprimer la sous-rubrique "<xsl:value-of select="/data/intra-sous-rubriques/entry[@id=$sous_rub_id]/nom"/>" ?<br/> Ses catégories et tous ses documents deviendront orphelins</label>
+
+
+				<input name="fields[nom]" type="hidden" value="{/data/intra-sous-rubriques/entry[@id=$sous_rub_id]/nom}" />
+			 	<input type="hidden" name="fields[actif]" value="no"/>
+				  <!-- this will be added to the submit url as an additional url param -->
+
+				<input type="hidden" value="hello-world" name="fields[entry]"/>
+			  	<input class="button red" name="action[add-sous-rubrique]" type="submit" value="Oui" />
+				
+				<a href="#" class="button-link green close {$tmp_form_id}" title="Fermer le formulaire">Non</a>						
+			</form>
+	</div>
+	
+	<script>
+		// jQuery Custome File Input
+			$('.fileupload').customFileInput();
+		// jQuery DateInput
+		$('.datepicker').datepick({ pickerClass: 'jq-datepicker' });
+		// Notification Close Button
+		$('.close-notification').live('click',
+			function () {
+				
+				$(this).parent().fadeTo(150, 0, function () {$(this).slideUp(600);});
+				return false;
+			}
+		);
+	var root = "<xsl:value-of select='$root'/>";
+	// pour gérer la redirection, dans les paramètres passés par l'url (document intranet.xls), 
+	//on a remplacé l'identifiant de la rubrique 
+	// $rub_id identifiant de la rubrique est , on la remplacé par le nom de la rublique 
+	var rubrique = "<xsl:value-of select='$rub_id' />";
+	var form_id = "<xsl:value-of select='$tmp_form_id'/>";
+	var form_id_selector = '#'+ form_id;
+	var form_id_class='.'+ form_id;
+	var sous_rub_id_class = "<xsl:value-of select='concat(".", $sous_rub_id)'/>";
+	
+	//ajaxForm solution
+ var options = { 
+        beforeSubmit:  showRequest,  // pre-submit callback 
+        success:       showResponse,  // post-submit callback 
+ 
+        // other available options: 
+        url:       root+'/form-traitement-xml/',        // override for form's 'action' attribute 
+        type:      'post',        // 'get' or 'post', override for form's 'method' attribute 
+        dataType:  'xml',       // 'xml', 'script', or 'json' (expected server response type) 
+        clearForm: false,        // clear all form fields after successful submit 
+        resetForm: false        // reset the form after successful submit 
+     }; 
+ 
+    // bind form using 'ajaxForm' 
+    $(form_id_selector).ajaxForm(options); 
+
+// pre-submit callback 
+function showRequest(formData, jqForm, options) { 
+
+ 	jqForm.validate();
+    
+ 	//show overlay loader	
+ 	$('#overLoader').show();
+
+    // here we could return false to prevent the form from being submitted; 
+    // returning anything other than false will allow the form submit to continue 
+    return XMLHttpRequest; 
+} 
+ 
+// post-submit callback 
+function showResponse(responseXML)  { 
+ 
+    var message = $( responseXML ).find( 'message' ).text()+"<br/>";
+	
+				
+		$( responseXML ).find( 'add-sous-rubrique' ).children()
+												.each(function (){
+					   							if ( $(this).attr('message') )
+					   							{
+					   								message+=$(this).attr('message')+"<br/>";
+						   								
+									   			}
+									   		});
+
+    var result=$( responseXML ).find( 'add-sous-rubrique' ).attr('result');
+
+		if(result=='success')
+		{
+		 	 
+		 	$(form_id_class).hide();
+			$('.notification.edit').slideUp(100).remove();
+			$('.notification.information').remove();
+			$('div.sup-sous-rubrique').remove();
+			// A FAIRE - il faudra rediriger vers le tableau des doc orphelins
+			var redirectToRubrique = root + '/intranet/' ;
+
+		 	var result = '<a class="close-notification" rel="tooltip" title="Fermer">X</a><p>Félicitation !<br />'+message+'</p>';
+				$('.notification').addClass('success')
+									.empty()
+									.html(result)
+									.fadeIn('slow')
+									.animate({opacity:1.0},3000)
+									.fadeOut('slow', function () {
+									$(this).slideUp(600);
+									window.location.replace(redirectToRubrique);
+								});
+		}
+		else if(result=='error')
+		{
+		 	var result = '<a class="close-notification" rel="tooltip" title="Fermer">X</a><p>Attention !<br />'+message+'</p>';
+			$('.notification').addClass('error')
+								.empty()
+								.html(result)
+								.fadeIn('slow')
+								.animate({opacity:1.0},3000)
+								.fadeOut('slow', function(){ $('#overLoader').hide(); });
+ 	
+		} 
+}   
+	</script>
+</xsl:if> <!-- fin sup sous-rubrique -->
+
 <!-- creation nouvelle catégorie -->
 <xsl:if test="$type = 'new-cat'">
 	<div class="{$type} container_{$tmp_form_id}">
@@ -595,16 +872,14 @@ function showResponse(responseXML)  {
 
 		  		<input name="MAX_FILE_SIZE" type="hidden" value="62914560" />
 		  		
-				  	<label>Nom</label>
+				  	<label>catégorie</label>
 					<input name="fields[nom]" type="text" value="{/data/intra-all-categories/entry[@id=$sous_rub_id]/nom}" />
 					
 					<input name="fields[sous-rubrique-parente]" type="hidden" value="{$rub_id}" />
-				
 			  	<!-- this will be added to the submit url as an additional url param -->
             		<input type="hidden" value="hello-world" name="fields[entry]"/>
             		<input type="hidden" name="fields[actif]" value="Yes"/>
 			  		<input class="button green" name="action[add-categorie]" type="submit" value="Envoyer" />
-			  		<input class="button red" name="action[delete-categorie]" type="submit" value="Supprimer" />
 					<a href="#" class="button-link close {$tmp_form_id}" title="Fermer le formulaire">Annuler</a>						
 			</form>
 	</div>
@@ -705,7 +980,7 @@ function showResponse(responseXML)  {
 
 		  		<input name="MAX_FILE_SIZE" type="hidden" value="62914560" />
 		  		
-				  	<label>Voulez-vous vraiment supprimer la catégorie : "<xsl:value-of select="/data/intra-all-categories/entry[@id=$sous_rub_id]/nom"/>" et tout ses documents ?</label>
+				  	<label>Voulez-vous vraiment supprimer la catégorie "<xsl:value-of select="/data/intra-all-categories/entry[@id=$sous_rub_id]/nom"/>" et tous ses documents ?</label>
 					<input name="fields[nom]" type="hidden" value="{/data/intra-all-categories/entry[@id=$sous_rub_id]/nom}" />
 					
 					<input name="fields[sous-rubrique-parente]" type="hidden" value="{$rub_id}" />

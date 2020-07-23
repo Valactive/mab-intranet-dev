@@ -14,7 +14,9 @@
 		public $dsParamSORT = 'nom';
 		public $dsParamASSOCIATEDENTRYCOUNTS = 'no';
 
-		
+		public $dsParamFILTERS = array(
+				'187' => 'yes',
+		);
 
 		public $dsParamINCLUDEDELEMENTS = array(
 				'nom',
@@ -31,11 +33,11 @@
 			return array(
 				'name' => 'Intranet Admin Menu',
 				'author' => array(
-					'name' => 'Valéry Frisch',
-					'website' => 'http://mab-france.org',
-					'email' => 'valery@valactive.com'),
+					'name' => 'Sophie STMadmin',
+					'website' => 'http://mab-intranet.localhost',
+					'email' => 'staminh@valactive.com'),
 				'version' => 'Symphony 2.2.5',
-				'release-date' => '2013-11-22T15:37:18+00:00'
+				'release-date' => '2020-07-15T12:46:00+00:00'
 			);
 		}
 
