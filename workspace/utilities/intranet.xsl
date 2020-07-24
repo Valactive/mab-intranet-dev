@@ -70,9 +70,8 @@
 																<div class="pen-sous-rubrique">
 																	<a class="pen ajax-form edit-sous-rubrique" rel="tooltip" title="Editer cette sous-rubrique">
 																		<xsl:attribute name="href">edit-sous-rubrique/no/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="@id"/>/no/<xsl:value-of select="$id_rub"/></xsl:attribute></a>
-																	<!-- pour pouvoir rediriger apres la suppression, on envoie le nom de la rubrique dans l'url à la place de l'identifiant de la rubrique -->	
 																	<a class="sup ajax-form sup-sous-rubrique" rel="tooltip" title="Supprimer cette sous-rubrique">
-																		<xsl:attribute name="href">sup-sous-rubrique/no/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="@id"/>/no/<xsl:value-of select="$rubrique"/></xsl:attribute></a>
+																		<xsl:attribute name="href">sup-sous-rubrique/no/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="@id"/>/no/</xsl:attribute></a>
 																</div>
 														</xsl:if>
 																
@@ -82,6 +81,11 @@
 								</ul>
 							</li>
 						</xsl:for-each>
+						<xsl:if test="$member-role = 'Administrateur'">
+							<li>
+								<a href="/intranet/" title="Doc orphelins" class="dashboard no-submenu">Doc Orphelins</a>
+							</li>
+						</xsl:if>
 					</ul>
 				</nav>
 						<!-- /Main Navigation -->

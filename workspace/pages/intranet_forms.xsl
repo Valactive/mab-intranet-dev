@@ -251,7 +251,7 @@ function showResponse(responseXML)  {
 
 </xsl:if>
 
-<!-- STM deplacer un document-->
+<!-- STM deplacer un document ICI -->
 
 <xsl:if test="($type = 'deplace-doc')">
 	<xsl:call-template name="deplace-document"/>
@@ -378,7 +378,7 @@ function showResponse(responseXML)  {
 
 </xsl:if>
 
-<!-- STM creation nouvelle sous-rubrique -->
+<!-- creation nouvelle sous-rubrique -->
 <xsl:if test="($type = 'new-sous-rubrique' )">
 	<div class="{$type} container_{$tmp_form_id}">
 		<form id="{$tmp_form_id}" method="post" action="/ajaxvalidate/" enctype="multipart/form-data">
@@ -480,7 +480,7 @@ function showResponse(responseXML)  {
 }   
 	</script>
 
-</xsl:if> <!-- STM fin creation nouvelle sous-rubrique -->
+</xsl:if> <!-- fin creation nouvelle sous-rubrique -->
 
 <!-- STM edit sous-rubrique -->
 <xsl:if test="$type = 'edit-sous-rubrique'">
@@ -630,9 +630,9 @@ async function getSRName(sous_rub_id) {
 	}
 }
 	</script>
-</xsl:if> <!-- STM fin edit sous-rubrique -->
+</xsl:if> <!-- fin edit sous-rubrique -->
 
-<!-- STM supression sous-rubrique ICI -->
+<!-- supression sous-rubrique -->
 <xsl:if test="$type = 'sup-sous-rubrique'"> 
 	<div class="{$type} container_{$tmp_form_id}">
 			<form id="{$tmp_form_id}" method="post" action="/ajaxvalidate/" enctype="multipart/form-data">
