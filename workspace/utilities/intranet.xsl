@@ -221,7 +221,9 @@
 																				<th>Nom</th>
 																				<th>Date</th>
 																				<th>Auteur(s)</th>
-																				<th>Actions</th>
+																				<xsl:if test="$member-role = 'Administrateur'">
+																					<th>Actions</th>
+																				</xsl:if>
 																			</tr>
 																		</thead>
 
@@ -245,12 +247,13 @@
 																							</xsl:call-template>
 																						</td>
 																						<td><xsl:value-of select="auteur"/></td>
-																						<td>
-																							<!-- actions
-																							member-role : Administrateur = ok
-																							member-role : Contributeur = ok uniquement pour ses propres documents
-																							-->
-																							<xsl:if test="$member-role = 'Administrateur' or $member-id = auteur/item/@id">
+																						<!-- seuls les admin (member-role : Administrateur = ok) peuvent faire  des actions sur les doc -->
+																						<xsl:if test="$member-role = 'Administrateur'">
+																							<td>
+																							
+																							 <!-- member-role : Contributeur = ok uniquement pour ses propres documents or 
+																								$member-id = auteur/item/@id" -->
+																							
 																								<ul class="actions">
 																									<li>
 																										<a class="edit open ajax-form table" title="Editer" rel="tooltip" target="_blank">
@@ -264,8 +267,8 @@
 																										</div>
 																									</li>
 																								</ul>
-																							</xsl:if>
-																						</td>
+																							</td>
+																						</xsl:if>
 
 																					</tr>
 																				</xsl:if>
