@@ -27,7 +27,9 @@
 									<th>Sous-rubrique</th>
 									<th>Catégorie</th>
 									<th class="text-center">Statut</th>
-									<th>Actions</th>
+									<xsl:if test="$member-role = 'Administrateur'">
+										<th>Actions</th>
+									</xsl:if>	
 								</tr>
 							</thead>
 
@@ -90,9 +92,9 @@
 											</xsl:otherwise>
 										</xsl:choose>
 										</td>
-										<td>
-											<ul class="actions"> <!-- icones d'action -->
-												<xsl:if test="$member-role = 'Administrateur'">
+										<xsl:if test="$member-role = 'Administrateur'">
+											<td>
+												<ul class="actions"> <!-- icones d'action -->
 													<li>
 														<a class="edit open ajax-form table" title="Editer" rel="tooltip" target="_blank">
 															<xsl:attribute name="href">edit-doc/<xsl:value-of select="$current-categorie-id"/>/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="$current-sous-rubrique-id"/>/<xsl:value-of select="@id"/>/</xsl:attribute>Editer</a>
@@ -102,12 +104,13 @@
 															<!-- paramètres url : type/cat_id/tmp_form_id/sous_rub_id/doc_id/rub_id -->
 															<xsl:attribute name="href">deplace-doc/<xsl:value-of select="$current-categorie-id"/>/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="$current-sous-rubrique-id"/>/<xsl:value-of select="@id"/>/id-rubrique</xsl:attribute>Déplacer</a>
 													</li>
-												</xsl:if>
-												<xsl:if test="($member-role = 'Administrateur' or $member-id = auteur/item/@id)">	
-													<li><a class="delete sup-doc ajax-form picto-sup-doc" title="Supprimer" rel="tooltip"><xsl:attribute name="href">sup-doc/<xsl:value-of select="$current-categorie-id"/>/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="$current-sous-rubrique-id"/>/<xsl:value-of select="@id"/>/</xsl:attribute>Supprimer</a></li>
-												</xsl:if>
-											</ul> <!-- fin icones d'action -->
-										</td>
+													<li>
+														<a class="delete sup-doc ajax-form picto-sup-doc" title="Supprimer" rel="tooltip">
+															<xsl:attribute name="href">sup-doc/<xsl:value-of select="$current-categorie-id"/>/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="$current-sous-rubrique-id"/>/<xsl:value-of select="@id"/>/</xsl:attribute>Supprimer</a>
+													</li>
+												</ul> <!-- fin icones d'action -->
+											</td>
+										</xsl:if>
 									</tr>
 									</xsl:if>
 								</xsl:for-each>
