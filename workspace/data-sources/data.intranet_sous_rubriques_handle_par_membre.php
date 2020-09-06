@@ -14,7 +14,6 @@
 		public $dsParamASSOCIATEDENTRYCOUNTS = 'no';
 
 		public $dsParamFILTERS = array(
-				'id' => '{$ds-intranet-sous-rubriques-par-membre}',
 				'187' => 'yes',
 		);
 
@@ -26,7 +25,7 @@
 
 		public function __construct(&$parent, $env=NULL, $process_params=true){
 			parent::__construct($parent, $env, $process_params);
-			$this->_dependencies = array('$ds-intranet-sous-rubriques-par-membre');
+			$this->_dependencies = array();
 		}
 
 		public function about(){
@@ -37,7 +36,7 @@
 					'website' => 'http://mab-intranet.localhost',
 					'email' => 'staminh@valactive.com'),
 				'version' => 'Symphony 2.2.5',
-				'release-date' => '2020-07-15T12:46:39+00:00'
+				'release-date' => '2020-08-31T08:05:44+00:00'
 			);
 		}
 

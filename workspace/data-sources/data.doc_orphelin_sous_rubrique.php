@@ -2,11 +2,11 @@
 
 	require_once(TOOLKIT . '/class.datasource.php');
 
-	Class datasourceintranet_membre extends Datasource{
+	Class datasourcedoc_orphelin_sous_rubrique extends Datasource{
 
-		public $dsParamROOTELEMENT = 'intranet-membre';
+		public $dsParamROOTELEMENT = 'doc-orphelin-sous-rubrique';
 		public $dsParamORDER = 'desc';
-		public $dsParamPAGINATERESULTS = 'yes';
+		public $dsParamPAGINATERESULTS = 'no';
 		public $dsParamLIMIT = '20';
 		public $dsParamSTARTPAGE = '1';
 		public $dsParamREDIRECTONEMPTY = 'no';
@@ -14,35 +14,39 @@
 		public $dsParamASSOCIATEDENTRYCOUNTS = 'no';
 
 		public $dsParamFILTERS = array(
-				'id' => '{$member-id}',
+				'142' => '{$ds-categorie-active}',
+				'157' => 'yes',
 		);
 
 		public $dsParamINCLUDEDELEMENTS = array(
-				'identifiant',
-				'email',
-				'role'
+				'nom-du-document',
+				'date',
+				'publie',
+				'document',
+				'categorie',
+				'auteur'
 		);
 
 
 		public function __construct(&$parent, $env=NULL, $process_params=true){
 			parent::__construct($parent, $env, $process_params);
-			$this->_dependencies = array();
+			$this->_dependencies = array('$ds-categorie-active');
 		}
 
 		public function about(){
 			return array(
-				'name' => 'Intranet membre',
+				'name' => 'doc-orphelin-sous-rubrique',
 				'author' => array(
 					'name' => 'Sophie STMadmin',
 					'website' => 'http://mab-intranet.localhost',
 					'email' => 'staminh@valactive.com'),
 				'version' => 'Symphony 2.2.5',
-				'release-date' => '2020-08-31T07:59:28+00:00'
+				'release-date' => '2020-08-31T20:33:36+00:00'
 			);
 		}
 
 		public function getSource(){
-			return '7';
+			return '28';
 		}
 
 		public function allowEditorToParse(){

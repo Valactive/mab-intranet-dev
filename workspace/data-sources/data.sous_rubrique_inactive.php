@@ -2,25 +2,25 @@
 
 	require_once(TOOLKIT . '/class.datasource.php');
 
-	Class datasourceintranet_membre extends Datasource{
+	Class datasourcesous_rubrique_inactive extends Datasource{
 
-		public $dsParamROOTELEMENT = 'intranet-membre';
+		public $dsParamROOTELEMENT = 'sous-rubrique-inactive';
 		public $dsParamORDER = 'desc';
-		public $dsParamPAGINATERESULTS = 'yes';
+		public $dsParamPAGINATERESULTS = 'no';
 		public $dsParamLIMIT = '20';
 		public $dsParamSTARTPAGE = '1';
 		public $dsParamREDIRECTONEMPTY = 'no';
+		public $dsParamPARAMOUTPUT = 'system:id';
 		public $dsParamSORT = 'system:id';
 		public $dsParamASSOCIATEDENTRYCOUNTS = 'no';
 
 		public $dsParamFILTERS = array(
-				'id' => '{$member-id}',
+				'187' => 'no',
 		);
 
 		public $dsParamINCLUDEDELEMENTS = array(
-				'identifiant',
-				'email',
-				'role'
+				'nom',
+				'rubrique-parente'
 		);
 
 
@@ -31,18 +31,18 @@
 
 		public function about(){
 			return array(
-				'name' => 'Intranet membre',
+				'name' => 'sous-rubrique-inactive',
 				'author' => array(
 					'name' => 'Sophie STMadmin',
 					'website' => 'http://mab-intranet.localhost',
 					'email' => 'staminh@valactive.com'),
 				'version' => 'Symphony 2.2.5',
-				'release-date' => '2020-08-31T07:59:28+00:00'
+				'release-date' => '2020-08-31T18:24:42+00:00'
 			);
 		}
 
 		public function getSource(){
-			return '7';
+			return '25';
 		}
 
 		public function allowEditorToParse(){

@@ -13,7 +13,7 @@
 
 <xsl:variable name="id_auteur"><xsl:value-of select="/data/intranet-document/entry[@id=$doc_id]/auteur/item/@id"/></xsl:variable>
 
-<xsl:if test="($type = 'new-doc' or $type = 'edit-doc')">
+<xsl:if test="($type = 'new-doc' or $type = 'edit-doc' or $type = 'edit-doc-orph')">
 
 <!-- new document -->
 	<div>
@@ -21,7 +21,6 @@
 	<!-- new document -->
 	<section>
 		<form id="{$tmp_form_id}" method="post" action="" enctype="multipart/form-data">
-		
 		<xsl:if test="$doc_id">
 			<input name="id" value="{$doc_id}" type="hidden"/>
 		</xsl:if>	
@@ -43,6 +42,12 @@
 					   			   			<xsl:value-of select="/data/intranet-membres/entry[@id = $id_auteur]/identifiant"/></option>
 					   			</select>
 				   			</xsl:when>
+							<xsl:when test="$type= 'edit-doc-orph'">
+				   			   	<select name="fields[auteur]">
+				   			   			<option value="{/data/intranet-membres/entry[@id = $id_auteur]/@id}">
+					   			   			<xsl:value-of select="/data/intranet-membres/entry[@id = $id_auteur]/identifiant"/></option>
+					   			</select>
+				   			</xsl:when>
 				   			<xsl:otherwise>
 				   				<select name="fields[auteur]">
 				   					<option value="{$member-id}"><xsl:value-of select="/data/intranet-membres/entry[@id = $member-id]/identifiant"/></option>
@@ -56,6 +61,12 @@
 					<xsl:variable name="current-date">
 						<xsl:choose>
 							<xsl:when test="$type= 'edit-doc'">
+								<xsl:call-template name="format-date">
+									<xsl:with-param name="date" select="/data/intranet-document/entry[@id=$doc_id]/date/date/start"/>
+									<xsl:with-param name="format" select="'d M Y'"/>
+								</xsl:call-template>
+							</xsl:when>
+							<xsl:when test="$type= 'edit-doc-orph'">
 								<xsl:call-template name="format-date">
 									<xsl:with-param name="date" select="/data/intranet-document/entry[@id=$doc_id]/date/date/start"/>
 									<xsl:with-param name="format" select="'d M Y'"/>
@@ -253,10 +264,12 @@ function showResponse(responseXML)  {
 
 <!-- STM deplacer un document ICI -->
 
-<xsl:if test="($type = 'deplace-doc')">
+<xsl:if test="($type = 'deplace-doc' or $type = 'deplace-doc-orph')">
 	<xsl:call-template name="deplace-document"/>
 </xsl:if> <!-- fin deplacer un document-->
 
+
+ 
 
 <xsl:if test="($type = 'sup-doc' )">
 <!-- sup document -->

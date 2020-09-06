@@ -2,24 +2,24 @@
 
 	require_once(TOOLKIT . '/class.datasource.php');
 
-	Class datasourceintranet_sous_rubriques_par_membre extends Datasource{
+	Class datasourcecategorie_inactive extends Datasource{
 
-		public $dsParamROOTELEMENT = 'intranet-sous-rubriques-par-membre';
+		public $dsParamROOTELEMENT = 'categorie-inactive';
 		public $dsParamORDER = 'desc';
 		public $dsParamPAGINATERESULTS = 'no';
-		public $dsParamLIMIT = '20';
+		public $dsParamLIMIT = '1';
 		public $dsParamSTARTPAGE = '1';
 		public $dsParamREDIRECTONEMPTY = 'no';
-		public $dsParamPARAMOUTPUT = 'autoriser-lacces-a';
+		public $dsParamPARAMOUTPUT = 'system:id';
 		public $dsParamSORT = 'system:id';
 		public $dsParamASSOCIATEDENTRYCOUNTS = 'no';
 
 		public $dsParamFILTERS = array(
-				'id' => '{$member-id}',
+				'153' => 'no',
 		);
 
 		public $dsParamINCLUDEDELEMENTS = array(
-				'autoriser-lacces-a'
+				'nom'
 		);
 
 
@@ -30,18 +30,18 @@
 
 		public function about(){
 			return array(
-				'name' => 'Intranet Sous-rubriques par Membre',
+				'name' => 'categorie-inactive',
 				'author' => array(
-					'name' => 'Valéry Frisch',
-					'website' => 'http://mab-france.dev',
-					'email' => 'valery@valactive.com'),
+					'name' => 'Sophie STMadmin',
+					'website' => 'http://mab-intranet.localhost',
+					'email' => 'staminh@valactive.com'),
 				'version' => 'Symphony 2.2.5',
-				'release-date' => '2013-11-22T13:59:03+00:00'
+				'release-date' => '2020-08-31T10:33:20+00:00'
 			);
 		}
 
 		public function getSource(){
-			return '7';
+			return '27';
 		}
 
 		public function allowEditorToParse(){

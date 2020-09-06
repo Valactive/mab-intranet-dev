@@ -1723,9 +1723,9 @@ a.new-sous-rubrique strong {
 }
 div.picto-edit-cat,
 #main-nav li li div.pen-sous-rubrique { display: none; }
-div.picto-sup-doc { position: relative;}
-div.picto-deplace-doc { position: relative;}
 
+div.picto-deplace-doc { position: relative;}
+div.sup-doc form,
 div.edit-cat, 
 div.sup-cat, 
 div.new-sous-rubrique, 
@@ -1733,22 +1733,24 @@ div.new-sous-rubrique,
 #main-nav ul li ul div.sup-sous-rubrique form{
 	position: absolute;
 	background: whiteSmoke;	
-	border: 1px solid ;
+	border: 2px solid ;
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
 	border-radius: 3px;
 	z-index: 600;
 }
-
+div.sup-doc form {
+	width : 540px;
+	top: -18px;
+    right: 20px;}
 div.edit-cat {width: 360px;}
 div.sup-cat {width : 540px;}
-div.new-sous-rubrique{width: 450px;}
+div.new-sous-rubrique{
+	width: 450px;
+	left: 224px;}
 #main-nav ul li ul div.edit-sous-rubrique form{width: 420px;}
 #main-nav ul li ul div.sup-sous-rubrique form {width : 580px;}
 
-div.new-sous-rubrique {
-	left: 224px;
-}
 
 div.sup-doc form a { display: inline;}
 

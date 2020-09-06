@@ -6,6 +6,7 @@
 	xmlns:math="http://exslt.org/math">
 
 	<xsl:import href="../utilities/tableau-de-bord.xsl"/>
+	<xsl:import href="../utilities/doc-orphelins.xsl"/>
 	<xsl:import href="../utilities/get-file-extension.xsl"/>
 	<xsl:template name="intranet">
 
@@ -13,9 +14,9 @@
 		<!-- $sous-rubrique : valeur dans l'url demandée -->
 		<!-- /data/ds-member-sous-rubrique : sous-rubrique autorisées pour l'utilisateur loggé -->
 		<!-- si l'utilisateur n'a pas le droit on affiche un simple message avec lien vers la home de l'intranet -->
-		<xsl:variable name="is_authorized">
+		<!--<xsl:variable name="is_authorized">
 			<xsl:value-of select="boolean(/data/intranet-sous-rubriques-handle-par-membre/entry[nom/@handle = $sous-rubrique])"/>
-		</xsl:variable>
+		</xsl:variable>-->
 		
 		<div class="fixed-wraper"> <!-- Fixed Wraper -->
 		
@@ -81,11 +82,6 @@
 								</ul>
 							</li>
 						</xsl:for-each>
-						<xsl:if test="$member-role = 'Administrateur'">
-							<li>
-								<a href="/intranet/" title="Doc orphelins" class="dashboard no-submenu">Doc Orphelins</a>
-							</li>
-						</xsl:if>
 					</ul>
 				</nav>
 						<!-- /Main Navigation -->
@@ -302,6 +298,10 @@
 						</article>
 					</xsl:otherwise>
 				</xsl:choose>
+			
+				<xsl:if test="($rubrique ='' and $member-role = 'Administrateur')">
+						<xsl:call-template name="doc-orphelins"/>
+				</xsl:if>
 				<div class="clearfix"></div> <!-- We're really sorry for this, but because of IE7 we still need separated div with clearfix -->
 
 			</section>  <!-- fin section main -->

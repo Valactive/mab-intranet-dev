@@ -339,7 +339,7 @@ $(function () {
 	//injection du formulaire en ajax dans le dom
 	$('a.ajax-form, a.ajax-form.edit-cat, a.ajax-form.sup-cat, a.ajax-form.sup-doc').live('click', function(evt){
 		evt.preventDefault();
-		//console.log("this et href : "+$(this).attr('href'));
+		console.log("this et href : "+$(this).attr('href'));
 		
 		var form_url = '/intranet/forms/' + $(this).attr('href')+'/';
 		var ref_segments = $(this).attr('href').split('/');
@@ -349,23 +349,28 @@ $(function () {
 		var is_table = $(this).is(".table");
 		var current_selector = this;
 
-		
+		console.log("type : "+ type);
+		console.log("current_selector : "+ current_selector);
+		console.log("current_selector");
+		console.log(current_selector);
 
 		var is_Sidetab = $(this).parents('div.sidetab').attr('id');
+		console.log('is_Sidetab : '+is_Sidetab);
 		var currentSidetab;
 		if(is_Sidetab){
 			currentSidetab = '#'+ is_Sidetab;
 		} else {
 			currentSidetab = 'table';
-		}
+		};
+
 		var currentIndex = $(this).parents('tr').index();
 
 		aTabIndex = $(this).parents('li').index();
-	
-	//	console.log("is_Sidetab : "+is_Sidetab);
-	//	console.log("currentSidetab : "+currentSidetab);
-	//	console.log("currentIndex : "+currentIndex);
-	//	console.log("aTabIndex : "+aTabIndex);
+		
+		console.log("is_Sidetab : "+is_Sidetab);
+		console.log("currentSidetab : "+currentSidetab);
+		console.log("currentIndex : "+currentIndex);
+		console.log("aTabIndex : "+aTabIndex);
 
 		switch ( type ) {
 				// STM creation sous-rubrique
@@ -378,10 +383,9 @@ $(function () {
 				
 				// STM edit sous-rubrique
 				// STM suppression sous-rubrique
-				// ICI
 				case '.edit-sous-rubrique':
 				case '.sup-sous-rubrique':
-					console.log("sous-rubrique : " + type );
+
 					var rubriqueIndex = $(this).parents('li').parents('li').index();
 					var rubriqueNav = $('#main-nav li').not('#main-nav ul li ul li').eq(rubriqueIndex);
 			
@@ -415,20 +419,34 @@ $(function () {
 				break;
 				
 				case '.edit-doc' :
-					console.log("case edit-doc");
-					console.log($(type));
-					console.log($(type).length);
 					if( $(type).length ){ 	
-						console.log(" edit-doc  : if");
 						$(type).slideDown('slow').css('display', 'none').fadeIn('fast').css('opacity',100); 
 					} else {
-						console.log(" edit-doc  : else");
 						$('.container').slideUp('fast').remove();
 						$.get(form_url, 
 							function(data){
 								if( is_table ){
 									data = '<tr class="'+ ref_segments[2] +' black"><td colspan="8">'+ data +'</td></tr>';
 									$(data).insertAfter( $('tr',currentSidetab).eq(currentIndex+1) );
+									$('container_'+tmp_form_id_class).slideDown('slow').css('display', 'none').fadeIn('fast').css('display', 'block');				
+								} else {
+									$(data).insertAfter(current_categorie_id,currentSidetab);
+									$('container_'+tmp_form_id_class).slideDown('slow').css('display', 'none').fadeIn('fast').css('display', 'block');				
+								}	
+							});
+					}
+				break;
+				case '.edit-doc-orph' :
+					if( $(type).length ){ 	
+						$(type).slideDown('slow').css('display', 'none').fadeIn('fast').css('opacity',100); 
+					} else {
+						$('.container').slideUp('fast').remove();
+						
+						$.get(form_url, 
+							function(data){
+								if( is_table ){
+									data = '<tr class="'+ ref_segments[2] +' black"><td colspan="8">'+ data +'</td></tr>';
+									$(data).insertAfter( $('tr',currentSidetab).eq(currentIndex+12) );
 									$('container_'+tmp_form_id_class).slideDown('slow').css('display', 'none').fadeIn('fast').css('display', 'block');				
 								} else {
 									$(data).insertAfter(current_categorie_id,currentSidetab);
@@ -451,19 +469,38 @@ $(function () {
 				break;
 				//STM deplace doc			
 				case '.deplace-doc' :
-					console.log("case deplace-doc");
-					console.log($(type).length);
 					if( $(type).length ){ 	
-						console.log("if");
 						$(type).slideDown('slow').css('display', 'none').fadeIn('fast').css('opacity',100); 
 					} else {
-						console.log("else");
 						$('.container').slideUp('fast').remove();
 						$.get(form_url, 
 							function(data){
+								console.log("current_selector");
+								console.log(current_selector);
 								if( is_table ){
 									data = '<tr class="'+ ref_segments[2] +' black"><td colspan="8">'+ data +'</td></tr>';
 									$(data).insertAfter( $('tr',currentSidetab).eq(currentIndex+1) );
+									$('container_'+tmp_form_id_class).slideDown('slow').css('display', 'none').fadeIn('fast').css('display', 'block');				
+								} else {
+									$(data).insertAfter(current_categorie_id,currentSidetab);
+									$('container_'+tmp_form_id_class).slideDown('slow').css('display', 'none').fadeIn('fast').css('display', 'block');				
+								}	
+							});
+					}
+				break;
+
+				case '.deplace-doc-orph' :
+					if( $(type).length ){ 	
+						$(type).slideDown('slow').css('display', 'none').fadeIn('fast').css('opacity',100); 
+					} else {
+						$('.container').slideUp('fast').remove();
+						$.get(form_url, 
+							function(data){
+								console.log("current_selector");
+								console.log(current_selector);
+								if( is_table ){
+									data = '<tr class="'+ ref_segments[2] +' black"><td colspan="8">'+ data +'</td></tr>';
+									$(data).insertAfter( $('tr',currentSidetab).eq(currentIndex+12) );
 									$('container_'+tmp_form_id_class).slideDown('slow').css('display', 'none').fadeIn('fast').css('display', 'block');				
 								} else {
 									$(data).insertAfter(current_categorie_id,currentSidetab);
@@ -478,9 +515,7 @@ $(function () {
 						function(data){
 							console.log("current_selector");
 							console.log(current_selector);
-							$(data).insertAfter( current_selector );
-							console.log("current_selector");
-							console.log(current_selector);
+							$(data).insertAfter(current_selector);
 						});	
 				break;	
 				} //end switch	
