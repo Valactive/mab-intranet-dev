@@ -14,9 +14,9 @@
 		<!-- $sous-rubrique : valeur dans l'url demandée -->
 		<!-- /data/ds-member-sous-rubrique : sous-rubrique autorisées pour l'utilisateur loggé -->
 		<!-- si l'utilisateur n'a pas le droit on affiche un simple message avec lien vers la home de l'intranet -->
-		<!--<xsl:variable name="is_authorized">
+		<xsl:variable name="is_authorized">
 			<xsl:value-of select="boolean(/data/intranet-sous-rubriques-handle-par-membre/entry[nom/@handle = $sous-rubrique])"/>
-		</xsl:variable>-->
+		</xsl:variable>
 		
 		<div class="fixed-wraper"> <!-- Fixed Wraper -->
 		
