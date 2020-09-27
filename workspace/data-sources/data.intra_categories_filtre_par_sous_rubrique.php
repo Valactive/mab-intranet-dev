@@ -6,6 +6,7 @@
 
 		public $dsParamROOTELEMENT = 'intra-categories-filtre-par-sous-rubrique';
 		public $dsParamORDER = 'asc';
+		public $dsParamGROUP = '136';
 		public $dsParamPAGINATERESULTS = 'no';
 		public $dsParamLIMIT = '20';
 		public $dsParamSTARTPAGE = '1';
@@ -36,11 +37,11 @@
 			return array(
 				'name' => 'Intra categories filtre par sous-rubrique',
 				'author' => array(
-					'name' => 'Valéry Frisch',
-					'website' => 'http://mab-france.org',
-					'email' => 'valery@valactive.com'),
-				'version' => 'Symphony 2.2.4',
-				'release-date' => '2012-01-24T07:32:21+00:00'
+					'name' => 'Sophie STMadmin',
+					'website' => 'http://mab-intranet.localhost',
+					'email' => 'staminh@valactive.com'),
+				'version' => 'Symphony 2.2.5',
+				'release-date' => '2020-09-24T13:56:21+00:00'
 			);
 		}
 

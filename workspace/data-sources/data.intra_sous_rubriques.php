@@ -6,6 +6,7 @@
 
 		public $dsParamROOTELEMENT = 'intra-sous-rubriques';
 		public $dsParamORDER = 'asc';
+		public $dsParamGROUP = '137';
 		public $dsParamPAGINATERESULTS = 'yes';
 		public $dsParamLIMIT = '100';
 		public $dsParamSTARTPAGE = '1';
@@ -36,7 +37,7 @@
 					'website' => 'http://mab-intranet.localhost',
 					'email' => 'staminh@valactive.com'),
 				'version' => 'Symphony 2.2.5',
-				'release-date' => '2020-07-15T12:45:45+00:00'
+				'release-date' => '2020-09-21T16:49:13+00:00'
 			);
 		}
 

@@ -15,7 +15,7 @@
 
 <xsl:if test="($type = 'new-doc' or $type = 'edit-doc' or $type = 'edit-doc-orph')">
 
-<!-- new document -->
+	<!-- new document -->
 	<div>
 		<xsl:attribute name="class">edit article-container black nested container_<xsl:value-of select="$tmp_form_id"/><xsl:text> </xsl:text><xsl:value-of select="$type"/></xsl:attribute>
 	<!-- new document -->
@@ -156,7 +156,7 @@
               });
           $(".liste-notifie").html(str);
           //check if notifications selected or not and put the right value for form action.
-//console.log($('select#notifier option:selected').length);
+		//console.log($('select#notifier option:selected').length);
           if($('select#notifier option:selected').length == 0){
           	$('.input-add').attr('name','action[add-documents]')
           }else{
@@ -265,6 +265,7 @@ function showResponse(responseXML)  {
 <!-- STM deplacer un document ICI -->
 
 <xsl:if test="($type = 'deplace-doc' or $type = 'deplace-doc-orph')">
+
 	<xsl:call-template name="deplace-document"/>
 </xsl:if> <!-- fin deplacer un document-->
 
@@ -506,7 +507,7 @@ function showResponse(responseXML)  {
 		  		<input name="MAX_FILE_SIZE" type="hidden" value="62914560" />
 		  		
 				  	<label>Sous-rubrique</label>
-					<input name="fields[nom]" type="text" value="{/data/intra-sous-rubriques/entry[@id=$sous_rub_id]/nom}" />
+					<input name="fields[nom]" type="text" value="{/data/intra-sous-rubriques/rubrique-parente/entry[@id=$sous_rub_id]/nom}" />
 					
 			  	<!-- this will be added to the submit url as an additional url param -->
             		<input type="hidden" value="hello-world" name="fields[entry]"/>
@@ -654,10 +655,10 @@ async function getSRName(sous_rub_id) {
 				</xsl:if>	
 
 		  		<input name="MAX_FILE_SIZE" type="hidden" value="33554432" />
-				<label>Voulez-vous vraiment supprimer la sous-rubrique "<xsl:value-of select="/data/intra-sous-rubriques/entry[@id=$sous_rub_id]/nom"/>" ?<br/> Ses catégories et tous ses documents deviendront orphelins</label>
+				<label>Voulez-vous vraiment supprimer la sous-rubrique "<xsl:value-of select="/data/intra-sous-rubriques/rubrique-parente/entry[@id=$sous_rub_id]/nom"/>" ?<br/> Ses catégories et tous ses documents deviendront orphelins</label>
 
 
-				<input name="fields[nom]" type="hidden" value="{/data/intra-sous-rubriques/entry[@id=$sous_rub_id]/nom}" />
+				<input name="fields[nom]" type="hidden" value="{/data/intra-sous-rubriques/rubrique-parente/entry[@id=$sous_rub_id]/nom}" />
 			 	<input type="hidden" name="fields[actif]" value="no"/>
 				  <!-- this will be added to the submit url as an additional url param -->
 

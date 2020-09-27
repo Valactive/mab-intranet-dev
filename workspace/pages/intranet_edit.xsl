@@ -98,7 +98,7 @@
 				  
 				  <dt><label>Catégorie</label></dt>	
 				  	<dd><select name="fields[categorie]">
-				  		<xsl:for-each select="/data/intra-categories-filtre-par-sous-rubrique/entry">
+				  		<xsl:for-each select="/data/intra-categories-filtre-par-sous-rubrique/sous-rubrique-parente/entry">
 				  			<option value="{@id}">
 				  				<xsl:if test="@id = /data/intra-document/entry/categorie/item/@id"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
 				  				<xsl:value-of select="nom"/></option>

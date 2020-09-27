@@ -39,7 +39,7 @@
 									</xsl:variable>
 									<xsl:variable name="current-categorie-nom">
 										<xsl:value-of select="categorie/item/@handle"/>
-									</xsl:variable>
+									</xsl:variable> 
 									<xsl:variable name="current-sous-rubrique-id">
 										<xsl:value-of select="/data/categorie-inactive/entry[nom/@handle = $current-categorie-nom]/sous-rubrique-parente/item/@id"/>
 									</xsl:variable>
@@ -116,15 +116,22 @@
 
 									<tr>
 										<td>
-											<a rel="external" href="http://docs.google.com/viewer?url={$workspace}{document/@path}/{document/filename}">
-												<xsl:attribute name="class">
-													<xsl:text>extension </xsl:text>
-													<xsl:call-template name="get-file-extension">
-														<xsl:with-param name="path" select="document/filename" />
-													</xsl:call-template>
-												</xsl:attribute>
-												<xsl:value-of select="nom-du-document"/>
-											</a>
+											<xsl:choose>
+												<xsl:when test="count(/data/intranet-sous-rubriques-handle-par-membre/entry[@id = $current-sous-rubrique-id]) = 0 and $member-role !='Administrateur'">
+													<xsl:value-of select="nom-du-document"/>
+												</xsl:when>
+												<xsl:otherwise>
+													<a rel="external" href="http://docs.google.com/viewer?url={$workspace}{document/@path}/{document/filename}">
+														<xsl:attribute name="class">
+															<xsl:text>extension </xsl:text>
+															<xsl:call-template name="get-file-extension">
+																<xsl:with-param name="path" select="document/filename" />
+															</xsl:call-template>
+														</xsl:attribute>
+														<xsl:value-of select="nom-du-document"/>
+													</a>
+												</xsl:otherwise>
+											</xsl:choose>
 										</td>
 										<td><xsl:call-template name="format-date">
 											<xsl:with-param name="date" select="date/date/start"/>
@@ -151,7 +158,7 @@
 												<li>
 													<a class=" deplace open ajax-form table" title="Deplacer" rel="tooltip" target="_blank">
 														<!-- paramètres url : type/cat_id/tmp_form_id/sous_rub_id/doc_id/rub_id -->
-														<xsl:attribute name="href">deplace-doc/<xsl:value-of select="$current-categorie-id"/>/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="$current-sous-rubrique-id"/>/<xsl:value-of select="@id"/>/id-rubrique</xsl:attribute>Déplacer</a>
+														<xsl:attribute name="href">deplace-doc-orph/<xsl:value-of select="$current-categorie-id"/>/a<xsl:value-of select="floor(math:random() * 1000000)"/>/no/<xsl:value-of select="@id"/>/no</xsl:attribute>Déplacer</a>
 												</li>
 												<li>
 													<a class="delete sup-doc ajax-form picto-sup-doc" title="Supprimer" rel="tooltip">

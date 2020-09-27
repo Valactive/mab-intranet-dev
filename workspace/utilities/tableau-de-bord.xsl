@@ -44,10 +44,10 @@
 										<xsl:value-of select="categorie/item/@handle"/>
 									</xsl:variable>
 									<xsl:variable name="current-sous-rubrique-id">
-										<xsl:value-of select="/data/intra-categories-filtre-par-sous-rubrique/entry[nom/@handle = $current-categorie-nom]/sous-rubrique-parente/item/@id"/>
+										<xsl:value-of select="/data/intra-categories-filtre-par-sous-rubrique/sous-rubrique-parente/entry[nom/@handle = $current-categorie-nom]/sous-rubrique-parente/item/@id"/>
 									</xsl:variable>
 									<xsl:variable name="current-rubrique-id">
-										<xsl:value-of select="/data/intra-categories-filtre-par-sous-rubrique/entry[nom/@handle = $current-categorie-nom]/sous-rubrique-parente/item/@id"/>
+										<xsl:value-of select="/data/intra-categories-filtre-par-sous-rubrique/sous-rubrique-parente/entry[nom/@handle = $current-categorie-nom]/sous-rubrique-parente/item/@id"/>
 									</xsl:variable>
 									<!-- admin voit tout -->
 									<!-- contributeur voit ses docuemnts et les doc publiés -->
@@ -55,7 +55,7 @@
 									<tr>
 										<td>
 											<xsl:choose>
-												<xsl:when test="count(/data/intranet-sous-rubriques-handle-par-membre/entry[@id = $current-sous-rubrique-id]) = 0 and $member-role !='Administrateur'">
+												<xsl:when test="count(/data/intranet-sous-rubriques-handle-par-membre/rubrique-parente/entry[@id = $current-sous-rubrique-id]) = 0 and $member-role !='Administrateur'">
 													<xsl:value-of select="nom-du-document"/>
 												</xsl:when>
 												<xsl:otherwise>
@@ -79,8 +79,8 @@
 		
 										<xsl:variable name="id-categorie"><xsl:value-of select="categorie/item/@id"/> </xsl:variable> 
 										
-										<td> <xsl:value-of select="/data/intra-sous-rubriques/entry[@id = $current-sous-rubrique-id]/rubrique-parente"/> </td>
-										<td> <xsl:value-of select="/data/intra-categories-filtre-par-sous-rubrique/entry[@id = $id-categorie]/sous-rubrique-parente"/> 
+										<td> <xsl:value-of select="/data/intra-sous-rubriques/rubrique-parente/entry[@id = $current-sous-rubrique-id]/rubrique-parente"/> </td>
+										<td> <xsl:value-of select="/data/intra-categories-filtre-par-sous-rubrique/sous-rubrique-parente/entry[@id = $id-categorie]/sous-rubrique-parente"/> 
 										</td>
 										<td><xsl:value-of select="categorie/item/@handle"/></td>
 										<td><xsl:choose>

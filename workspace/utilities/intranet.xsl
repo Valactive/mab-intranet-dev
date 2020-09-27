@@ -115,13 +115,12 @@
 							<div class="article-container">
 								<!-- Sous-rubrique Header -->
 								<header>
-									<h2><xsl:value-of select="/data/intra-sous-rubriques/entry[nom/@handle = $sous-rubrique]/nom"/></h2>
-									<!--<xsl:if test="count(/data/intra-categories-filtre-par-sous-rubrique/entry)>0">-->
+									<h2><xsl:value-of select="/data/intra-sous-rubriques/rubrique-parente/entry[nom/@handle = $sous-rubrique]/nom"/></h2>
 									<nav>
 										<ul class="button-switch">
 											<!-- paramètres url : type/cat_id/tmp_form_id/sous_rub_id/doc_id/rub_id -->
 											<a class="button green ajax-form new-cat" rel="tooltip" title="Ajouter une catégorie dans cette rubrique">
-											<xsl:attribute name="href">new-cat/no/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="/data/intra-sous-rubriques/entry[nom/@handle = $sous-rubrique]/@id"/></xsl:attribute><span>Ajouter une </span><strong>Catégorie</strong></a>
+											<xsl:attribute name="href">new-cat/no/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="/data/intra-sous-rubriques/rubrique-parente/entry[nom/@handle = $sous-rubrique]/@id"/></xsl:attribute><span>Ajouter une </span><strong>Catégorie</strong></a>
 										</ul>
 									</nav>
 								</header>
@@ -129,17 +128,12 @@
 								<!-- catégories ou non ? -->
 								<xsl:choose>
 									<!-- pas de catégories -->
-									<xsl:when test="count(/data/intra-categories-filtre-par-sous-rubrique/entry)=0">
+									<xsl:when test="count(/data/intra-categories-filtre-par-sous-rubrique/sous-rubrique-parente/entry)=0">
 										<article class="article-container">
 											<div class="notification information">
 												<ul class="button-switch">
 													<h2>Ooops !</h2>
-													<p>Il n'y a aucune catégorie pour cette sous-rubrique, il est temps de 
-														<!--<a class="button-link green ajax-form new-cat" rel="tooltip" >
-															<xsl:attribute name="href">new-cat/no/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="/data/intra-sous-rubriques/entry[nom/@handle = $sous-rubrique]/@id"/></xsl:attribute
-															><span>cliquer sur ce bouton</span>
-														</a> pour en créer une.-->
-														la créer.
+													<p>Il n'y a aucune catégorie pour cette sous-rubrique, il est temps de la créer.
 													</p>
 												</ul>
 											</div>
@@ -155,7 +149,7 @@
 												<nav class="sidetab-switch">
 													<ul>
 														<!-- SOUS-RUBRIQUES-->
-														<xsl:for-each select="/data/intra-categories-filtre-par-sous-rubrique/entry">
+														<xsl:for-each select="/data/intra-categories-filtre-par-sous-rubrique/sous-rubrique-parente/entry">
 															<li>
 																<a>
 																	<xsl:if test="position()=1"><xsl:attribute name="class">aTab default-tab current</xsl:attribute></xsl:if>
@@ -169,11 +163,11 @@
 																<xsl:if test="($member-role = 'Administrateur' or $member-id = auteur/item/@id)">
 																	<div class="picto-edit-cat">
 																		<a class="pen ajax-form edit-cat" rel="tooltip" title="Editer cette catégorie">
-																			<xsl:attribute name="href">edit-cat/no/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="@id"/>/no/<xsl:value-of select="/data/intra-categories-filtre-par-sous-rubrique/entry[@id=@id]/sous-rubrique-parente/item/@id"/></xsl:attribute>Editer cette catégorie
+																			<xsl:attribute name="href">edit-cat/no/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="@id"/>/no/<xsl:value-of select="/data/intra-categories-filtre-par-sous-rubrique/sous-rubrique-parente/entry[@id=@id]/sous-rubrique-parente/item/@id"/></xsl:attribute>Editer cette catégorie
 																		</a>
 
 																		<a class="sup ajax-form sup-cat" rel="tooltip" title="Supprimer cette catégorie">
-																			<xsl:attribute name="href">sup-cat/no/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="@id"/>/no/<xsl:value-of select="/data/intra-categories-filtre-par-sous-rubrique/entry[@id=@id]/sous-rubrique-parente/item/@id"/></xsl:attribute>Supprimer cette catégorie</a>
+																			<xsl:attribute name="href">sup-cat/no/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="@id"/>/no/<xsl:value-of select="/data/intra-categories-filtre-par-sous-rubrique/sous-rubrique-parente/entry[@id=@id]/sous-rubrique-parente/item/@id"/></xsl:attribute>Supprimer cette catégorie</a>
 																	</div>
 																</xsl:if>
 
@@ -186,7 +180,7 @@
 												<!-- Side Tab Content #sidetab1++ -->
 												<xsl:variable name="counter" select="0"/>
 
-												<xsl:for-each select="/data/intra-categories-filtre-par-sous-rubrique/entry">
+												<xsl:for-each select="/data/intra-categories-filtre-par-sous-rubrique/sous-rubrique-parente/entry">
 													<xsl:variable name="current-categorie-id" select="@id"/>
 													<xsl:variable name="current-sous-rubrique-id" select="sous-rubrique-parente/item/@id"/>
 
@@ -255,6 +249,11 @@
 																										<a class="edit open ajax-form table" title="Editer" rel="tooltip" target="_blank">
 																											<xsl:attribute name="href">edit-doc/<xsl:value-of select="$current-categorie-id"/>/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="$current-sous-rubrique-id"/>/<xsl:value-of select="@id"/>/</xsl:attribute>Editer
 																										</a>
+																									</li>
+																									<li>
+																										<a class=" deplace open ajax-form table" title="Deplacer" rel="tooltip" target="_blank">
+																										<!-- paramètres url : type/cat_id/tmp_form_id/sous_rub_id/doc_id/rub_id -->
+																										<xsl:attribute name="href">deplace-doc/<xsl:value-of select="$current-categorie-id"/>/a<xsl:value-of select="floor(math:random() * 1000000)"/>/<xsl:value-of select="$current-sous-rubrique-id"/>/<xsl:value-of select="@id"/>/no</xsl:attribute>Déplacer</a>
 																									</li>
 																									<li>
 																										<div class="picto-sup-doc">

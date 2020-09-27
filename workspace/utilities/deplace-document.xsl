@@ -16,13 +16,45 @@
 <!-- ********************************************************************* -->
 
 	<xsl:template name="deplace-document">
+		
+
+		<script>
+		<!-- une boucle for en xslt pour récuperer-->
+		<!-- declarer une variable javascript de type tableau
+		lire la premiere boucle xslt qui lit les rubrique et affecte le nom de la rubrique à mon tableau
+		et on crée un nouveau tableau à chaque rubrique
+		=> j'ai alors deux entree
+		puis lire la seconde boucle pour affecté les valeurs des sous-rubrique sous forme de tableau imbriqué-->
+			var tab_sous_rubrique = Array();	
+			<xsl:for-each select="data/intra-sous-rubriques/rubrique-parente">
+				var i = "<xsl:value-of select="@link-handle"/>";
+				tab_sous_rubrique[i] = new Array();
+				var j = 0;
+				<xsl:for-each select="entry">
+					tab_sous_rubrique[i][j] = "<xsl:value-of select="nom/@handle"/>,<xsl:value-of select="nom"/>";
+					j=j+1;
+				</xsl:for-each>
+			</xsl:for-each>
+			//console.table(tab_sous_rubrique);
+
+			var tab_categorie = Array();
+			<xsl:for-each select="data/intra-categories-filtre-par-sous-rubrique/sous-rubrique-parente">
+				var k = "<xsl:value-of select="@link-handle"/>";
+				tab_categorie[k] = new Array();
+				var m = 0;
+				<xsl:for-each select="entry">
+					tab_categorie[k][m] = "<xsl:value-of select="@id"/>,<xsl:value-of select="nom"/>";
+					m=m+1;
+				</xsl:for-each>
+			</xsl:for-each>
+			//console.table(tab_categorie);
+		</script>
 
 	<div>
 		<xsl:attribute name="class">edit article-container black nested container_<xsl:value-of select="$tmp_form_id"/><xsl:text> </xsl:text><xsl:value-of select="$type"/></xsl:attribute>
 	
 		<section>
 			<form id="{$tmp_form_id}" method="post" action="" enctype="multipart/form-data">
-		
 				<xsl:if test="$doc_id">
 					<input name="id" value="{$doc_id}" type="hidden"/>
 				</xsl:if>	
@@ -35,33 +67,29 @@
 					    <dd><input name="fields[nom-du-document]" type="text" class="medium" value="{/data/intranet-document/entry[@id=$doc_id]/nom-du-document}" /></dd>
 						<!-- STM ajout des rubriques, sous-rubriques et categories -->
 						<!-- paramètres url : type/cat_id/tmp_form_id/sous_rub_id/doc_id/rub_id -->
-						<dt><label>Rubrique<br/>Sous-rubrique<br/>Catégorie</label></dt>
+						<dt><label>Choisir</label></dt>
 					    <dd>
-							<div class="quarter-block">
-								<select id="deplace-rubrique" name="fields[rubrique][]" size="3">
+							<!-- liste des rubrique : Mab et RdB -->
+							<div class="quarter-block deplace-rubrique"><label>Rubrique</label><br/>
+								<select id="rubrique" name="fields[rubrique][]" size="3">
 									<xsl:for-each select="data/liste-rubrique/entry">
-						   			<option value="{deplace-rubrique}"><xsl:value-of select="nom"/></option>
+						   				<option value="{nom/@handle}"><xsl:value-of select="nom"/></option>
 									</xsl:for-each>
 								</select>
 							</div>
-							<div class="quarter-block">
-								<select id="deplace-sous-rubrique" name="fields[sous-rubrique][]" size="8">
-									<xsl:for-each select="data/liste-sous-rubrique/entry">
-						   			<option value="{deplace-sous-rubrique}"><xsl:value-of select="nom"/></option>
-									</xsl:for-each>
+							<!-- au clic sur une rubrique, affichage des sous-rubriques actives liées -->	
+							<div class="quarter-block"><label>Sous-rubrique</label><br/>
+								<select id="sous_rubrique" name="fields[sous-rubrique][]">
 								</select>
 							</div>
-							<div class="quarter-block">
-								<select id="deplace-categorie" name="fields[catégorie][]" size="8">
-									<xsl:for-each select="data/liste-sous-rubrique/entry">
-						   			<option value="{deaplce-categorie}"><xsl:value-of select="nom"/></option>
-									</xsl:for-each>
+							<div class="quarter-block"><label>Catégorie</label><br/>
+								<select id="categorie" name="fields[categorie]">
 								</select>
 							</div>
 							<div class="rubrique-notifie"></div>
 						</dd>
 						<!-- STM fin ajout des rubriques, sous-rubriques et categories -->
-				  		<input name="fields[categorie]" type="hidden" value="{$cat_id}" />
+			
 					</dl>	
 				</fieldset>
 

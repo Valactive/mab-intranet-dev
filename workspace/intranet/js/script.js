@@ -339,7 +339,7 @@ $(function () {
 	//injection du formulaire en ajax dans le dom
 	$('a.ajax-form, a.ajax-form.edit-cat, a.ajax-form.sup-cat, a.ajax-form.sup-doc').live('click', function(evt){
 		evt.preventDefault();
-		console.log("this et href : "+$(this).attr('href'));
+		//console.log("this et href : "+$(this).attr('href'));
 		
 		var form_url = '/intranet/forms/' + $(this).attr('href')+'/';
 		var ref_segments = $(this).attr('href').split('/');
@@ -349,13 +349,10 @@ $(function () {
 		var is_table = $(this).is(".table");
 		var current_selector = this;
 
-		console.log("type : "+ type);
-		console.log("current_selector : "+ current_selector);
-		console.log("current_selector");
-		console.log(current_selector);
+		//console.log("type : "+ type);
+		//console.log("current_selector : "+ current_selector);
 
 		var is_Sidetab = $(this).parents('div.sidetab').attr('id');
-		console.log('is_Sidetab : '+is_Sidetab);
 		var currentSidetab;
 		if(is_Sidetab){
 			currentSidetab = '#'+ is_Sidetab;
@@ -367,11 +364,6 @@ $(function () {
 
 		aTabIndex = $(this).parents('li').index();
 		
-		console.log("is_Sidetab : "+is_Sidetab);
-		console.log("currentSidetab : "+currentSidetab);
-		console.log("currentIndex : "+currentIndex);
-		console.log("aTabIndex : "+aTabIndex);
-
 		switch ( type ) {
 				// STM creation sous-rubrique
 				 case '.new-sous-rubrique':
@@ -475,8 +467,6 @@ $(function () {
 						$('.container').slideUp('fast').remove();
 						$.get(form_url, 
 							function(data){
-								console.log("current_selector");
-								console.log(current_selector);
 								if( is_table ){
 									data = '<tr class="'+ ref_segments[2] +' black"><td colspan="8">'+ data +'</td></tr>';
 									$(data).insertAfter( $('tr',currentSidetab).eq(currentIndex+1) );
@@ -496,8 +486,6 @@ $(function () {
 						$('.container').slideUp('fast').remove();
 						$.get(form_url, 
 							function(data){
-								console.log("current_selector");
-								console.log(current_selector);
 								if( is_table ){
 									data = '<tr class="'+ ref_segments[2] +' black"><td colspan="8">'+ data +'</td></tr>';
 									$(data).insertAfter( $('tr',currentSidetab).eq(currentIndex+12) );
@@ -513,8 +501,6 @@ $(function () {
 				case '.sup-doc' :
 					$.get(form_url,
 						function(data){
-							console.log("current_selector");
-							console.log(current_selector);
 							$(data).insertAfter(current_selector);
 						});	
 				break;	
@@ -524,6 +510,54 @@ $(function () {
 		$(this).parent().empty().html('<input class="fileupload" name="fields[document]" type="file"/>').next('input').remove();
 	});
 
+// deplacement doc clic sur rubrique => affichage des sous-rubriques
+$("#rubrique").live('change', function(){ 
+	let selectedRubrique =  this.value ;
+	//get values for the selected rubrique
+	let currentSRubriques = tab_sous_rubrique[selectedRubrique];
+	// remove existing options in select
+	$("#sous_rubrique").html('');
+	$("#categorie").html('');
+
+	// set new options from selected rubrique
+	$("#sous_rubrique")
+	.append($("<option></option")
+	.text("Choisir une sous-rubrique"));
+	$.each(currentSRubriques, function(key, value){
+		var values = value.split(',');
+		var optionName = values[1];
+		var optionValue = values[0];
+		$("#sous_rubrique")
+		.append($("<option></option")
+		.attr("value", optionValue)
+		.text(optionName));
+	})
+});
+// action : deplacement doc clic sur sous-rubrique => affichage des catégories
+$("#sous_rubrique").live('change', function(){ 
+	let selectedSRubrique =  this.value ;
+	//recuperation de la sous-rubrique selectionnée
+	let currentCategories = tab_categorie[selectedSRubrique];
+	// recuperation des categories liées à la sous-rubrique sélectionnée
+	$("#categorie").html('');
+	// set new options from selected rubrique
+	$("#categorie")
+	.append($("<option></option")
+	.text("Choisir une catégorie"));
+	$.each(currentCategories, function(key, value){
+		var values = value.split(',');
+		var optionName = values[1];
+		var optionValue = values[0];
+		$("#categorie")
+		.append($("<option></option")
+		.attr("value", optionValue)
+		.text(optionName));
+	})
+});
+// deplacement doc clic sur catégorie => mise à jour table document
+$("#categorie").live('change', function(){ 
+	let selectedCategorie =  this.value ;	
+});
 //close form
 	$('.close').live('click',
 			function () {
