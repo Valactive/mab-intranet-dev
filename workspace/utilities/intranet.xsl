@@ -222,7 +222,7 @@
 																			<xsl:for-each select="/data/intra-documents/entry">
 																				<xsl:if test="categorie/item/@id = $current-categorie-id">
 																					<tr>
-																						<td><a rel="external" href="http://docs.google.com/viewer?url={$workspace}{document/@path}/{document/filename}">
+																						<td><a rel="external" href="{$workspace}{document/@path}/{document/filename}">
 																							<xsl:attribute name="class">
 																								<xsl:text>extension </xsl:text>
 																								<xsl:call-template name="get-file-extension">
