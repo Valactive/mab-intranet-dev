@@ -88,7 +88,7 @@
 					<xsl:choose>    
 				    	<xsl:when test="$doc_id">
 					    	<dd class="file-name">
-						   		<a class="view" href="http://docs.google.com/viewer?url={$workspace}{/data/intranet-document/entry[@id=$doc_id]/document/@path}/{/data/intranet-document/entry[@id=$doc_id]/document/filename}" title="Voir dans google viewer" target="_blank" rel="tooltip"><xsl:value-of select="/data/intranet-document/entry[@id=$doc_id]/document/filename"/></a>
+						   		<a class="view" href="{$workspace}{/data/intranet-document/entry[@id=$doc_id]/document/@path}/{/data/intranet-document/entry[@id=$doc_id]/document/filename}" title="Voir dans google viewer" target="_blank" rel="tooltip"><xsl:value-of select="/data/intranet-document/entry[@id=$doc_id]/document/filename"/></a>
 						    	<a class="button-link left-25 change_input_file" href="#">Supprimer le fichier</a>
 							</dd>
 					    	<input name="fields[document]" type="hidden" value="{/data/intranet-document/entry[@id=$doc_id]/document/@path}/{/data/intranet-document/entry[@id=$doc_id]/document/filename}" />

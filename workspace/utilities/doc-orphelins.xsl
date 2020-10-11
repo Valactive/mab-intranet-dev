@@ -51,7 +51,7 @@
 													<xsl:value-of select="nom-du-document"/>
 												</xsl:when>
 												<xsl:otherwise>
-													<a rel="external" href="http://docs.google.com/viewer?url={$workspace}{document/@path}/{document/filename}">
+													<a rel="external" href="{$workspace}{document/@path}/{document/filename}">
 														<xsl:attribute name="class">
 															<xsl:text>extension </xsl:text>
 															<xsl:call-template name="get-file-extension">
@@ -121,7 +121,7 @@
 													<xsl:value-of select="nom-du-document"/>
 												</xsl:when>
 												<xsl:otherwise>
-													<a rel="external" href="http://docs.google.com/viewer?url={$workspace}{document/@path}/{document/filename}">
+													<a rel="external" href="{$workspace}{document/@path}/{document/filename}">
 														<xsl:attribute name="class">
 															<xsl:text>extension </xsl:text>
 															<xsl:call-template name="get-file-extension">
