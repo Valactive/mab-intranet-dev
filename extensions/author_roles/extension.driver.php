@@ -76,7 +76,7 @@ Class extension_author_roles extends Extension
 		);
 		
 		$data = $this->getCurrentAuthorRoleData();
-		if($data == false || Administration::instance()->Author->isDeveloper()) {			
+		if($data == false || Administration::instance()->Author()->isDeveloper()) {			
 			return;
 		}
 		
@@ -139,7 +139,7 @@ Class extension_author_roles extends Extension
 	 */
 	public function addRolePicker($context)
 	{
-		if(Administration::instance()->Author->isDeveloper())
+		if(Administration::instance()->Author()()->isDeveloper())
 		{
 			$group = new XMLElement('fieldset');
 			$group->setAttribute('class', 'settings');
@@ -216,7 +216,7 @@ Class extension_author_roles extends Extension
 	private function adjustIndex($context, $callback)
 	{
 		$data = $this->getCurrentAuthorRoleData();
-		if($data == false || Administration::instance()->Author->isDeveloper()) {
+		if($data == false || Administration::instance()->Author()->isDeveloper()) {
 			return;
 		}
 		
@@ -248,7 +248,7 @@ Class extension_author_roles extends Extension
 				{
 					// For only show entries created by this author:
 					// Get a list of entry id's created by this author:
-					$id_author = Administration::instance()->Author->get('id');
+					$id_author = Administration::instance()->Author()->get('id');
 					if($rules['own_entries'] == 1)
 					{
 						//need to know section id to retrieve current author and not only creator.
@@ -409,7 +409,7 @@ Class extension_author_roles extends Extension
 	public function makePreAdjustements($context)
 	{
 		$data = $this->getCurrentAuthorRoleData();
-		if($data == false || Administration::instance()->Author->isDeveloper()) {
+		if($data == false || Administration::instance()->Author()->isDeveloper()) {
 			return;
 		}
 		
@@ -436,7 +436,7 @@ Class extension_author_roles extends Extension
 	private function adjustEntryEditor($context, $callback)
 	{
 		$data = $this->getCurrentAuthorRoleData();
-		if($data == false || Administration::instance()->Author->isDeveloper()) {
+		if($data == false || Administration::instance()->Author()->isDeveloper()) {
 			return;
 		}
 		
@@ -516,7 +516,7 @@ Class extension_author_roles extends Extension
 	{
 		if(Administration::instance()->isLoggedIn())
         {
-            $id_author = Administration::instance()->Author()->get('id');
+            $id_author = Administration::instance()->Author()()->get('id');
             $id_role   = $this->getAuthorRole($id_author);
             if($id_role != false)
             {
@@ -536,7 +536,7 @@ Class extension_author_roles extends Extension
 	public function modifyAreas($context)
 	{
 		$data = $this->getCurrentAuthorRoleData();
-		if($data == false || Administration::instance()->Author->isDeveloper()) {
+		if($data == false || Administration::instance()->Author()->isDeveloper()) {
 			return;
 		}
 		
@@ -558,7 +558,7 @@ Class extension_author_roles extends Extension
 	 */
 	public function saveAuthorRole($context)
 	{
-		if(Administration::instance()->Author->isDeveloper())
+		if(Administration::instance()->Author()->isDeveloper())
 		{
 			$id_role = intval($_POST['fields']['role']);
 			$id_author = $context['author']->get('id');
