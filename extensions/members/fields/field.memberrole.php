@@ -1,6 +1,7 @@
 <?php
 
-	require_once(TOOLKIT . '/fields/field.select.php');
+	require_once TOOLKIT . '/fields/field.select.php';
+	require_once(EXTENSIONS . '/members/lib/class.role.php');
 
 	Class fieldMemberRole extends fieldSelect {
 
@@ -8,8 +9,8 @@
 		Definition:
 	-------------------------------------------------------------------------*/
 
-		public function __construct(&$parent){
-			parent::__construct($parent);
+		public function __construct(){
+			parent::__construct();
 			$this->_name = __('Member: Role');
 			$this->_showassociation = false;
 		}
@@ -42,7 +43,7 @@
 				  `default_role` int(11) unsigned NOT NULL,
 				  PRIMARY KEY (`id`),
 				  UNIQUE KEY `field_id` (`field_id`)
-				) ENGINE=MyISAM;
+				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 			");
 		}
 
@@ -54,8 +55,8 @@
  				  `role_id` int(11) unsigned NOT NULL,
 				  PRIMARY KEY  (`id`),
 				  UNIQUE KEY `entry_id` (`entry_id`)
-				)"
-			);
+				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+			");
 		}
 
 	/*-------------------------------------------------------------------------
@@ -73,7 +74,7 @@
 			return $states;
 		}
 
-		public function toggleFieldData($data, $newState){
+		public function toggleFieldData(array $data, $newState, $entry_id = null){
 			$data['role_id'] = $newState;
 			return $data;
 		}
@@ -88,11 +89,11 @@
 			parent::setFromPOST($settings);
 		}
 
-		public function displaySettingsPanel(&$wrapper, $errors=NULL){
+		public function displaySettingsPanel(XMLElement &$wrapper, $errors = NULL){
 			Field::displaySettingsPanel($wrapper, $errors);
 
 			$group = new XMLElement('div');
-			$group->setAttribute('class', 'group');
+			$group->setAttribute('class', 'two columns');
 
 			// Get Role in system
 			$roles = RoleManager::fetch();
@@ -104,6 +105,7 @@
 			}
 
 			$label = new XMlElement('label', __('Default Member Role'));
+			$label->setAttribute('class', 'column');
 			$label->appendChild(Widget::Select(
 				"fields[{$this->get('sortorder')}][default_role]", $options
 			));
@@ -111,14 +113,13 @@
 			$group->appendChild($label);
 			$wrapper->appendChild($group);
 
-			$div = new XMLElement('div', null, array('class' => 'compact'));
-			$this->appendRequiredCheckbox($div);
+			$div = new XMLElement('div', null, array('class' => 'two columns'));
 			$this->appendShowColumnCheckbox($div);
 			$wrapper->appendChild($div);
 		}
 
-		public function checkFields(&$errors, $checkForDuplicates=true) {
-			Field::checkFields(&$errors, $checkForDuplicates);
+		public function checkFields(array &$errors, $checkForDuplicates = true) {
+			Field::checkFields($errors, $checkForDuplicates);
 		}
 
 		public function commit(){
@@ -135,13 +136,50 @@
 				'default_role' => $this->get('default_role')
 			);
 
-			Symphony::Database()->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id' LIMIT 1");
-			return Symphony::Database()->insert($fields, 'tbl_fields_' . $this->handle());
+			return FieldManager::saveSettings($id, $fields);
 		}
 
 	/*-------------------------------------------------------------------------
 		Publish:
 	-------------------------------------------------------------------------*/
+
+		/**
+		 * If the Members installation has a Activation field used, we need to make sure
+		 * that this field represents accurately what Role this Member actually has.
+		 * The Activation field allows developers to set a Activation Role, which is the role
+		 * assigned to Members who have registered, but not yet activated their account.
+		 * This Activation role masks the Role field's value, so the Member assumes the
+		 * Role of the Activation role.
+		 *
+		 * @param integer $entry_id
+		 *  The Entry ID of the Member
+		 * @param integer $role_id
+		 *  A given Role ID
+		 * @return integer
+		 *  The resulting Role ID, whether that is the Activation ID or the
+		 *  given `$role_id`.
+		 */
+		public function getActivationRole($entry_id = null, $role_id = null) {
+			if(is_null($entry_id)) return null;
+
+			$activation_role_id = null;
+			$activation = extension_Members::getField('activation', $this->get('parent_section'));
+			if(!is_null($activation) && !is_null($entry_id)) {
+				$entry = EntryManager::fetch($entry_id);
+				$entry = $entry[0];
+
+				if($entry instanceof Entry && $entry->getData($activation->get('id'), true)->activated != 'yes') {
+					$activation_role_id = $activation->get('activation_role_id');
+				}
+			}
+
+			if(!is_null($role_id) && is_null($activation_role_id)) {
+				return $role_id;
+			}
+			else {
+				return $activation_role_id;
+			}
+		}
 
 		public function displayPublishPanel(XMLElement &$wrapper, $data = null, $error = null, $prefix = null, $postfix = null, $entry_id = null) {
 			$states = $this->getToggleStates();
@@ -151,20 +189,7 @@
 				$data['role_id'] = $this->get('default_role');
 			}
 
-			// If the Members installation has a Activation field used, we need to make sure
-			// that this field represents accurately what Role this Member actually has.
-			// The Activation field allows developers to set a Activation Role, which is the role
-			// assigned to Members who have registered, but not yet activated their account.
-			$activation_role_id = null;
-			$activation = extension_Members::getField('activation');
-			if(!is_null($activation) && !is_null($entry_id)) {
-				$entry = extension_Members::$entryManager->fetch($entry_id);
-				$entry = $entry[0];
-
-				if($entry instanceof Entry && $entry->getData($activation->get('id'), true)->activated != 'yes') {
-					$activation_role_id = $activation->get('activation_role_id');
-				}
-			}
+			$activation_role_id = $this->getActivationRole($entry_id);
 
 			// Loop over states to build the Select options array
 			foreach($states as $role_id => $role_name){
@@ -177,34 +202,39 @@
 
 			$label = Widget::Label($this->get('label'));
 			$label->appendChild(Widget::Select(
-				'fields'.$fieldnamePrefix.'['.$this->get('element_name').']'.$fieldnamePostfix,
+				'fields'.$prefix.'['.$this->get('element_name').']'.$postfix,
 				$options,
 				!is_null($activation_role_id) ? array('disabled' => 'disabled') : array())
 			);
 
 			// Add message about user's Role when they activate and a hidden field that
-			// contains the Default Role ID
+			// contains the Default Role ID. The Default Role ID can be two things,
+			// either the Default Role as set on the Settings page (most of the time) or
+			// if a value has been explicitly set.
 			if(!is_null($activation_role_id)) {
-				$default_role = RoleManager::fetch($this->get('default_role'));
-				$label->appendChild(
-					new XMLElement('span',
-					__('Member will assume the role <strong>%s</strong> when activated.', array($default_role->get('name'))),
-					array('class' => 'help frame'))
-				);
-				$label->appendChild(
-					Widget::Input('fields'.$fieldnamePrefix.'['.$this->get('element_name').']'.$fieldnamePostfix, $data['role_id'], 'hidden')
-				);
+				$default_role_id = !is_null($data['role_id']) ? $data['role_id'] : $this->get('default_role');
+				$default_role = RoleManager::fetch($default_role_id);
+				if($default_role instanceof Role) {
+					$label->appendChild(
+						new XMLElement('span',
+						__('Member will assume the role <strong>%s</strong> when activated.', array($default_role->get('name'))),
+						array('class' => 'help frame'))
+					);
+					$label->appendChild(
+						Widget::Input('fields'.$prefix.'['.$this->get('element_name').']'.$postfix, $default_role_id, 'hidden')
+					);
+				}
 			}
 
 			if(!is_null($error)) {
-				$wrapper->appendChild(Widget::wrapFormElementWithError($label, $error));
+				$wrapper->appendChild(Widget::Error($label, $error));
 			}
 			else {
 				$wrapper->appendChild($label);
 			}
 		}
 
-		public function processRawFieldData($data, &$status, $simulate=false, $entry_id=NULL){
+		public function processRawFieldData($data, &$status, &$message=null, $simulate=false, $entry_id=NULL){
 			$status = self::__OK__;
 
 			if(is_null($data)) {
@@ -229,13 +259,14 @@
 		public function appendFormattedElement(XMLElement &$wrapper, $data, $encode = false, $mode = null, $entry_id = null) {
 			if(!is_array($data) || empty($data)) return;
 
-			$role_id = $data['role_id'];
+			$role_id = $this->getActivationRole($entry_id, $data['role_id']);
 			$role = RoleManager::fetch($role_id);
 
 			if(!$role instanceof Role) return;
 
 			$element = new XMLElement($this->get('element_name'), null, array(
 				'id' => $role->get('id'),
+				'assumed-id' => $data["role_id"],
 				'mode' => ($mode == "permissions") ? $mode : 'normal'
 			));
 			$element->appendChild(
@@ -254,9 +285,8 @@
 
 				$forbidden_pages = $role->get('forbidden_pages');
 				if(is_array($forbidden_pages) & !empty($forbidden_pages)) {
-					$page_data = Symphony::Database()->fetch(sprintf(
-						"SELECT * FROM `tbl_pages` WHERE id IN (%s)",
-						implode(',', $forbidden_pages)
+					$page_data = PageManager::fetch(false, array('*'), array(
+						sprintf('id IN (%s)', implode(',', $forbidden_pages))
 					));
 
 					if(is_array($page_data) && !empty($page_data)) {
@@ -306,26 +336,33 @@
 			$wrapper->appendChild($element);
 		}
 
-		public function prepareTableValue($data, XMLElement $link=NULL){
-			$role_id = $data['role_id'];
+		public function prepareTableValue($data, XMLElement $link = null, $entry_id = null) {
+			$role_id = $this->getActivationRole($entry_id, $data['role_id']);
 
 			$role = RoleManager::fetch($role_id);
 
 			return parent::prepareTableValue(array(
 				'value' => $role instanceof Role ? General::sanitize($role->get('name')) : null
-			), $link);
+			), $link, $entry_id);
+		}
+
+		public function getParameterPoolValue(array $data, $entry_id = null) {
+			$role_id = $this->getActivationRole($entry_id, $data['role_id']);
+
+			return $role_id;
 		}
 
 	/*-------------------------------------------------------------------------
 		Filtering:
 	-------------------------------------------------------------------------*/
 
-		public function buildDSRetrievalSQL($data, &$joins, &$where, $andOperation=false){
+		public function buildDSRetrievalSQL($data, &$joins, &$where, $andOperation = false){
 
 			$field_id = $this->get('id');
 
 			if($andOperation) {
 				foreach($data as $key => $bit){
+					$bit = Symphony::Database()->cleanValue($bit);
 					$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id$key` ON (`e`.`id` = `t$field_id$key`.entry_id) ";
 					$joins .= " LEFT JOIN `tbl_members_roles` AS `tg$field_id$key` ON (`t$field_id$key`.`role_id` = `tg$field_id$key`.id) ";
 					$where .= " AND (`t$field_id$key`.role_id = '$bit' OR (`tg$field_id$key`.name = '$bit' OR `tg$field_id$key`.handle = '$bit')) ";
@@ -333,6 +370,7 @@
 			}
 			else {
 				$data = !is_array($data) ? array($data) : $data;
+				$data = array_map(array(Symphony::Database(), 'cleanValue'), $data);
 				$value = implode("', '", $data);
 
 				$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id` ON (`e`.`id` = `t$field_id`.entry_id) ";
@@ -355,8 +393,21 @@
 	-------------------------------------------------------------------------*/
 
 		public function buildSortingSQL(&$joins, &$where, &$sort, $order='ASC') {
-			$joins .= "INNER JOIN `tbl_entries_data_".$this->get('id')."` AS `ed` ON (`e`.`id` = `ed`.`entry_id`) ";
-			$sort .= 'ORDER BY ' . (strtolower($order) == 'random' ? 'RAND()' : "`ed`.`role_id` $order");
+			if(in_array(strtolower($order), array('random', 'rand'))) {
+				$sort = 'ORDER BY RAND()';
+			}
+			else {
+				$sort = sprintf(
+					'ORDER BY (
+						SELECT %s
+						FROM tbl_entries_data_%d AS `ed`
+						WHERE entry_id = e.id
+					) %s',
+					'`ed`.role_id',
+					$this->get('id'),
+					$order
+				);
+			}
 		}
 
 	/*-------------------------------------------------------------------------
@@ -372,7 +423,7 @@
 			foreach($records as $r){
 				$data = $r->getData($this->get('id'));
 
-				$role_id = $data['role_id'];
+				$role_id = $this->getActivationRole($entry_id, $data['role_id']);
 				if(!$role = RoleManager::fetch($role_id)) continue;
 
 				if(!isset($groups[$this->get('element_name')][$role_id])){
@@ -402,7 +453,7 @@
 			foreach($states as $role_id => $role_name){
 				$options[] = array(
 					$role_id,
-					$role_id == $data['role_id'],
+					false,
 					$role_name
 				);
 			}

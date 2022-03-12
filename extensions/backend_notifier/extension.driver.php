@@ -124,7 +124,8 @@
 				
 				Symphony::Configuration()->set('watched_role', $survStr, 'backend-notifier');
 				Symphony::Configuration()->set('notified_role', $notStr, 'backend-notifier');
-				Administration::instance()->saveConfig();
+				//Administration::instance()->saveConfig();
+				Symphony::Configuration()->write();
 			} else {
 				// If no roles are selected, delete the file:
 				$this->uninstall();

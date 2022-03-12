@@ -516,7 +516,7 @@ Class extension_author_roles extends Extension
 	{
 		if(Administration::instance()->isLoggedIn())
         {
-            $id_author = Administration::instance()->Author->get('id');
+            $id_author = Administration::instance()->Author()->get('id');
             $id_role   = $this->getAuthorRole($id_author);
             if($id_role != false)
             {

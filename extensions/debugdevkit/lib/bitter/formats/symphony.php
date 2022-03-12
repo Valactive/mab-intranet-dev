@@ -19,17 +19,25 @@
 		}
 		
 		protected function processTabs() {
-			if (!function_exists('__expander')) eval("
-				function __expander(\$matches) {
-					return \$matches[1] . str_repeat(
-						' ', strlen(\$matches[2]) * {$this->tabsize} - (strlen(\$matches[1]) % {$this->tabsize})
-					);
+			// first split the output into manageable chunks
+			$lines = explode(PHP_EOL, $this->output);
+			$linesCount = count($lines);
+			// fix lines one by one
+			for ($x = 0; $x < $linesCount; $x++) {
+				// while there are still tabs
+				while (strpos($lines[$x], "\t") !== FALSE) {
+					// replace tabs for spaces
+					$lines[$x] = preg_replace_callback('%^([^\t]*)([\t]+)%', array($this, 'processTabsLine'), $lines[$x]);
 				}
-			");
-			
-			while (strstr($this->output, "\t")) {
-				$this->output = preg_replace_callback('%^([^\t\n]*)(\t+)%m', '__expander', $this->output);
 			}
+			// concat the final output
+			$this->output = implode(PHP_EOL, $lines);
+		}
+		
+		protected function processTabsLine($matches) {
+			return $matches[1] . str_repeat(
+				' ', strlen($matches[2]) * $this->tabsize
+			);
 		}
 		
 		protected function processLines() {

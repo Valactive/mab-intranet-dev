@@ -1,6 +1,9 @@
 <?php
 
-	Class fieldMemberPassword extends Field{
+	require_once FACE . '/interface.exportablefield.php';
+	require_once FACE . '/interface.importablefield.php';
+
+	Class fieldMemberPassword extends Field implements ExportableField, ImportableField {
 
 		protected static $_strengths = array();
 
@@ -14,8 +17,8 @@
 		Definition:
 	-------------------------------------------------------------------------*/
 
-		public function __construct(&$parent){
-			parent::__construct($parent);
+		public function __construct(){
+			parent::__construct();
 			$this->_name = __('Member: Password');
 			$this->_required = true;
 
@@ -49,11 +52,10 @@
 				  `field_id` int(11) unsigned NOT NULL,
 				  `length` tinyint(2) NOT NULL,
 				  `strength` enum('weak', 'good', 'strong') NOT NULL,
-				  `salt` varchar(255) default NULL,
 				  `code_expiry` varchar(50) NOT NULL,
 				  PRIMARY KEY  (`id`),
 				  UNIQUE KEY `field_id` (`field_id`)
-				) ENGINE=MyISAM;
+				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 			");
 		}
 
@@ -62,7 +64,7 @@
 				"CREATE TABLE IF NOT EXISTS `tbl_entries_data_" . $this->get('id') . "` (
 				  `id` int(11) unsigned NOT NULL auto_increment,
 				  `entry_id` int(11) unsigned NOT NULL,
-				  `password` varchar(40) default NULL,
+				  `password` varchar(150) default NULL,
 				  `recovery-code` varchar(40) default NULL,
 				  `length` tinyint(2) NOT NULL,
 				  `strength` enum('weak', 'good', 'strong') NOT NULL,
@@ -74,8 +76,8 @@
 				  KEY `password` (`password`),
 				  KEY `expires` (`expires`),
 				  UNIQUE KEY `recovery-code` (`recovery-code`)
-				) ENGINE=MyISAM;"
-			);
+				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+			");
 		}
 
 	/*-------------------------------------------------------------------------
@@ -89,19 +91,22 @@
 		 *
 		 * @param array|string $needle
 		 * @param integer $member_id
+		 * @param boolean $isHashed
 		 * @return Entry|null
 		 */
-		public function fetchMemberIDBy($needle, $member_id) {
-			if(is_array($needle)) {
-				extract($needle);
-			}
-			else {
+		public function fetchMemberIDBy($needle, $member_id = null, $isHashed = false) {
+			$valid = true;
+			$password = null;
+			if (is_array($needle) && !empty($needle['password'])) {
+				$password = $needle['password'];
+			} else {
 				$password = $needle;
 			}
 
 			if(empty($password)) {
 				extension_Members::$_errors[$this->get('element_name')] = array(
-					'message' => __('%s is a required field.', array($this->get('label'))),
+					'message' => __('\'%s\' is a required field.', array($this->get('label'))),
+					'message-id' => EventMessages::FIELD_MISSING,
 					'type' => 'missing',
 					'label' => $this->get('label')
 				);
@@ -109,17 +114,48 @@
 			}
 
 			$data = Symphony::Database()->fetchRow(0, sprintf("
-					SELECT `entry_id`, `reset`
+					SELECT `entry_id`, `password`, `reset`
 					FROM `tbl_entries_data_%d`
-					WHERE `password` = '%s'
-					AND `entry_id` = %d
+					WHERE %s
 					LIMIT 1
 				",
-				$this->get('id'), $password, Symphony::Database()->cleanValue($member_id)
+				$this->get('id'),
+				is_null($member_id)
+					? '1 = 1'
+					: sprintf('`entry_id` = %d', Symphony::Database()->cleanValue($member_id))
 			));
 
+			if(!empty($data)) {
+				// The old passwords had salts, so add that the password
+				// for accurate comparsion to determine if migrating needs to happen
+				if($isHashed === false && strlen($data['password']) === 40 && !is_null($this->get('salt'))) {
+					$compare_password = $this->get('salt') . $password;
+				}
+				else {
+					$compare_password = $password;
+				}
+
+				// Check if the password's match
+				if(Cryptography::compare($compare_password, $data['password'], $isHashed)) {
+					// Great! They match, but do we need to update the original password
+					// to a more secure algorithm now?
+					if(Cryptography::requiresMigration($data['password'])) {
+						Symphony::Database()->update(array(
+								'password' => $this->encodePassword($password)
+							),
+							'tbl_entries_data_' . $this->get('id'),
+							sprintf('`entry_id` = %d', Symphony::Database()->cleanValue($member_id))
+						);
+					}
+				}
+				// Passwords don't match, invalid password
+				else {
+					$valid = false;
+				}
+			}
+
 			// Check that if the password has been reset that it is still valid
-			if(!empty($data) && $data['reset'] == 'yes') {
+			if($valid && !empty($data['reset']) && $data['reset'] == 'yes') {
 				$valid_id = Symphony::Database()->fetchVar('entry_id', 0, sprintf("
 						SELECT `entry_id`
 						FROM `tbl_entries_data_%d`
@@ -127,7 +163,9 @@
 						AND DATE_FORMAT(expires, '%%Y-%%m-%%d %%H:%%i:%%s') > '%s'
 						LIMIT 1
 					",
-					$this->get('id'), $data['entry_id'], DateTimeObj::get('Y-m-d H:i:s', strtotime('now - '. $this->get('code_expiry')))
+					$this->get('id'),
+					$data['entry_id'],
+					DateTimeObj::get('Y-m-d H:i:s', strtotime('now - '. $this->get('code_expiry')))
 				));
 
 				// If we didn't get an entry_id back, then it's because it was expired
@@ -146,10 +184,11 @@
 				}
 			}
 
-			if(!empty($data)) return $member_id;
+			if($valid) return $member_id;
 
 			extension_Members::$_errors[$this->get('element_name')] = array(
 				'message' => __('Invalid %s.', array($this->get('label'))),
+				'message-id' => MemberEventMessages::MEMBER_INVALID,
 				'type' => 'invalid',
 				'label' => $this->get('label')
 			);
@@ -158,14 +197,34 @@
 		}
 
 		/**
-		 * Given a string, this function will encode it using the
-		 * field's salt and the sha1 algorithm
+		 * Generates a random password for a member, using
+		 * `openssl_random_pseudo_bytes` on PHP5.3, or falling back to a
+		 * simple `uniqid` variant for other systems.
+		 *
+		 * @link http://php.net/manual/en/function.openssl-random-pseudo-bytes.php
+		 * @link http://php.net/manual/en/function.uniqid.php
+		 * @return string
+		 */
+		public function generatePassword() {
+			if(function_exists('openssl_random_pseudo_bytes')) {
+				return openssl_random_pseudo_bytes(20);
+			}
+			else {
+				return str_shuffle(uniqid());
+			}
+		}
+
+		/**
+		 * Given a string, this function will encode the password
+		 * using the PBKDF2 algorithm.
 		 *
 		 * @param string $password
 		 * @return string
 		 */
 		public function encodePassword($password) {
-			return General::hash($this->get('salt') . $password, 'sha1');
+			require_once TOOLKIT . '/class.cryptography.php';
+
+			return Cryptography::hash($password);
 		}
 
 		protected static function checkPassword($password) {
@@ -194,8 +253,14 @@
 			return false;
 		}
 
+		// Although the salt is no longer used, it is required to assist
+		// migrating Member passwords from earlier versions.
 		protected function rememberSalt() {
 			$field_id = $this->get('id');
+
+			if(!Symphony::Database()->tableContainsField('tbl_fields_memberpassword', 'salt')) {
+				return;
+			}
 
 			try {
 				$salt = Symphony::Database()->fetchVar('salt', 0, "
@@ -242,16 +307,17 @@
 		Settings:
 	-------------------------------------------------------------------------*/
 
-		public function displaySettingsPanel(&$wrapper, $errors=NULL){
+		public function displaySettingsPanel(XMLElement &$wrapper, $errors = NULL){
 			parent::displaySettingsPanel($wrapper, $errors);
 			$order = $this->get('sortorder');
 
 		// Validator ----------------------------------------------------------
 
 			$group = new XMLElement('div');
-			$group->setAttribute('class', 'group');
+			$group->setAttribute('class', 'two columns');
 
 			$label = Widget::Label(__('Minimum Length'));
+			$label->setAttribute('class', 'column');
 			$label->appendChild(Widget::Input(
 				"fields[{$order}][length]", $this->get('length')
 			));
@@ -267,6 +333,7 @@
 			}
 
 			$label = Widget::Label(__('Minimum Strength'));
+			$label->setAttribute('class', 'column');
 			$label->appendChild(Widget::Select(
 				"fields[{$order}][strength]", $values
 			));
@@ -274,34 +341,9 @@
 			$group->appendChild($label);
 			$wrapper->appendChild($group);
 
-		// Salt ---------------------------------------------------------------
+		// Add Activiation Code Expiry ------------------------------------------
 
-			$group = new XMLElement('div');
-			$group->setAttribute('class', 'group');
-
-			$label = Widget::Label(__('Password Salt'));
-			$label->appendChild(
-				new XMLElement('i', __('A salt gives your passwords extra security. It cannot be changed once set'))
-			);
-			$input = Widget::Input(
-				"fields[{$order}][salt]", $this->get('salt')
-			);
-
-			if ($this->get('salt')) {
-				$input->setAttribute('disabled', 'disabled');
-			}
-
-			$label->appendChild($input);
-
-			if (isset($errors['salt'])) {
-				$label = Widget::wrapFormElementWithError($label, $errors['salt']);
-			}
-
-			$group->appendChild($label);
-
-			// Add Activiation Code Expiry
 			$div = new XMLElement('div');
-
 			$label = Widget::Label(__('Recovery Code Expiry'));
 			$label->appendChild(
 				new XMLElement('i', __('How long a member\'s recovery code will be valid for before it expires'))
@@ -310,37 +352,30 @@
 				"fields[{$this->get('sortorder')}][code_expiry]", $this->get('code_expiry')
 			));
 
-			$ul = new XMLElement('ul', NULL, array('class' => 'tags singular'));
+			$ul = new XMLElement('ul', null, array('class' => 'tags singular', 'data-interactive' => 'data-interactive'));
 			$tags = fieldMemberPassword::findCodeExpiry();
 			foreach($tags as $name => $time) {
 				$ul->appendChild(new XMLElement('li', $name, array('class' => $time)));
 			}
 
-			if (isset($errors['code_expiry'])) {
-				$label = Widget::wrapFormElementWithError($label, $errors['code_expiry']);
-			}
-
 			$div->appendChild($label);
 			$div->appendChild($ul);
 
-			$group->appendChild($div);
-			$wrapper->appendChild($group);
+			if (isset($errors['code_expiry'])) {
+				$div = Widget::Error($div, $errors['code_expiry']);
+			}
+
+			$wrapper->appendChild($div);
 
 			// Add checkboxes
-			$div = new XMLElement('div', null, array('class' => 'compact'));
+			$div = new XMLElement('div', null, array('class' => 'two columns'));
 			$this->appendRequiredCheckbox($div);
 			$this->appendShowColumnCheckbox($div);
 			$wrapper->appendChild($div);
 		}
 
-		public function checkFields(&$errors, $checkForDuplicates = true) {
+		public function checkFields(array &$errors, $checkForDuplicates = true) {
 			parent::checkFields($errors, $checkForDuplicates);
-
-			$this->rememberSalt();
-
-			if (trim($this->get('salt')) == '') {
-				$errors['salt'] = __('This is a required field.');
-			}
 
 			if (trim($this->get('code_expiry')) == '') {
 				$errors['code_expiry'] = __('This is a required field.');
@@ -366,12 +401,14 @@
 				'field_id' => $id,
 				'length' => $this->get('length'),
 				'strength' => $this->get('strength'),
-				'salt' => $this->get('salt'),
 				'code_expiry' => $this->get('code_expiry')
 			);
 
-			Symphony::Database()->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id' LIMIT 1");
-			return Symphony::Database()->insert($fields, 'tbl_fields_' . $this->handle());
+			if($this->get('salt')) {
+				$fields['salt'] = $this->get('salt');
+			}
+
+			return FieldManager::saveSettings($id, $fields);
 		}
 
 	/*-------------------------------------------------------------------------
@@ -383,9 +420,9 @@
 			$handle = $this->get('element_name');
 
 			$group = new XMLElement('div');
-			$group->setAttribute('class', 'group');
+			$group->setAttribute('class', 'two columns');
 
-		//	Password
+			// Password
 			$password = $data['password'];
 			$password_set = Symphony::Database()->fetchVar('id', 0, sprintf("
 					SELECT
@@ -424,9 +461,9 @@
 				);
 			}
 
-			//	Error?
+			// Error?
 			if(!is_null($error)) {
-				$group = Widget::wrapFormElementWithError($group, $error);
+				$group = Widget::Error($group, $error);
 				$wrapper->appendChild($group);
 			}
 			else {
@@ -441,6 +478,7 @@
 			$required = ($this->get('required') == 'yes');
 
 			$label = Widget::Label(__($title));
+			$label->setAttribute('class', 'column');
 			if(!$required) $label->appendChild(new XMLElement('i', __('Optional')));
 
 			$input = Widget::Input("fields{$name}", null, 'password', array('autocomplete' => 'off'));
@@ -460,14 +498,14 @@
 			$password = trim($data['password']);
 			$confirm = trim($data['confirm']);
 
-			//	If the field is required, we should have both a $username and $password.
+			// If the field is required, we should have both a $username and $password.
 			if($required && !isset($data['optional']) && (empty($password))) {
 				$message = __('%s is a required field.', array($this->get('label')));
 				return self::__MISSING_FIELDS__;
 			}
 
-			//	Check password
-			if(!empty($password)) {
+			// Check password
+			if(!empty($password) || !empty($confirm)) {
 				if($confirm !== $password) {
 					$message = __('%s confirmation does not match.', array($this->get('label')));
 					return self::__INVALID_FIELDS__;
@@ -492,7 +530,7 @@
 			return self::__OK__;
 		}
 
-		public function processRawFieldData($data, &$status, $simulate=false, $entry_id = null){
+		public function processRawFieldData($data, &$status, &$message=null, $simulate=false, $entry_id = null){
 			$status = self::__OK__;
 			$required = ($this->get('required') == "yes");
 
@@ -500,9 +538,9 @@
 
 			$password = trim($data['password']);
 
-			//	We only want to run the processing if the password has been altered
-			//	or if the entry hasn't been created yet. If someone attempts to change
-			//	their username, but not their password, this will be caught by checkPostFieldData
+			// We only want to run the processing if the password has been altered
+			// or if the entry hasn't been created yet. If someone attempts to change
+			// their username, but not their password, this will be caught by checkPostFieldData
 			if(!empty($password) || is_null($entry_id)) {
 				return array(
 					'password'	=> $this->encodePassword($password),
@@ -518,7 +556,7 @@
 		Output:
 	-------------------------------------------------------------------------*/
 
-		public function appendFormattedElement(&$wrapper, $data, $encode=false) {
+		public function appendFormattedElement(XMLElement &$wrapper, $data, $encode = false, $mode = null, $entry_id = null){
 			$pw = new XMLElement($this->get('element_name'));
 
 			// If reset is set, return the recovery-code
@@ -541,12 +579,47 @@
 			$wrapper->appendChild($pw);
 		}
 
-		public function prepareTableValue($data, XMLElement $link=NULL){
+		public function prepareTableValue($data, XMLElement $link=NULL, $entry_id = null){
 			if(empty($data)) return __('None');
 
 			return parent::prepareTableValue(array(
 				'value' => __(ucwords($data['strength'])) . ' (' . $data['length'] . ')'
-			), $link);
+			), $link, $entry_id);
+		}
+
+	/*-------------------------------------------------------------------------
+		Import:
+	-------------------------------------------------------------------------*/
+
+		public function getImportModes() {
+			return array(
+				'getPostdata' =>	ImportableField::ARRAY_VALUE
+			);
+		}
+
+		public function prepareImportValue($data, $mode, $entry_id = null) {
+			$message = $status = null;
+			$modes = (object)$this->getImportModes();
+
+			if($mode === $modes->getPostdata) {
+				return $this->processRawFieldData($data, $status, $message, true, $entry_id);
+			}
+
+			return null;
+		}
+
+	/*-------------------------------------------------------------------------
+		Export:
+	-------------------------------------------------------------------------*/
+
+		public function getExportModes() {
+			return array(
+				ExportableField::POSTDATA
+			);
+		}
+
+		public function prepareExportValue($data, $mode, $entry_id = null) {
+			return null;
 		}
 
 	/*-------------------------------------------------------------------------
@@ -560,6 +633,7 @@
 				foreach($data as $key => $value) {
 					$this->_key++;
 					$value = $this->encodePassword($value);
+					$value = Symphony::Database()->cleanValue($value);
 					$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id$key` ON (`e`.`id` = `t$field_id$key`.entry_id) ";
 					$where .= " AND `t$field_id$key`.password = '$value' ";
 				}
@@ -577,6 +651,7 @@
 					$value = $this->encodePassword($value);
 				}
 
+				$data = array_map(array(Symphony::Database(), 'cleanValue'), $data);
 				$data = implode("', '", $data);
 				$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id` ON (`e`.`id` = `t$field_id`.entry_id) ";
 				$where .= " AND `t$field_id`.password IN ('{$data}') ";

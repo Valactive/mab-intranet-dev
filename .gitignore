@@ -1,0 +1,4 @@
+.htaccess
+workspace/uploads
+manifest/logs
+manifest/config.php

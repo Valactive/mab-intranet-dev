@@ -1,743 +1,1078 @@
 <?php
-if(!defined('__IN_SYMPHONY__')) die('<h2>Symphony Error</h2><p>You cannot directly access this file</p>');
 
-Class fieldDatetime extends Field {
+	/**
+	 * @package datetime
+	 */
+	/**
+	 * This field provides an interface to manage single or multiple dates as well as date ranges.
+	 */
+	if(!defined('__IN_SYMPHONY__')) die('<h2>Symphony Error</h2><p>You cannot directly access this file</p>');
 
-    const SIMPLE = 0;
-    const REGEXP = 1;
-    const RANGE = 3;
-    const ERROR = 4;
-    private $key;
+	require_once TOOLKIT . '/fields/field.date.php';
+	require_once(EXTENSIONS . '/datetime/lib/class.calendar.php');
 
-    private static $english = array(
-            'yesterday', 'today', 'tomorrow', 'now',
-            'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday',
-            'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat',
-            'Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa',
-            'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December',
-            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    );
+	Class fieldDatetime extends fieldDate {
 
-    private $locale;
+		const SIMPLE = 0;
+		const REGEXP = 1;
 
-    /**
-     * Initialize Datetime as unrequired field.
-     */
+		const RANGE = 10;
+		const START = 11;
+		const END = 12;
+		const STRICT = 13;
+		const EXTRANGE = 14;
 
-    function __construct(&$parent) {
-        // Replace relative and locale date and time strings
-        foreach(self::$english as $string) {
-            $locale[] = __($string);
-        }
-        $this->locale = $locale;
+		const ERROR = 20;
 
-        parent::__construct($parent);
-        $this->_name = __('Date/Time');
-        $this->_required = false;
-    }
-
-    /**
-     * Allow data source filtering.
-     */
-
-    function canFilter() {
-        return true;
-    }
-
-    /**
-     * Allow data source sorting.
-     */
-
-    function isSortable() {
-        return true;
-    }
-
-    /**
-     * Allow prepopulation of other fields.
-     */
-
-    function canPrePopulate() {
-        return false;
-    }
-
-    /**
-     * Allow data source output grouping.
-     */
-
-    function allowDatasourceOutputGrouping() {
-        return true;
-    }
-
-    /**
-     * Allow data source parameter output.
-     */
-
-    function allowDatasourceParamOutput() {
-        return true;
-    }
-
-    /**
-     * Displays setting panel in section editor.
-     *
-     * @param XMLElement $wrapper - parent element wrapping the field
-     * @param array $errors - array with field errors, $errors['name-of-field-element']
-     */
-
-    function displaySettingsPanel(&$wrapper, $errors=NULL) {
-
-        // initialize field settings based on class defaults (name, placement)
-        parent::displaySettingsPanel($wrapper, $errors);
-        $this->appendShowColumnCheckbox($wrapper);
-
-        // format
-        $label = new XMLElement('label', __('Date format') . '<i>' . __('Use comma to separate date and time') . '</i>');
-        $label->appendChild(
-            Widget::Input('fields['.$this->get('sortorder').'][format]', $this->get('format') ? $this->get('format') : 'd MMMM yyyy, HH:mm')
-        );
-        $wrapper->appendChild($label);
-
-        // prepopulate
-        $label = Widget::Label();
-        $input = Widget::Input('fields['.$this->get('sortorder').'][prepopulate]', 'yes', 'checkbox');
-        if($this->get('prepopulate') != 'no') {
-            $input->setAttribute('checked', 'checked');
-        }
-        $label->setValue(__('%s Pre-populate this field with today\'s date', array($input->generate())));
-        $wrapper->appendChild($label);
-
-        // allow multiple
-        $label = Widget::Label();
-        $input = Widget::Input('fields['.$this->get('sortorder').'][allow_multiple_dates]', 'yes', 'checkbox');
-        if($this->get('allow_multiple_dates') != 'no') {
-            $input->setAttribute('checked', 'checked');
-        }
-        $label->setValue(__('%s Allow multiple dates', array($input->generate())));
-        $wrapper->appendChild($label);
-
-    }
-
-    /**
-     * Checks fields for errors in section editor.
-     *
-     * @param array $errors
-     * @param boolean $checkForDuplicates
-     */
-
-    function checkFields(&$errors, $checkForDuplicates=true) {
-
-        parent::checkFields($errors, $checkForDuplicates);
-
-    }
-
-    /**
-     * Save fields settings in section editor.
-     */
-
-    function commit() {
-
-        // prepare commit
-        if(!parent::commit()) return false;
-        $id = $this->get('id');
-        if($id === false) return false;
-
-        // set up fields
-        $fields = array();
-        $fields['field_id'] = $id;
-        $fields['format'] = $this->get('format');
-        if(empty($fields['format'])) $fields['format'] = 'd MMMM yyyy, HH:mm';
-        $fields['prepopulate'] = ($this->get('prepopulate') ? $this->get('prepopulate') : 'no');
-        $fields['allow_multiple_dates'] = ($this->get('allow_multiple_dates') ? $this->get('allow_multiple_dates') : 'no');
-
-        // delete old field settings
-        Administration::instance()->Database->query(
-            "DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id' LIMIT 1"
-        );
-
-        // save new field setting
-        return Administration::instance()->Database->insert($fields, 'tbl_fields_' . $this->handle());
-
-    }
-
-    /**
-     * Displays publish panel in content area.
-     *
-     * @param XMLElement $wrapper
-     * @param $data
-     * @param $flagWithError
-     * @param $fieldnamePrefix
-     * @param $fieldnamePostfix
-     */
-
-    function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL) {
-		if (Administration::instance() instanceof Symphony && !is_null(Administration::instance()->Page)) {
-			Administration::instance()->Page->addScriptToHead(URL . '/extensions/datetime/assets/jquery-ui.js', 100, true);
-			Administration::instance()->Page->addScriptToHead(URL . '/extensions/datetime/assets/datetime.js', 201, false);
-			Administration::instance()->Page->addStylesheetToHead(URL . '/extensions/datetime/assets/datetime.css', 'screen', 202, false);
+		function __construct() {
+			parent::__construct();
+			$this->_name = __('Date/Time');
+			$this->_required = true;
+			$this->set('location', 'sidebar');
 		}
 
-        // title and help
-        $wrapper->setValue($this->get('label') . '<i>' . __('Press <code>alt</code> to add a range') . '</i>');
+	/*-------------------------------------------------------------------------
+		Definition:
+	-------------------------------------------------------------------------*/
 
-        // settings
-        $fieldname = 'fields['  .$this->get('element_name') . ']';
-        $setting = array(
-            'DATE' => __('date'),
-            'FROM' => __('from'),
-            'START' => __('start'),
-            'END' => __('end'),
-            'FORMAT' => $this->get('format'),
-            'multiple' => $this->get('allow_multiple_dates'),
-            'prepopulate' => $this->get('prepopulate')
-        );
-        $settings = Widget::Input($fieldname . '[settings]', str_replace('"', "'", json_encode($setting)), 'hidden');
+		function canPrePopulate() {
+			return false;
+		}
 
-        // default setup
-        if($data == NULL) {
-            $label = Widget::Label(NULL, NULL, 'first last');
+		/**
+		 * Method that flag the DS to add a DISTINCT keyword when retreiving entries
+		 * @see symphony/lib/toolkit/Field::requiresSQLGrouping()
+		 * @see http://symphony-cms.com/learn/api/2.3/toolkit/field/#requiresSQLGrouping
+		 */
+		public function requiresSQLGrouping(){
+			return true;
+		}
 
-            $span = new XMLElement('span', '<em>' . __('from') . '</em>', array('class' => 'start'));
-            $span->appendChild(
-                Widget::Input($fieldname . '[start][]', '', 'text')
-            );
-            $span->appendChild(
-                new XMLElement('a', 'delete', array('class' => 'delete'))
-            );
-            $label->appendChild($span);
+	/*-------------------------------------------------------------------------
+		Setup:
+	-------------------------------------------------------------------------*/
 
-            $span = new XMLElement('span', '<em>' . __('to') . '</em>', array('class' => 'end'));
-            $span->appendChild(
-                Widget::Input($fieldname . '[end][]', '', 'text')
-            );
-            $label->appendChild($span);
-
-            $label->appendChild($settings);
-            $wrapper->appendChild($label);
-        } else {
-            if(!is_array($data['start'])) $data['start'] = array($data['start']);
-            if(!is_array($data['end'])) $data['end'] = array($data['end']);
-
-			$count = count($data['start']);
-            for($i = 1; $i <= $count; $i++) {
-                $label = Widget::Label();
-
-                if($i == 1 && $i != $count) {
-                    $label->setAttribute('class', 'first');
-                } else if($i == 1 && $i == $count) {
-                    $label->setAttribute('class', 'first last');
-                } else if($i != 1 && $i == $count) {
-                    $label->setAttribute('class', 'last');
-                }
-
-                $span = new XMLElement('span', '<em>' . __('from') . '</em>', array('class' => 'start'));
-                $span->appendChild(
-                    Widget::Input($fieldname . '[start][]', $data['start'][$i - 1], 'text')
-                );
-                $span->appendChild(
-                    new XMLElement('a', 'delete', array('class' => 'delete'))
-                );
-                $label->appendChild($span);
-
-                $span = new XMLElement('span', '<em>' . __('to') . '</em>', array('class' => 'end'));
-                $span->appendChild(
-                    Widget::Input($fieldname . '[end][]', ($data['end'][$i - 1] == '0000-00-00 00:00:00') ? '' : $data['end'][$i - 1], 'text')
-                );
-                $label->appendChild($span);
-
-                if($i == 1) $label->appendChild($settings);
-                $wrapper->appendChild($label);
-            }
-        }
-
-        // add new
-        if($this->get('allow_multiple_dates') == 'yes') {
-            $wrapper->appendChild(
-				new XMLElement('a', __('Add new date'), array('class' => 'new'))
+		function createTable() {
+			return Symphony::Database()->query(
+				"CREATE TABLE IF NOT EXISTS `tbl_entries_data_" . $this->get('id') . "` (
+				`id` int(11) unsigned NOT NULL auto_increment,
+				`entry_id` int(11) unsigned NOT NULL,
+				`start` datetime NOT NULL,
+				`end` datetime NOT NULL,
+				PRIMARY KEY (`id`),
+				KEY `entry_id` (`entry_id`)
+				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
 			);
-        }
-    }
-
-    /**
-     * Prepares field values for database.
-     */
-
-    function processRawFieldData($data, &$status, $simulate=false, $entry_id=NULL) {
-
-        $status = self::__OK__;
-        if(!is_array($data) or empty($data)) return NULL;
-
-        $result = array('entry_id' => array(), 'start' => array(), 'end' => array());
-        $count = count($data['start']);
-        for($i = 0; $i < $count; $i++) {
-            if(!empty($data['start'][$i])) {
-                $result['entry_id'][] = $entry_id;
-                $result['start'][] = date('c', strtotime($this->translateLocalizedDateString($data['start'][$i])));
-                $result['end'][] = empty($data['end'][$i]) ? '0000-00-00 00:00:00' : date('c', strtotime($this->translateLocalizedDateString($data['end'][$i])));
-            }
-        }
-        return $result;
-
-    }
-
-    /**
-     * Creates database field table.
-     */
-
-    function createTable() {
-
-        return Administration::instance()->Database->query(
-            "CREATE TABLE IF NOT EXISTS `tbl_entries_data_" . $this->get('id') . "` (
-            `id` int(11) unsigned NOT NULL auto_increment,
-            `entry_id` int(11) unsigned NOT NULL,
-            `start` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-            `end` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-            PRIMARY KEY (`id`),
-            KEY `entry_id` (`entry_id`)
-            );"
-        );
-
-    }
-
-    /**
-     * Prepare value for the content overview table.
-     *
-     * @param array $data
-     * @param XMLElement $link
-     */
-
-    function prepareTableValue($data, XMLElement $link=NULL) {
-
-        $value = '';
-        if(!is_array($data['start'])) $data['start'] = array($data['start']);
-        if(!is_array($data['end'])) $data['end'] = array($data['end']);
-
-        foreach($data['start'] as $id => $date) {
-            if(empty($date)) continue;
-            if($data['end'][$id] != "0000-00-00 00:00:00") {
-                if($value != '') $value .= ', ';
-
-				/* 	If it's not the same day
-				**	from {date}{time} to {date}{time} else
-				**	{date}{time} - {time}
-				*/
-				if(DateTimeObj::get("D M Y", strtotime($data['start'][$id])) != DateTimeObj::get("D M Y", strtotime($data['end'][$id]))) {
-					$value .= '<span style="color: rgb(136, 136, 119);">' . __('from') . '</span> ' . DateTimeObj::get(__SYM_DATETIME_FORMAT__, strtotime($data['start'][$id]));
-	                $value .= ' <span style="color: rgb(136, 136, 119);">' .__('to') . '</span> ' . DateTimeObj::get(__SYM_DATETIME_FORMAT__, strtotime($data['end'][$id]));
-				} else {
-					$value .= '<span style="color: rgb(136, 136, 119);">' . __('from') . '</span> ' . DateTimeObj::get(__SYM_DATETIME_FORMAT__, strtotime($data['start'][$id]));
-					$value .= ' <span style="color: rgb(136, 136, 119);">-</span> ' . DateTimeObj::get(__SYM_TIME_FORMAT__, strtotime($data['end'][$id]));
-				}
-
-            } else {
-                if($value != '') $value .= ', ';
-                $value .= DateTimeObj::get(__SYM_DATETIME_FORMAT__, strtotime($data['start'][$id]));
-            }
-        }
-
-        return $this->localizeDateString($value);
-
-    }
-
-    /**
-     * Localizes an english date string safely. Opposite of translateLocalizedDateString() method, see it's comment
-     * for more details.
-     */
-    private function localizeDateString ($date) {
-        foreach (self::$english as $termIndex => $term) {
-            $date = preg_replace("/\b{$term}\b/i", $this->locale[$termIndex], $date);
-        }
-        return $date;
-    }
-
-    /**
-     * Translates every localized date term in a date string to a normalized english term for use with
-     * the PHP strtotime function. Uses preg_replace with word boundaries to make sure we don't translate parts
-     * of date terms, otherwise "tomorrow" could be translated again to "Tomorrow" for languages where "to" is
-     * the abbreviated version of "thursday".
-     */
-    private function translateLocalizedDateString ($date) {
-        foreach ($this->locale as $termIndex => $term) {
-            $date = preg_replace("/\b{$term}\b/i", self::$english[$termIndex], $date);
-        }
-        return $date;
-    }
-
-    /**
-     * Build data source sorting sql.
-     *
-     * @param string $joins
-     * @param string $where
-     * @param string $sort
-     * @param string $order
-     */
-
-    function buildSortingSQL(&$joins, &$where, &$sort, $order='ASC') {
-        $joins .= "LEFT OUTER JOIN `tbl_entries_data_".$this->get('id')."` AS `dt` ON (`e`.`id` = `dt`.`entry_id`) ";
-        $sort = 'ORDER BY ' . (in_array(strtolower($order), array('random', 'rand')) ? 'RAND()' : "`dt`.`start` $order");
-    }
-
-    /**
-     * Build data source retrieval sql.
-     *
-     * @param array $data
-     * @param string $joins
-     * @param string $where
-     * @param boolean $andOperation
-     */
-
-    function buildDSRetrivalSQL($data, &$joins, &$where, $andOperation = false) {
-
-        if (self::isFilterRegex($data[0])) {
-            $field_id = $this->get('id');
-            $this->_key++;
-            $pattern = str_replace('regexp:', '', $this->cleanValue($data[0]));
-            $joins .= "
-                LEFT JOIN
-                    `sym_entries_data_{$field_id}` AS t{$field_id}_{$this->_key}
-                    ON (e.id = t{$field_id}_{$this->_key}.entry_id)
-            ";
-            $where .= "
-                AND t{$field_id}_{$this->_key}.start REGEXP '{$pattern}' OR t{$field_id}_{$this->_key}.end REGEXP '{$pattern}'
-            ";
-            return true;
-        }
-
-        $parsed = array();
-
-        foreach($data as $string) {
-            $type = self::__parseFilter($string);
-            if($type == self::ERROR) return false;
-            if(!is_array($parsed[$type])) $parsed[$type] = array();
-            $parsed[$type][] = $string;
-        }
-
-        foreach($parsed as $type => $value) {
-            switch($type) {
-                case self::RANGE:
-                    if(!empty($value)) $this->__buildRangeFilterSQL($value, $joins, $where, $andOperation);
-                    break;
-
-                case self::SIMPLE:
-                    if(!empty($value)) $this->__buildSimpleFilterSQL($value, $joins, $where, $andOperation);
-                    break;
-            }
-        }
-
-        return true;
-
-    }
-
-    /**
-     * Build sql for single dates.
-     *
-     * @param array $data
-     * @param string $joins
-     * @param string $where
-     * @param boolean $andOperation
-     */
-
-    protected function __buildSimpleFilterSQL($data, &$joins, &$where, $andOperation = false) {
-
-        $field_id = $this->get('id');
-
-        $connector = ' OR '; // filter separated with commas
-        if($andOperation == 1) $connector = ' AND '; // filter conntected with plus signs
-
-        foreach($data as $date) {
-            $tmp[] = "'" . DateTimeObj::get('Y-m-d H:i:s', strtotime($date)) . "' BETWEEN
-                DATE_FORMAT(`t$field_id".$this->key."`.start, '%Y-%m-%d %H:%i:%s') AND
-                DATE_FORMAT(`t$field_id".$this->key."`.end, '%Y-%m-%d %H:%i:%s')";
-        }
-        $joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id".$this->key."` ON `e`.`id` = `t$field_id".$this->key."`.entry_id ";
-        $where .= " AND (".implode($connector, $tmp).") ";
-        $this->key++;
-    }
-
-    /**
-     * Build sql for dates ranges.
-     *
-     * @param array $data
-     * @param string $joins
-     * @param string $where
-     * @param boolean $andOperation
-     */
-
-    protected function __buildRangeFilterSQL($data, &$joins, &$where, $andOperation=false) {
-
-        $field_id = $this->get('id');
-
-        $connector = ' OR '; // filter separated with commas
-        if($andOperation == 1) $connector = ' AND '; // filter conntected with plus signs
-
-        foreach($data as $date) {
-            $tmp[] = "(DATE_FORMAT(`t$field_id".$this->key."`.start, '%Y-%m-%d %H:%i:%s') BETWEEN
-                '" . DateTimeObj::get('Y-m-d H:i:s', strtotime($date['start'])) . "' AND
-                '" . DateTimeObj::get('Y-m-d H:i:s', strtotime($date['end'])) . "' OR
-                DATE_FORMAT(`t$field_id".$this->key."`.end, '%Y-%m-%d %H:%i:%s') BETWEEN
-                '" . DateTimeObj::get('Y-m-d H:i:s', strtotime($date['start'])) . "' AND
-                '" . DateTimeObj::get('Y-m-d H:i:s', strtotime($date['end'])) . "')";
-        }
-        $joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id".$this->key."` ON `e`.`id` = `t$field_id".$this->key."`.entry_id ";
-        $where .= " AND (".implode($connector, $tmp).") ";
-        $this->key++;
-    }
-
-    /**
-     * Clean up date string.
-     * This function is a copy from the core date field.
-     *
-     * @param string $string
-     */
-
-    protected static function __cleanFilterString($string) {
-
-        $string = trim($string);
-        $string = trim($string, '-/');
-        return urldecode($string);
-
-    }
-
-    /**
-     * Parse filter string for shorthand dates and ranges.
-     * This function is a copy from the core date field.
-     *
-     * @param string $string
-     */
-
-    protected static function __parseFilter(&$string) {
-
-        $string = self::__cleanFilterString($string);
-
-        // Check its not a regexp
-        if(preg_match('/^regexp:/i', $string)) {
-            $string = str_replace('regexp:', '', $string);
-            return self::REGEXP;
-        }
-
-        // Look to see if its a shorthand date (year only), and convert to full date
-        elseif(preg_match('/^(1|2)\d{3}$/i', $string)) {
-            $string = "$string-01-01 to $string-12-31";
-        }
-
-        elseif(preg_match('/^(earlier|later) than (.*)$/i', $string, $match)) {
-
-            $string = $match[2];
-
-            if(!self::__isValidDateString($string)) return self::ERROR;
-
-            $time = strtotime($string);
-
-            switch($match[1]){
-                case 'later': $string = DateTimeObj::get('Y-m-d H:i:s', $time+1) . ' to 2038-01-01'; break;
-                case 'earlier': $string = '1970-01-03 to ' . DateTimeObj::get('Y-m-d H:i:s', $time-1); break;
-            }
-
-        }
-
-        // Look to see if its a shorthand date (year and month), and convert to full date
-        elseif(preg_match('/^(1|2)\d{3}[-\/]\d{1,2}$/i', $string)) {
-
-            $start = "$string-01";
-
-            if(!self::__isValidDateString($start)) return self::ERROR;
-
-            $string = "$start to $string-" . date('t', strtotime($start));
-        }
-
-        // Match for a simple date (Y-m-d), check its ok using checkdate() and go no further
-        elseif(!preg_match('/\s+to\s+/i', $string)) {
-
-            if(!self::__isValidDateString($string)) return self::ERROR;
-
-            $string = DateTimeObj::get('Y-m-d H:i:s', strtotime($string));
-            return self::SIMPLE;
-
-        }
-
-		//	A date range, check it's ok!
-		elseif(preg_match('/\s+to\s+/i', $string)) {
-
-			if(!$parts = preg_split('/\s+to\s+/', $string, 2, PREG_SPLIT_NO_EMPTY)) return self::ERROR;
-
-			foreach($parts as $i => &$part) {
-				if(!self::__isValidDateString($part)) return self::ERROR;
-
-				$part = DateTimeObj::get('Y-m-d H:i:s', strtotime($part));
+		}
+
+	/*-------------------------------------------------------------------------
+		Utilities:
+	-------------------------------------------------------------------------*/
+
+		/**
+		 * Create date element.
+		 *
+		 * @param string $start
+		 *  start date
+		 * @param string $end
+		 *  end date
+		 * @param mixed $class
+		 *  class names that will be added to the date element
+		 * @param int $prepopulate
+		 *  if set to 1, prepopulate element with the current date
+		 * @param int $time
+		 *  if set to 1, display time
+		 * @return XMLElement
+		 *  returns a date element
+		 */
+		public static function createDate($element, $start=NULL, $end=NULL, $class=NULL, $prepopulate=1, $time=1) {
+			$classes = array();
+
+			// This is hacky: remove empty end dates
+			if($end == $start) {
+				$end = NULL;
 			}
 
-			$string = "$parts[0] to $parts[1]";
-        }
+			// Range
+			if(isset($end)) {
+				$classes[] = 'range';
+			}
 
-        // Parse the full date range and return an array
-        if(!$parts = preg_split('/\s+to\s+/', $string, 2, PREG_SPLIT_NO_EMPTY)) return self::ERROR;
+			// Additional classes
+			if($class) {
+				$classes[] = $class;
+			}
 
-        $parts = array_map(array('self', '__cleanFilterString'), $parts);
+			// Get timer
+			if($time == 1) {
+				$cutter = '<div class="timer">' .
+					self::__createTimeline('start') .
+					self::__createTimeline('end') .
+				'</div>';
+			}
 
-        list($start, $end) = $parts;
+			// Create element
+			return new XMLElement(
+				'li',
+				'<header>
+					<div>' .
+						self::__createDateField($element, 'start', $start, $time, $prepopulate) .
+						self::__createDateField($element, 'end', $end, $time) .
+				'	</div>
+				</header>
+				<div class="dt-calendar content">' .
+					self::__createCalendar() .
+					$cutter .
+				'</div>',
+				array('class' => implode($classes, ' '))
+			);
+		}
 
-        if(!self::__isValidDateString($start) || !self::__isValidDateString($end)) return self::ERROR;
+		/**
+		 * Create a date input field containing the given date
+		 *
+		 * @param string $element
+		 *  the Symphony field name
+		 * @param string $type
+		 *  either 'start' or 'end'
+		 * @param string $date
+		 *  a date
+		 * @param int $time
+		 *  display the time, if set to 1; either 1 or 0
+		 * @param int $prepopulate
+		 *  prepopulate with current date, if set to 1; either 1 or 0
+		 * @return string
+		 *  returns an input field as string
+		 */
+		private static function __createDateField($element, $type, $date, $time, $prepopulate=0) {
 
-        $string = array('start' => $start, 'end' => $end);
+			// Parse date
+			if(isset($date) || $prepopulate) {
+				$parsed = Calendar::formatDate($date, $time);
 
-        return self::RANGE;
-    }
+				// Generate field
+				if($parsed['status'] == 'invalid') {
+					$class = 'invalid';
+				}
+			}
 
-    /**
-     * Validate date.
-     * This function is a copy from the core date field.
-     *
-     * @param string $string
-     */
+			// Generate field
+			return '<input type="text" name="fields[' . $element . '][' . $type . '][]" value="' . $parsed['date'] . '" data-timestamp="' . $parsed['timestamp'] . '" class="' . $type . ' ' . $class . '" autocomplete="off" /><em class="' . $type . ' label"></em>';
+		}
 
-    protected static function __isValidDateString($string) {
+		private static function __createCalendar() {
+			return '<div class="date">
+				<nav>
+					<a class="previous">&#171;</a>
+					<div class="switch">
+						<ul class="months"></ul>
+						<ul class="years"></ul>
+					</div>
+					<a class="next">&#187;</a>
+				</nav>
+				<table>
+					<thead>
+						<tr>
+							<td>' . __('Sun') . '</td>
+							<td>' . __('Mon') . '</td>
+							<td>' . __('Tue') . '</td>
+							<td>' . __('Wed') . '</td>
+							<td>' . __('Thu') . '</td>
+							<td>' . __('Fri') . '</td>
+							<td>' . __('Sat') . '</td>
+						</tr>
+					</thead>
+					<tbody>
+						<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+						<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+						<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+						<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+						<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+						<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+					</tbody>
+				</table>
+			</div>';
+		}
 
-        $string = trim($string);
+		private static function __createTimeline($type) {
+			return '<div class="timeline ' . $type . '">
+				<span class="hour1"></span>
+				<span class="hour2"></span>
+				<span class="hour3"></span>
+				<span class="hour4"></span>
+				<span class="hour5"></span>
+				<span class="hour6"></span>
+				<span class="hour7"></span>
+				<span class="hour8"></span>
+				<span class="hour9"></span>
+				<span class="hour10"></span>
+				<span class="hour11"></span>
+				<span class="hour12"></span>
+				<span class="hour13"></span>
+				<span class="hour14"></span>
+				<span class="hour15"></span>
+				<span class="hour16"></span>
+				<span class="hour17"></span>
+				<span class="hour18"></span>
+				<span class="hour19"></span>
+				<span class="hour20"></span>
+				<span class="hour21"></span>
+				<span class="hour22"></span>
+				<span class="hour23"></span>
+				<div class="range">
+					<code>0:00</code>
+					<span class="start"></span>
+					<span class="active"></span>
+					<span class="end"></span>
+				</div>
+			</div>';
+		}
 
-        if(empty($string)) return false;
+		/**
+		 * Get filtering mode from string.
+		 *
+		 * @param string $string
+		 *	A filter string
+		 * @return string
+		 *  Returns the filter mode
+		 */
+		private function __getModeFromString(&$string) {
+			$string = trim($string);
 
-        // Its not a valid date, so just return it as is
-        if(!$info = getdate(strtotime($string))) return false;
-        elseif(!checkdate($info['mon'], $info['mday'], $info['year'])) return false;
+			// Filter by start date
+			if(strpos($string, 'start:') === 0) {
+				$this->__removeModeFromString($string);
+				$mode = self::START;
+			}
 
-        return true;
-    }
+			// Filter by end date
+			elseif(strpos($string, 'end:') === 0) {
+				$this->__removeModeFromString($string);
+				$mode = self::END;
+			}
 
-    /**
-     * Group records by year and month (calendar view).
-     *
-     * @param $wrapper
-     */
+			// Filter by full range (strict)
+			elseif(strpos($string, 'strict:') === 0) {
+				$this->__removeModeFromString($string);
+				$mode = self::STRICT;
+			}
 
-    function groupRecords($records) {
+			// Remove unsupported regular expressions prefixes in order to support Publish Filtering
+			elseif(strpos($string, 'regexp:') === 0) {
+				$this->__removeModeFromString($string);
+				$mode = self::RANGE;
+			}
 
-        if(!is_array($records) || empty($records)) return;
+			// Filter by extended range (end date can be null)
+			elseif(strpos($string, 'extended:') === 0) {
+				$this->__removeModeFromString($string);
+				$mode = self::EXTRANGE;
+			}
 
-        $groups = array('year' => array());
+			// Filter by full range
+			else {
+				$mode = self::RANGE;
+			}
 
-        // walk through dates
-        foreach($records as $entry) {
-            $data = $entry->getData($this->get('id'));
-            if(!is_array($data['start'])) $data['start'] = array($data['start']);
-            if(!is_array($data['end'])) $data['end'] = array($data['end']);
-            // create calendar
-            foreach($data['start'] as $id => $start) {
-                $start = date('Y-m-01', strtotime($start));
-                if($data['end'][$id] == "0000-00-00 00:00:00") $data['end'][$id] = $start;
-                $end = date('Y-m-01', strtotime($data['end'][$id]));
-                $starttime = strtotime($start);
-                $endtime = strtotime($end);
-                // find matching months
-                while($starttime <= $endtime) {
-                    $year = date('Y', $starttime);
-                    $month[1] = date('n', $starttime);
-                    $month[2] = date('m', $starttime);
-                    // add entry
-                    $groups['year'][$year]['attr']['value'] = $year;
-                    $groups['year'][$year]['groups']['month'][$month[1]]['attr']['value'] = $month[2];
-                    $groups['year'][$year]['groups']['month'][$month[1]]['records'][] = $entry;
-                    // jump to next month
-                    $starttime = strtotime(date('Y-m-01', $starttime) . ' +1 month');
-                }
-            }
-        }
+			return $mode;
+		}
 
-        // sort years and months
-        ksort($groups['year']);
-        foreach($groups['year'] as $year) {
-            $current = $year['attr']['value'];
-            ksort($groups['year'][$current]['groups']['month']);
-        }
+		/**
+		 * Remove filter mode from the first data source filter.
+		 *
+		 * @param string $string
+		 *	Current data source filter
+		 */
+		private function __removeModeFromString(&$string) {
+			$filter = explode(':', $string, 2);
+			$string = $filter[1];
+		}
 
-        // return calendar groups
-        return $groups;
+		/**
+		 * Build range filter sql.
+		 *
+		 * @param array $data
+		 *	An array of all date ranges that have been set as filters
+		 * @param string $joins
+		 *	Tables joins
+		 * @param string $where
+		 *	Filter statements
+		 * @param boolean $andOperation
+		 *	Connect filters with 'AND' if true, defaults to false
+		 */
+		public function buildRangeFilterSQL($data, &$joins, &$where, $andOperation = false) {
+			$field_id = $this->get('id');
 
-    }
+			// Get filter connection
+			if($andOperation) {
+				$connector = ' AND ';
+			}
+			else {
+				$connector = ' OR ';
+			}
 
-    /**
-     * Generate data source output.
-     *
-     * @param XMLElement $wrapper
-     * @param array $data
-     * @param boolean $encode
-     * @param string $mode
-     */
+			// Prepare SQL
+			foreach($data as $range) {
 
-    public function appendFormattedElement(&$wrapper, $data, $encode = false) {
+				// Filter mode
+				switch($range['mode']) {
 
-        // create date and time element
-        $datetime = new XMLElement($this->get('element_name'));
+					// Filter by start date
+					case self::START:
 
-        // get timeline
-        if(!is_array($data['start'])) $data['start'] = array($data['start']);
-        if(!is_array($data['end'])) $data['end'] = array($data['end']);
-        $timeline = $data['start'];
-        sort($timeline);
+						if ($range['start'] == 'IS NULL') {
+							$tmp[] = "(`t$field_id`.start IS NULL)";
+						} else {
+							$tmp[] = "(`t$field_id`.start BETWEEN '" . $range['start'] . "' AND '" . $range['end'] . "')";
+						}
+						break;
 
-        // generate XML
-        foreach($data['start'] as $id => $date) {
-            if(empty($date)) continue;
-            $date = new XMLElement('date');
-            $date->setAttribute('timeline', array_search($data['start'][$id], $timeline) + 1);
-            $timestamp = strtotime($data['start'][$id]);
-            $date->appendChild(
-                $start = new XMLElement('start', DateTimeObj::get('Y-m-d', $timestamp), array(
-                        'iso' => DateTimeObj::get('c', strtotime($data['start'][$id])),
-                        'time' => DateTimeObj::get('H:i', $timestamp),
-                        'weekday' => DateTimeObj::get('w', $timestamp),
-                        'offset' => DateTimeObj::get('O', $timestamp)
-                    )
-                )
-            );
+					// Filter by end date
+					case self::END:
+						if ($range['end'] == 'IS NULL') {
+							$tmp[] = "(`t$field_id`.end IS NULL)";
+						} else {
+							$tmp[] = "(`t$field_id`.end BETWEEN '" . $range['start'] . "' AND '" . $range['end'] . "')";
+						}
+						break;
 
-            if($data['end'][$id] != "0000-00-00 00:00:00") {
-                $timestamp = strtotime($data['end'][$id]);
+					// Filter by full date range, start and end have to be in range
+					case self::STRICT:
+						$tmp[] = "((`t$field_id`.start BETWEEN '" . $range['start'] . "' AND '" . $range['end'] . "') AND
+								(`t$field_id`.end BETWEEN '" . $range['start'] . "' AND '" . $range['end'] . "'))";
+						break;
 
-                $date->appendChild(
-                    $end = new XMLElement('end', DateTimeObj::get('Y-m-d', $timestamp), array(
-                            'iso' => DateTimeObj::get('c', strtotime($data['end'][$id])),
-                            'time' => DateTimeObj::get('H:i', $timestamp),
-                            'weekday' => DateTimeObj::get('w', $timestamp),
-                            'offset' => DateTimeObj::get('O', $timestamp)
-                        )
-                    )
-                );
-                $date->setAttribute('type', 'range');
-            } else {
-                $date->setAttribute('type', 'exact');
-            }
-            $datetime->appendChild($date);
-        }
+					// Filter by full date range, start or end have to be in range
+					case self::RANGE:
+						$tmp[] = "((`t$field_id`.start BETWEEN '" . $range['start'] . "' AND '" . $range['end'] . "') OR
+								(`t$field_id`.end BETWEEN '" . $range['start'] . "' AND '" . $range['end'] . "') OR
+								(`t$field_id`.start < '" . $range['start'] . "' AND `t$field_id`.end > '" . $range['end'] . "'))";
+						break;
 
-        // append date and time to data source
-        $wrapper->appendChild($datetime);
+					// Filter by extended date range
+					case self::EXTRANGE:
+						$tmp[] = "((`t$field_id`.start BETWEEN '" . $range['start'] . "' AND '" . $range['end'] . "') OR
+								(`t$field_id`.end BETWEEN '" . $range['start'] . "' AND '" . $range['end'] . "') OR
+								(`t$field_id`.start < '" . $range['start'] . "' AND `t$field_id`.end > '" . $range['end'] . "') OR
+								(`t$field_id`.start < '" . $range['start'] . "' AND `t$field_id`.end = `t$field_id`.start))";
+						break;
+				}
+			}
 
-    }
+			// Build SQL
+			$this->lastWhere = implode($connector, $tmp);
+			$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id` ON `e`.`id` = `t$field_id`.entry_id ";
+			$where .= " AND (" . $this->lastWhere . ") ";
+		}
 
-    /**
-     * Generate parameter pool values.
-     *
-     * @param array $data
-     */
+	/*-------------------------------------------------------------------------
+		Settings:
+	-------------------------------------------------------------------------*/
 
-    public function getParameterPoolValue($data) {
+		function displaySettingsPanel(XMLElement &$wrapper, $errors = null) {
 
-        $start = array();
-        foreach($data['start'] as $date) {
-            $start[] = DateTimeObj::get('Y-m-d H:i:s', strtotime($date));
-        }
+			// Initialize field settings based on class defaults (name, placement)
+			field::displaySettingsPanel($wrapper, $errors);
 
-        return implode(',', $start);
+		/*-----------------------------------------------------------------------*/
 
-    }
+			$columns = new XMLElement('div', null, array('class' => 'two columns'));
+			$wrapper->appendChild($columns);
 
-    /**
-     * Sample markup for the event editor.
-     */
+			// Prepopulation
+			$checkbox = Widget::Input('fields[' . $this->get('sortorder') . '][prepopulate]', 'yes', 'checkbox');
+			if((int)$this->get('prepopulate') === 1) {
+				$checkbox->setAttribute('checked', 'checked');
+			}
+			$setting = new XMLElement('label', __('%s Pre-populate with current date', array($checkbox->generate())), array('class' => 'column'));
+			$columns->appendChild($setting);
 
-    public function getExampleFormMarkup() {
+			// Time
+			$checkbox = Widget::Input('fields[' . $this->get('sortorder') . '][time]', 'yes', 'checkbox');
+			if((int)$this->get('time') === 1) {
+				$checkbox->setAttribute('checked', 'checked');
+			}
+			$setting = new XMLElement('label', __('%s Display time', array($checkbox->generate())), array('class' => 'column'));
+			$columns->appendChild($setting);
 
-        $label = Widget::Label($this->get('label'));
-        $label->appendChild(Widget::Input('fields['.$this->get('element_name').'][start][]'));
-        return $label;
+			// Multiple dates
+			$checkbox = Widget::Input('fields[' . $this->get('sortorder') . '][multiple]', 'yes', 'checkbox');
+			if((int)$this->get('multiple') === 1) {
+				$checkbox->setAttribute('checked', 'checked');
+			}
+			$setting = new XMLElement('label', __('%s Allow multiple dates', array($checkbox->generate())), array('class' => 'column'));
+			$columns->appendChild($setting);
 
-    }
-}
+			// Date ranges
+			$checkbox = Widget::Input('fields[' . $this->get('sortorder') . '][range]', 'yes', 'checkbox');
+			if((int)$this->get('range') === 1) {
+				$checkbox->setAttribute('checked', 'checked');
+			}
+			$setting = new XMLElement('label', __('%s Enable date ranges', array($checkbox->generate())), array('class' => 'column'));
+			$columns->appendChild($setting);
+
+		/*-----------------------------------------------------------------------*/
+
+			// General
+			$fieldset = new XMLElement('fieldset');
+			$group = new XMLElement('div', NULL, array('class' => 'two columns'));
+			$this->appendRequiredCheckbox($group);
+			$this->appendShowColumnCheckbox($group);
+			$fieldset->appendChild($group);
+			$wrapper->appendChild($fieldset);
+		}
+
+		function commit() {
+
+			// Prepare commit
+			if(!field::commit()) return false;
+			$id = $this->get('id');
+			if($id === false) return false;
+
+			// Set up fields
+			$fields = array();
+			$fields['field_id'] = $id;
+			$fields['prepopulate'] = ($this->get('prepopulate') ? 1 : 0);
+			$fields['time'] = ($this->get('time') ? 1 : 0);
+			$fields['multiple'] = ($this->get('multiple') ? 1 : 0);
+			$fields['range'] = ($this->get('range') ? 1 : 0);
+
+			return FieldManager::saveSettings($id, $fields);
+		}
+
+	/*-------------------------------------------------------------------------
+		Publish:
+	-------------------------------------------------------------------------*/
+
+		function displayPublishPanel(XMLElement &$wrapper, $data = null, $flagWithError = null, $fieldnamePrefix = null, $fieldnamePostfix = null, $entry_id = null) {
+
+			// Houston, we have problem: we've been called out of context!
+			if( !Symphony::Engine() instanceof Administration ){
+				return;
+			}
+
+			$callback = Administration::instance()->getPageCallback();
+			if($callback['context']['page'] != 'edit' && $callback['context']['page'] != 'new') {
+				return;
+			}
+
+			// Datetime
+			Administration::instance()->Page->addScriptToHead(URL . '/extensions/datetime/assets/datetime.publish.js', 103, false);
+			Administration::instance()->Page->addStylesheetToHead(URL . '/extensions/datetime/assets/datetime.publish.css', 'screen', 104, false);
+
+			// Calendar
+			Administration::instance()->Page->addStylesheetToHead(URL . '/extensions/datetime/assets/calendar.publish.css', 'screen', 105, false);
+			Administration::instance()->Page->addScriptToHead(URL . '/extensions/datetime/assets/calendar.publish.js', 106, false);
+
+			// Timer
+			Administration::instance()->Page->addStylesheetToHead(URL . '/extensions/datetime/assets/timer.publish.css', 'screen', 107, false);
+			Administration::instance()->Page->addScriptToHead(URL . '/extensions/datetime/assets/timer.publish.js', 108, false);
+
+			// Field label
+			$fieldname = 'fields['  .$this->get('element_name') . ']';
+			$label = new XMLElement('label', $this->get('label') . '<i>' . ($this->get('required') == 'no' ? __('Optional') : '') . '</i>');
+			$wrapper->appendChild($label);
+
+			// Get settings
+			$settings = array('dark', 'frame');
+			if((int)$this->get('multiple') === 1) {
+				$settings[] = 'multiple';
+			}
+			else {
+				$settings[] = 'single';
+			}
+			if((int)$this->get('prepopulate') === 1) {
+				$settings[] = 'prepopulate';
+			}
+			if((int)$this->get('range') === 0) {
+				$settings[] = 'simple';
+			}
+
+			// Create interface
+			$duplicator = new XMLElement('div', null, array(
+				'class' => implode(' ', $settings)
+			));
+			$list = new XMLElement('ol', null, array(
+				'data-add' => __('Add date'),
+				'data-remove' => __('Remove')
+			));
+
+			// Existing dates
+			if(is_array($data)) {
+				if(!is_array($data['start'])) $data['start'] = array($data['start']);
+				if(!is_array($data['end'])) $data['end'] = array($data['end']);
+
+				for($i = 0; $i < count($data['start']); $i++) {
+					$list->appendChild(
+						self::createDate($this->get('element_name'), $data['start'][$i], $data['end'][$i], NULL, $this->get('prepopulate'), $this->get('time'))
+					);
+				}
+			}
+
+			// Current date and time
+			elseif((int)$this->get('prepopulate') === 1 || (int)$this->get('multiple') === 0) {
+				$list->appendChild(
+					self::createDate($this->get('element_name'), NULL, NULL, NULL, $this->get('prepopulate'), $this->get('time'))
+				);
+			}
+
+			// Add template
+			if((int)$this->get('multiple') === 1) {
+				$template = self::createDate($this->get('element_name'), NULL, NULL, 'template', $this->get('prepopulate'), $this->get('time'));
+				$template->setAttribute('data-name', 'datetime');
+				$template->setAttribute('data-type', 'datetime');
+				$list->appendChild($template);
+			}
+
+			// Append Duplicator
+			$duplicator->appendChild($list);
+			if(!is_null($flagWithError)) {
+				$wrapper->appendChild(Widget::Error($duplicator, $flagWithError));
+			}
+			else {
+				$wrapper->appendChild($duplicator);
+			}
+		}
+
+
+		public function checkPostFieldData($data, &$message, $entry_id = null) {
+			if($this->get('required') === 'yes' && empty($data['start'][0])) {
+				$message = __("‘%s’ is a required field.", array($this->get('label')));
+				return self::__MISSING_FIELDS__;
+			}
+
+			// @todo validate all dates and flag errors
+			return self::__OK__;
+		}
+
+		function processRawFieldData($data, &$status, &$message=null, $simulate=false, $entry_id=null) {
+			$status = self::__OK__;
+			if(!is_array($data)) return NULL;
+
+			// Clean up dates
+			$result = array('start' => array(), 'end' => array());
+			for($i = 0; $i < count($data['start']); $i++) {
+				if(!empty($data['start'][$i])) {
+
+					// Parse start date
+					$parsed = $this->parseDateTime($data['start'][$i]);
+					$result['start'][] = $parsed['date'];
+
+					// Empty end date
+					if(empty($data['end'][$i])) {
+						$result['end'][] = $parsed['date'];
+					}
+
+					// Specific end date
+					else {
+						$parsed = $this->parseDateTime($data['end'][$i]);
+						$result['end'][] = $parsed['date'];
+					}
+				}
+			}
+
+			// Result
+			if(empty($data['start'][0])) {
+				return NULL;
+			}
+			else {
+				return $result;
+			}
+		}
+
+		public function parseDateTime($dateString) {
+			$dateFormat = 'Y-m-d';
+			$timeFormat = 'H:i:s';
+			$format = !$this->get('time')
+						? "$dateFormat 00:00:00"
+						: "$dateFormat $timeFormat";
+
+			return Calendar::formatDate($dateString, true, $format);
+		}
+
+	/*-------------------------------------------------------------------------
+		Events:
+	-------------------------------------------------------------------------*/
+
+		public function getExampleFormMarkup() {
+			$label = Widget::Label($this->get('label'));
+			$label->appendChild(Widget::Input('fields['.$this->get('element_name').'][start][]'));
+			$label->appendChild(Widget::Input('fields['.$this->get('element_name').'][end][]'));
+
+			return $label;
+		}
+
+	/*-------------------------------------------------------------------------
+		Output:
+	-------------------------------------------------------------------------*/
+
+		public function appendFormattedElement(XMLElement &$wrapper, $data, $encode = false, $mode = null, $entry_id = null) {
+			$datetime = new XMLElement($this->get('element_name'));
+
+			// Prepare data
+			if(!is_array($data['start'])) $data['start'] = array($data['start']);
+			if(!is_array($data['end'])) $data['end'] = array($data['end']);
+
+			// Get timeline
+			$timeline = $data['start'];
+			sort($timeline);
+
+			// Generate XML
+			foreach($data['start'] as $id => $date) {
+				$date = new XMLElement('date');
+				$date->setAttribute('timeline', array_search($data['start'][$id], $timeline) + 1);
+
+				// Start date
+				$start = new DateTime($data['start'][$id]);
+				$date->appendChild(
+					$start = new XMLElement(
+						'start',
+						$start->format('Y-m-d'),
+						array(
+							'iso' => $start->format('c'),
+							'timestamp' => $start->getTimestamp(),
+							'time' => $start->format('H:i'),
+							'weekday' => $start->format('N'),
+							'offset' => $start->format('O')
+						)
+					)
+				);
+
+				// Date range
+				if($data['end'][$id] != $data['start'][$id]) {
+					$end = new DateTime($data['end'][$id]);
+					$date->appendChild(
+						$end = new XMLElement(
+							'end',
+							$end->format('Y-m-d'),
+							array(
+								'iso' => $end->format('c'),
+								'timestamp' => $end->getTimestamp(),
+								'time' => $end->format('H:i'),
+								'weekday' => $end->format('N'),
+								'offset' => $end->format('O')
+							)
+						)
+					);
+					$date->setAttribute('type', 'range');
+				}
+
+				// Single date
+				else {
+					$date->setAttribute('type', 'exact');
+				}
+
+				$datetime->appendChild($date);
+			}
+
+			// append date and time to data source
+			if(!empty($data['start'][0])) {
+				$wrapper->appendChild($datetime);
+			}
+		}
+
+		public function prepareTableValue($data, XMLElement $link = null, $entry_id = null) {
+			$values = implode(', <br />', $this->prepareTextArray($data, $entry_id, true));
+			if (empty($values)) {
+				$values = '<span class="inactive">' . __('No Date') . '</span>';
+			}
+			// Link?
+			if($link) {
+				$link->setValue($values);
+				return $link->generate();
+			}
+			return $values;
+		}
+
+		public function prepareReadableValue($data, $entry_id = null, $truncate = false, $defaultValue = null) {
+			$defaultValue = __('No Date');
+			return parent::prepareReadableValue($data, $entry_id, $truncate, $defaultValue);
+		}
+
+		public function prepareTextValue($data, $entry_id = null) {
+			return implode(', ', $this->prepareTextArray($data, $entry_id, false));
+		}
+
+		public function getScheme() {
+			$hasTime = (int)$this->get('time') === 1;
+			// Get schema
+			$scheme = trim($hasTime ? __SYM_DATETIME_FORMAT__ : __SYM_DATE_FORMAT__);
+			if (empty($scheme)) {
+				$scheme = $hasTime ? 'Y/m/d H:i:s' : 'Y/m/d';
+			}
+			return $scheme;
+		}
+
+		public function getTimeFormat() {
+			$timeFormat = trim(__SYM_TIME_FORMAT__);
+			return !empty($timeFormat) ? $timeFormat : 'H:i:s';
+		}
+
+		public function prepareTextArray($data, $entry_id, $html) {
+			if(!is_array($data['start'])) $data['start'] = array($data['start']);
+			if(!is_array($data['end'])) $data['end'] = array($data['end']);
+			// Handle empty dates
+			if(empty($data['start'][0])) {
+				return array();
+			}
+
+			$scheme = $this->getScheme();
+
+			$timeFormat = $this->getTimeFormat();
+
+			// Parse dates
+			$value = array();
+			for($i = 0; $i < count($data['start']); $i++) {
+				$start = new DateTime($data['start'][$i]);
+				$separator = ' &#8211; ';
+
+				// Date range
+				if($data['end'][$i] !== $data['start'][$i]) {
+					$end = new DateTime($data['end'][$i]);
+
+					// Different start and end days
+					if($start->format('d-m-Y') !== $end->format('d-m-Y')) {
+						$value[] = $this->getDatetime($start, $scheme, $html) . $separator . $this->getDatetime($end, $scheme, $html);
+					}
+
+					// Same day
+					else {
+
+						// Show time
+						if((int)$this->get('time') === 1) {
+
+							// Adjust separator
+							if($timeFormat == 'H:i') {
+								$separator = '&#8211;';
+							}
+
+							$value[] = $this->getDatetime($start, $scheme, $html) . $separator . $this->getDatetime($end, $timeFormat, $html);
+						}
+
+						// Hide time
+						else {
+							$value[] = $this->getDatetime($start, $scheme, $html);
+						}
+					}
+				}
+
+				// Single date
+				else {
+					$value[] = $this->getDatetime($start, $scheme, $html);
+				}
+			}
+
+			return $value;
+		}
+
+		public function getDatetime($date, $scheme, $html) {
+			if (!$html) {
+				return LANG::localizeDate($date->format($scheme));
+			}
+			return '<time datetime="' . $date->format('Y-m-d\TH:i:s\Z') . '">' . LANG::localizeDate($date->format($scheme)) . '</time>';
+		}
+
+		public function getParameterPoolValue(array $data, $entry_id=NULL) {
+			return $this->prepareExportValue($data, ExportableField::LIST_OF + ExportableField::VALUE, $entry_id);
+		}
+
+	/*-------------------------------------------------------------------------
+		Filtering:
+	-------------------------------------------------------------------------*/
+		private $lastWhere = '';
+		function buildDSRetrievalSQL($data, &$joins, &$where, $andOperation = false) {
+
+			// Parse dates
+			$dates = array();
+			foreach($data as $range) {
+				$mode = $this->__getModeFromString($range);
+				$result = self::parseFilter($range);
+
+				if($result !== FieldDate::ERROR && !empty($range)) {
+					$range['mode'] = $mode;
+					$dates[] = $range;
+				}
+			}
+
+			// Build filter SQL
+			if(!empty($dates)) {
+				$this->buildRangeFilterSQL($dates, $joins, $where, $andOperation);
+			}
+			else {
+				$this->lastWhere = '';
+			}
+
+			return true;
+		}
+
+	/*-------------------------------------------------------------------------
+		Sorting:
+	-------------------------------------------------------------------------*/
+
+		private function buildSortingSQLForTable($table, $field_id, $order) {
+			$sort = 'ORDER BY ';
+			
+			// parse the last where clause used in filtering
+			$sortFilter = preg_replace( '/`t[0-9]+`/', '`m`', $this->lastWhere);
+			if (!$sortFilter) {
+				$sortFilter = '1=1';
+			}
+			else {
+				// clear the last where since it has been consumed
+				$this->lastWhere = '';
+			}
+
+			$op = 'MIN';
+
+			if( in_array( $order, array('random', 'rand') ) ){
+				$sort .= 'RAND()';
+			}
+			elseif( $order === 'asc' ){
+				$sort .= "`$table`.`start` $order, `$table`.`end` $order";
+			}
+			else{
+				$sort .= "`$table`.`start` $order";
+				$op = 'MAX';
+			}
+			
+			$null_clause = '';
+			if ($this->get('required') != 'yes') {
+				$null_clause = " OR `$table`.`start` IS NULL";
+			}
+			
+			$where = " AND (`$table`.`start` = (
+				SELECT $op(`m`.`start`) FROM `tbl_entries_data_".$field_id."`AS `m`
+				WHERE `m`.`entry_id` = `e`.`id` AND $sortFilter
+				GROUP BY `m`.`entry_id`
+				LIMIT 1
+				) $null_clause
+			)";
+
+			return array(
+				'sort' => $sort,
+				'where' => $where,
+			);
+		}
+
+		public function buildSortingSQL(&$joins, &$where, &$sort, $order = 'ASC'){
+			$field_id = $this->get( 'id' );
+			$order    = strtolower( $order );
+			
+			// If we already have a JOIN to the entry table, don't create another one,
+			// this prevents issues where an entry with multiple dates is returned multiple
+			// times in the SQL, but is actually the same entry.
+			if( !preg_match( '/`t'.$field_id.'`/', $joins ) ){
+				$joins .= "LEFT OUTER JOIN `tbl_entries_data_".$field_id."` AS `ed` ON (`e`.`id` = `ed`.`entry_id`) ";
+				
+				$sql = $this->buildSortingSQLForTable('ed', $field_id, $order);
+			}
+			else {
+				$sql = $this->buildSortingSQLForTable("t$field_id", $field_id, $order);
+			}
+			
+			$sort .= $sql['sort'];
+			$where .= $sql['where'];
+		}
+
+		public function buildSortingSelectSQL($sort, $order = 'ASC')
+		{
+			if ($this->isRandomOrder($order)) {
+				return null;
+			}
+			$field_id = $this->get('id');
+			if (!preg_match( '/`t'.$field_id.'`/', $sort)) {
+				return '`ed`.`start`, `ed`.`end`';
+			}
+			return "`t$field_id`.`start`, `t$field_id`.`end`";
+		}
+
+	/*-------------------------------------------------------------------------
+		Grouping:
+	-------------------------------------------------------------------------*/
+
+		public function groupRecords($records) {
+			if(!is_array($records) || empty($records)) return;
+			$groups = array('year' => array());
+
+			// Walk through dates
+			foreach($records as $entry) {
+				$data = $entry->getData($this->get('id'));
+				if(!is_array($data['start'])) $data['start'] = array($data['start']);
+				if(!is_array($data['end'])) $data['end'] = array($data['end']);
+
+				// Create calendar
+				for($i = 0; $i < count($data['start']); $i++) {
+					$start = new DateTime($data['start'][$i]);
+					$end = new DateTime($data['end'][$i]);
+
+					// Find matching months
+					while($start->format('Y-m-01') <= $end->format('Y-m-01')) {
+						$year = $start->format('Y');
+						$month = $start->format('n');
+
+						// Add entry
+						$groups['year'][$year]['attr']['value'] = $year;
+						$groups['year'][$year]['groups']['month'][$month]['attr']['value'] = $start->format('m');
+						$groups['year'][$year]['groups']['month'][$month]['records'][] = $entry;
+
+						// Jump to next month
+						$start->modify('+1 month');
+					}
+				}
+			}
+
+			// Sort years and months
+			ksort($groups['year']);
+			foreach($groups['year'] as $year) {
+				$current = $year['attr']['value'];
+				ksort($groups['year'][$current]['groups']['month']);
+			}
+
+			// Return calendar groups
+			return $groups;
+		}
+
+	/*-------------------------------------------------------------------------
+		Importing:
+	-------------------------------------------------------------------------*/
+
+		public function getImportModes() {
+			return array(
+				'getPostdata' =>	ImportableField::ARRAY_VALUE,
+				'getString' =>		ImportableField::STRING_VALUE
+			);
+		}
+
+		/**
+		 * This function prepares values for import with XMLImporter
+		 *
+		 * @param string|array $data
+		 *  Data that should be prepared for import
+		 * @param integer $entry_id
+		 *  The current entry_id, if it exists, otherwise null.
+		 * @return array
+		 *  Return an associative array of start and end dates
+		 */
+		public function prepareImportValue($data, $mode, $entry_id = null) {
+			$message = $status = null;
+			$modes = (object)$this->getImportModes();
+
+			if($mode === $modes->getPostdata) {
+				if(!is_array($data)) $data = array($data);
+				if(is_array($data[0])) $data = $data[0];
+
+				// Reformat array
+				if(!array_key_exists('start', $data)) {
+					$datetime = array();
+
+					// Start date
+					$datetime['start'] = array($data[0]);
+
+					// End date
+					if($data[1]) {
+						$datetime['end'] = array($data[1]);
+					}
+					else {
+						$datetime['end'] = array($data[0]);
+					}
+
+					$data = $datetime;
+				}
+
+				return $this->processRawFieldData($data, $status, $message, true, $entry_id);
+			}
+			else if($mode === $modes->getString) {
+				$dates = explode(',', $data);
+				$data = array();
+				foreach($dates as $date_string) {
+					self::parseFilter($date_string);
+
+					$data['start'][] = $date_string['start'];
+					$data['end'][] = $date_string['end'];
+				}
+
+				return $this->processRawFieldData($data, $status, $message, true, $entry_id);
+			}
+
+			return null;
+		}
+
+	/*-------------------------------------------------------------------------
+		Export:
+	-------------------------------------------------------------------------*/
+
+		/**
+		 * Return a list of supported export modes for use with `prepareExportValue`.
+		 *
+		 * @return array
+		 */
+		public function getExportModes() {
+			return array(
+				'listDateObject' =>		ExportableField::LIST_OF + ExportableField::OBJECT,
+				'listDateValue'  =>		ExportableField::LIST_OF + ExportableField::VALUE,
+				'getPostdata'	 =>		ExportableField::POSTDATA
+			);
+		}
+
+		/**
+		 * Give the field some data and ask it to return a value using one of many
+		 * possible modes.
+		 *
+		 * @param mixed $data
+		 * @param integer $mode
+		 * @param integer $entry_id
+		 * @return DateTime|null
+		 */
+		public function prepareExportValue($data, $mode, $entry_id = null) {
+			$modes = (object)$this->getExportModes();
+			$dates = array();
+
+			if(!is_array($data['start'])) $data['start'] = array($data['start']);
+			if(!is_array($data['end'])) $data['end'] = array($data['end']);
+
+			if ($mode === $modes->listDateObject) {
+				$timezone = Symphony::Configuration()->get('timezone', 'region');
+
+				for($i = 0; $i < count($data['start']); $i++) {
+					$start = new DateTime($data['start'][$i]);
+					$end = new DateTime($data['end'][$i]);
+
+					$start->setTimezone(new DateTimeZone($timezone));
+					$end->setTimezone(new DateTimeZone($timezone));
+
+					$dates[] = array(
+						'start' => $start,
+						'end' => $end
+					);
+				}
+
+				return $dates;
+			}
+
+			else if ($mode === $modes->listDateValue) {
+				for($i = 0; $i < count($data['start']); $i++) {
+					$start = new DateTime($data['start'][$i]);
+					$end = new DateTime($data['end'][$i]);
+
+					// Different dates
+					if($start != $end) {
+						$dates[] = $start->format('Y-m-d H:i:s') . ' to ' . $end->format('Y-m-d H:i:s');
+					}
+
+					// Same date
+					else {
+						$dates[] = $start->format('Y-m-d H:i:s');
+					}
+				}
+
+				return $dates;
+			}
+
+			else if ($mode === $modes->getPostdata) {
+				return $data;
+			}
+
+			return null;
+		}
+
+	}

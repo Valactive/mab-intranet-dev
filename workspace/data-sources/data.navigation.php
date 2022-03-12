@@ -1,63 +1,68 @@
 <?php
 
-	require_once(TOOLKIT . '/class.datasource.php');
+class datasourcenavigation extends NavigationDatasource
+{
+    public $dsParamROOTELEMENT = 'navigation';
+    public $dsParamORDER = 'desc';
+    public $dsParamREDIRECTONEMPTY = 'no';
+    public $dsParamREDIRECTONFORBIDDEN = 'no';
+    public $dsParamREDIRECTONREQUIRED = 'no';
+    public $dsParamSORT = 'id';
 
-	Class datasourcenavigation extends Datasource{
+    public function __construct($env = null, $process_params = true)
+    {
+        parent::__construct($env, $process_params);
+        $this->_dependencies = array();
+    }
 
-		public $dsParamROOTELEMENT = 'navigation';
-		public $dsParamORDER = 'desc';
-		public $dsParamREDIRECTONEMPTY = 'no';
+    public function about()
+    {
+        return array(
+            'name' => 'Navigation',
+            'author' => array(
+                'name' => 'Valéry Frisch',
+                'website' => 'http://mab-intranet.localhost',
+                'email' => 'valery.frisch@gmail.com'),
+            'version' => 'Symphony 2.7.10',
+            'release-date' => '2022-03-07T21:40:58+00:00'
+        );
+    }
 
-		
+    public function getSource()
+    {
+        return 'navigation';
+    }
 
-		
+    public function allowEditorToParse()
+    {
+        return true;
+    }
 
-		public function __construct(&$parent, $env=NULL, $process_params=true){
-			parent::__construct($parent, $env, $process_params);
-			$this->_dependencies = array();
-		}
+    public function execute(array &$param_pool = null)
+    {
+        $result = new XMLElement($this->dsParamROOTELEMENT);
 
-		public function about(){
-			return array(
-				'name' => 'Navigation',
-				'author' => array(
-					'name' => 'Valéry Frisch',
-					'website' => 'http://mab-france.valactive.net',
-					'email' => 'valery@valactive.com'),
-				'version' => '1.0',
-				'release-date' => '2011-06-16T14:11:16+00:00'
-			);
-		}
+        try {
+            $result = parent::execute($param_pool);
+        } catch (FrontendPageNotFoundException $e) {
+            // Work around. This ensures the 404 page is displayed and
+            // is not picked up by the default catch() statement below
+            FrontendPageNotFoundExceptionHandler::render($e);
+        } catch (Exception $e) {
+            $result->appendChild(new XMLElement('error',
+                General::wrapInCDATA($e->getMessage() . ' on ' . $e->getLine() . ' of file ' . $e->getFile())
+            ));
+            return $result;
+        }
 
-		public function getSource(){
-			return 'navigation';
-		}
+        if ($this->_force_empty_result) {
+            $result = $this->emptyXMLSet();
+        }
 
-		public function allowEditorToParse(){
-			return true;
-		}
+        if ($this->_negate_result) {
+            $result = $this->negateXMLSet();
+        }
 
-		public function grab(&$param_pool=NULL){
-			$result = new XMLElement($this->dsParamROOTELEMENT);
-
-			try{
-				include(TOOLKIT . '/data-sources/datasource.navigation.php');
-			}
-			catch(FrontendPageNotFoundException $e){
-				// Work around. This ensures the 404 page is displayed and
-				// is not picked up by the default catch() statement below
-				FrontendPageNotFoundExceptionHandler::render($e);
-			}
-			catch(Exception $e){
-				$result->appendChild(new XMLElement('error', $e->getMessage()));
-				return $result;
-			}
-
-			if($this->_force_empty_result) $result = $this->emptyXMLSet();
-
-			
-
-			return $result;
-		}
-
-	}
+        return $result;
+    }
+}

@@ -1,106 +1,110 @@
 <?php
 
-	Class migration_221 extends Migration{
+    class migration_221 extends Migration
+    {
+        public static function getVersion()
+        {
+            return '2.2.1';
+        }
 
-		static function getVersion(){
-			return '2.2.1';
-		}
+        public static function getReleaseNotes()
+        {
+            return 'http://getsymphony.com/download/releases/version/2.2.1/';
+        }
 
-		static function getReleaseNotes(){
-			return 'http://getsymphony.com/download/releases/version/2.2.1/';
-		}
+        public static function upgrade()
+        {
+            // 2.2.1 Beta 1
+            if (version_compare(self::$existing_version, '2.2.1 Beta 1', '<=')) {
+                Symphony::Configuration()->set('version', '2.2.1 Beta 1', 'symphony');
+                try {
+                    Symphony::Database()->query('CREATE INDEX `session_expires` ON `tbl_sessions` (`session_expires`)');
+                    Symphony::Database()->query('OPTIMIZE TABLE `tbl_sessions`');
+                } catch (Exception $ex) {
+                }
+                Symphony::Configuration()->write();
+            }
 
-		static function upgrade(){
+            // 2.2.1 Beta 2
+            if (version_compare(self::$existing_version, '2.2.1 Beta 2', '<=')) {
+                Symphony::Configuration()->set('version', '2.2.1 Beta 2', 'symphony');
 
-			// 2.2.1 Beta 1
-			if(version_compare(self::$existing_version, '2.2.1 Beta 1', '<=')) {
-				Symphony::Configuration()->set('version', '2.2.1 Beta 1', 'symphony');
-				try {
-					Symphony::Database()->query('CREATE INDEX `session_expires` ON `tbl_sessions` (`session_expires`)');
-					Symphony::Database()->query('OPTIMIZE TABLE `tbl_sessions`');
-				}
-				catch (Exception $ex) {}
-				Symphony::Configuration()->write();
-			}
+                // Add Security Rules from 2.2 to .htaccess
+                try {
+                    $htaccess = file_get_contents(DOCROOT . '/.htaccess');
 
-			// 2.2.1 Beta 2
-			if(version_compare(self::$existing_version, '2.2.1 Beta 2', '<=')) {
-				Symphony::Configuration()->set('version', '2.2.1 Beta 2', 'symphony');
+                    if ($htaccess !== false && !preg_match('/### SECURITY - Protect crucial files/', $htaccess)) {
+                        $security = '
+            ### SECURITY - Protect crucial files
+            RewriteRule ^manifest/(.*)$ - [F]
+            RewriteRule ^workspace/(pages|utilities)/(.*)\.xsl$ - [F]
+            RewriteRule ^(.*)\.sql$ - [F]
+            RewriteRule (^|/)\. - [F]
 
-				// Add Security Rules from 2.2 to .htaccess
-				try {
-					$htaccess = file_get_contents(DOCROOT . '/.htaccess');
+            ### DO NOT APPLY RULES WHEN REQUESTING "favicon.ico"';
 
-					if($htaccess !== false && !preg_match('/### SECURITY - Protect crucial files/', $htaccess)){
-						$security = '
-			### SECURITY - Protect crucial files
-			RewriteRule ^manifest/(.*)$ - [F]
-			RewriteRule ^workspace/(pages|utilities)/(.*)\.xsl$ - [F]
-			RewriteRule ^(.*)\.sql$ - [F]
-			RewriteRule (^|/)\. - [F]
+                        $htaccess = str_replace('### DO NOT APPLY RULES WHEN REQUESTING "favicon.ico"', $security, $htaccess);
+                        file_put_contents(DOCROOT . '/.htaccess', $htaccess);
+                    }
+                } catch (Exception $ex) {
+                }
 
-			### DO NOT APPLY RULES WHEN REQUESTING "favicon.ico"';
+                // Add correct index to the `tbl_cache`
+                try {
+                    Symphony::Database()->query('ALTER TABLE `tbl_cache` DROP INDEX `creation`');
+                    Symphony::Database()->query('CREATE INDEX `expiry` ON `tbl_cache` (`expiry`)');
+                    Symphony::Database()->query('OPTIMIZE TABLE `tbl_cache`');
+                } catch (Exception $ex) {
+                }
 
-						$htaccess = str_replace('### DO NOT APPLY RULES WHEN REQUESTING "favicon.ico"', $security, $htaccess);
-						file_put_contents(DOCROOT . '/.htaccess', $htaccess);
-					}
-				}
-				catch (Exception $ex) {}
+                // Remove Hide Association field from Select Data tables
+                $select_tables = Symphony::Database()->fetchCol("field_id", "SELECT `field_id` FROM `tbl_fields_select`");
 
-				// Add correct index to the `tbl_cache`
-				try {
-					Symphony::Database()->query('ALTER TABLE `tbl_cache` DROP INDEX `creation`');
-					Symphony::Database()->query('CREATE INDEX `expiry` ON `tbl_cache` (`expiry`)');
-					Symphony::Database()->query('OPTIMIZE TABLE `tbl_cache`');
-				}
-				catch (Exception $ex) {}
+                if (is_array($select_tables) && !empty($select_tables)) {
+                    foreach ($select_tables as $field) {
+                        if (Symphony::Database()->tableContainsField('tbl_entries_data_' . $field, 'show_association')) {
+                            Symphony::Database()->query(sprintf(
+                            "ALTER TABLE `tbl_entries_data_%d` DROP `show_association`",
+                            $field
+                        ));
+                        }
+                    }
+                }
 
-				// Remove Hide Association field from Select Data tables
-				$select_tables = Symphony::Database()->fetchCol("field_id", "SELECT `field_id` FROM `tbl_fields_select`");
+                // Update Select table to include the sorting option
+                if (!Symphony::Database()->tableContainsField('tbl_fields_select', 'sort_options')) {
+                    Symphony::Database()->query('ALTER TABLE `tbl_fields_select` ADD `sort_options` ENUM( "yes", "no" ) COLLATE utf8_unicode_ci NOT NULL DEFAULT "no"');
+                }
 
-				if(is_array($select_tables) && !empty($select_tables)) foreach($select_tables as $field) {
-					if(Symphony::Database()->tableContainsField('tbl_entries_data_' . $field, 'show_association')) {
-						Symphony::Database()->query(sprintf(
-							"ALTER TABLE `tbl_entries_data_%d` DROP `show_association`",
-							$field
-						));
-					}
-				}
+                // Remove the 'driver' from the Config
+                Symphony::Configuration()->remove('driver', 'database');
+                Symphony::Configuration()->write();
 
-				// Update Select table to include the sorting option
-				if(!Symphony::Database()->tableContainsField('tbl_fields_select', 'sort_options')) {
-					Symphony::Database()->query('ALTER TABLE `tbl_fields_select` ADD `sort_options` ENUM( "yes", "no" ) COLLATE utf8_unicode_ci NOT NULL DEFAULT "no"');
-				}
+                // Remove the NOT NULL from the Author tables
+                try {
+                    $author = Symphony::Database()->fetchCol("field_id", "SELECT `field_id` FROM `tbl_fields_author`");
 
-				// Remove the 'driver' from the Config
-				Symphony::Configuration()->remove('driver', 'database');
-				Symphony::Configuration()->write();
+                    foreach ($author as $id) {
+                        $table = '`tbl_entries_data_' . $id . '`';
 
-				// Remove the NOT NULL from the Author tables
-				try {
-					$author = Symphony::Database()->fetchCol("field_id", "SELECT `field_id` FROM `tbl_fields_author`");
+                        Symphony::Database()->query(
+                            'ALTER TABLE ' . $table . ' CHANGE `author_id` `author_id` int(11) unsigned NULL'
+                        );
+                    }
+                } catch (Exception $ex) {
+                }
 
-					foreach($author as $id) {
-						$table = '`tbl_entries_data_' . $id . '`';
+                Symphony::Configuration()->write();
+            }
 
-						Symphony::Database()->query(
-							'ALTER TABLE ' . $table . ' CHANGE `author_id` `author_id` int(11) unsigned NULL'
-						);
-					}
-				}
-				catch(Exception $ex) {}
+            // Update the version information
+            return parent::upgrade();
+        }
 
-				Symphony::Configuration()->write();
-			}
-
-			// Update the version information
-			return parent::upgrade();
-		}
-
-		static function postUpdateNotes(){
-			return array(
-				__('Version %s introduces some improvements and fixes to Static XML Datasources. If you have any Static XML Datasources in your installation, please be sure to re-save them through the Data Source Editor to prevent unexpected results.', array('<code>2.2.1</code>'))
-			);
-		}
-
-	}
+        public static function postUpdateNotes()
+        {
+            return array(
+                __('Version %s introduces some improvements and fixes to Static XML Datasources. If you have any Static XML Datasources in your installation, please be sure to re-save them through the Data Source Editor to prevent unexpected results.', array('<code>2.2.1</code>'))
+            );
+        }
+    }

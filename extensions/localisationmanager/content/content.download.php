@@ -7,9 +7,22 @@
 
 		private $LocalisationManager;
 		
-		function __construct(&$parent) {
-			parent::__construct($parent);
-			$this->LocalisationManager = new LocalisationManager($parent);
+		private $titles = array(
+			'/login' => 'Namespaced translations for the login area',
+			'/publish' => 'Namespace translations for the publish area',
+			'/blueprints/pages' => 'Namespaced translations for pages', 
+			'/blueprints/sections' => 'Namespaced translations for sections',
+			'/blueprints/datasources' => 'Namespaced translations for Data Sources', 
+			'/blueprints/events' => 'Namespaced translations for events',
+			'/blueprints/utilities' => 'Namespaced translations for utilities',
+			'/system/authors' => 'Namespaced translations for authors',
+			'/system/preferences' => 'Namespaced translations for the preferences',
+			'/system/extensions' => 'Namespaced translations for the extension overview'		
+		);
+		
+		function __construct() {
+			parent::__construct();
+			$this->LocalisationManager = new LocalisationManager();
 		}
 		
 		/**
@@ -50,17 +63,21 @@
 			$template = str_replace('<!-- $strings -->', $this->__layout($data['dictionary']['strings']), $template);
 			$template = str_replace('<!-- $obsolete -->', $this->__layout($data['dictionary']['obsolete'], 'Obsolete'), $template);
 			$template = str_replace('<!-- $missing -->', $this->__layout($data['dictionary']['missing'], 'Missing'), $template);
+			$template = str_replace('<!-- $namespaces -->', $this->__layoutNamespace($data['dictionary']['namespaces']), $template);
 	
 			if($context == 'symphony') {
-				$template = str_replace('<!-- $alphabetical uppercase -->', $this->__transliterations($data['transliterations']['alphabetical']['uppercase'], 5), $template);
-				$template = str_replace('<!-- $alphabetical lowercase -->', $this->__transliterations($data['transliterations']['alphabetical']['lowercase'], 5), $template);
-				$template = str_replace('<!-- $symbolic -->', $this->__transliterations($data['transliterations']['symbolic'], 3), $template);
-				$template = str_replace('<!-- $ampersands -->', $this->__transliterations($data['transliterations']['ampersands']), $template);
+				$template = str_replace('<!-- $uppercase -->', $this->__transliterations($data['transliterations']['straight']['uppercase'], 5), $template);
+				$template = str_replace('<!-- $lowercase -->', $this->__transliterations($data['transliterations']['straight']['lowercase'], 5), $template);
+				$template = str_replace('<!-- $symbolic -->', $this->__transliterations($data['transliterations']['straight']['symbolic'], 3), $template);
+				$template = str_replace('<!-- $special -->', $this->__transliterations($data['transliterations']['straight']['special']), $template);
+				$template = str_replace('<!-- $otherstraight -->', $this->__transliterations($data['transliterations']['straight']['other']), $template);
+				$template = str_replace('<!-- $ampersands -->', $this->__transliterations($data['transliterations']['regexp']['ampersands']), $template);
+				$template = str_replace('<!-- $otherregexp -->', $this->__transliterations($data['transliterations']['regexp']['other']), $template);
 			}
 			
 			// Send file
 			header('Content-Type: application/x-php; charset=utf-8');
-			header('Content-Disposition: attachment; filename="lang.' . $lang. '.php"');
+			header('Content-Disposition: attachment; filename="lang.' . ($lang ? $lang : 'new') . '.php"');
 			header("Content-Description: File Transfer");
 			header("Cache-Control: no-cache, must-revalidate");
 			header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
@@ -68,13 +85,37 @@
 			exit();			
 		}
 		
-		private function __layout($strings, $comment=false) {
+		private function __layoutNamespace($namespaces) {
+			if(empty($namespaces)) return;
+		
+			$namespaced = '';
+			foreach($namespaces as $name => $groups) {
+			
+				// Get context
+				if(array_key_exists($name, $this->titles)) {
+					$title = $this->titles[$name];
+				}
+				else {
+					$title = 'Namespaced translations for other areas';
+				}
+			
+				// Create namespace
+				$namespaced .= "\t\t// " . $title . "\n\n";
+				$namespaced .= "\t\t'" . $this->__clean($name) . "' => array(\n\n";
+				$namespaced .= $this->__layout($groups['strings'], false, $indent = "\t\t\t");
+				$namespaced .= $this->__layout($groups['obsolete'], 'Obsolete', $indent = "\t\t\t");
+				$namespaced .= "\t\t),\n\n";
+			}
+			return $namespaced;
+		}
+		
+		private function __layout($strings, $comment=false, $indent = "\t\t") {
 			if(!is_array($strings) || empty($strings)) return;
 			if($comment) {
-				$content = "\t\t// " . $comment . "\n\n";
+				$content = $indent . "// " . $comment . "\n\n";
 			}
 			foreach($strings as $key => $string) {
-				$content .= "\t\t'" . $this->__clean($key) . "' => \n\t\t" . $this->__clean($string, true) . ",\n\n";
+				$content .= $indent . "'" . $this->__clean($key) . "' => \n" . $indent . $this->__clean($string, true) . ",\n\n";
 			}
 			return $content;
 		}
@@ -84,12 +125,12 @@
 			$count = 0;
 			foreach($strings as $key => $string) {
 				if($count == $break) {
-					$content .= "\n";
+					$content .= "\n\t";
 					$count = 0;
 				}
 				if(empty($string)) $string = 'null';
 				else $string = "'" . $string . "'";
-				$content .= "\t\t'" . $key . "' => " . $string . ",";
+				$content .= " \t'" . $key . "' => " . $string . ",";
 				$count++;
 			}
 			return $content;

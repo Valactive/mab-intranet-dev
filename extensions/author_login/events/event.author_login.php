@@ -36,21 +36,20 @@
 			
 			## Cookies only show up on page refresh. This flag helps in making sure the correct XML is being set
 			$loggedin = false;
-			
+		
 			if(isset($_REQUEST['action']['login'])){
 				$username = $_REQUEST['username'];
 				$password = $_REQUEST['password'];
-				$loggedin = $this->_Parent->login($username, $password);
+				$loggedin = Frontend::instance()->login($username, $password);
 			}
 			
-			else $loggedin = $this->_Parent->isLoggedIn();
-			
+			else $loggedin = Frontend::instance()->isLoggedIn();
+
+
 			if($loggedin){
 				$result = new XMLElement('login-info');
 				$result->setAttribute('logged-in', 'true');
-				
-				$author = $this->_Parent->Author;
-				
+				$author = Frontend::instance()->Author;
 				$result->setAttributeArray(array(
 					'id' => $author->get('id'), 
 					'user-type' => $author->get('user_type'),
@@ -65,7 +64,7 @@
 	
 				if($author->isTokenActive()) $fields['author-token'] = new XMLElement('author-token', $author->createAuthToken());
 	
-				if($section = $this->_Parent->Database->fetchRow(0, "SELECT `id`, `handle`, `name` FROM `tbl_sections` WHERE `id` = '".$author->get('default_section')."' LIMIT 1")){
+				if($section = Symphony::Database()->fetchRow(0, "SELECT `id`, `handle`, `name` FROM `tbl_sections` WHERE `id` = '".$author->get('default_section')."' LIMIT 1")){
 					$default_section = new XMLElement('default-section', $section['name']);
 					$default_section->setAttributeArray(array('id' => $section['id'], 'handle' => $section['handle']));
 					$fields['default-section'] = $default_section;

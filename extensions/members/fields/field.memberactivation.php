@@ -1,6 +1,7 @@
 <?php
 
-	require_once(TOOLKIT . '/fields/field.select.php');
+	require_once TOOLKIT . '/fields/field.select.php';
+	require_once FACE . '/interface.importablefield.php';
 
 	/**
 	 * Activation field. If added to a Members section, it generates and stores
@@ -8,14 +9,14 @@
 	 * sends emails, and displays as a checkbox in the backend publish area.
 	 */
 
-	Class fieldMemberActivation extends fieldSelect {
+	Class fieldMemberActivation extends fieldSelect implements ImportableField {
 
 	/*-------------------------------------------------------------------------
 		Definition:
 	-------------------------------------------------------------------------*/
 
-		public function __construct(&$parent){
-			parent::__construct($parent);
+		public function __construct(){
+			parent::__construct();
 			$this->_name = __('Member: Activation');
 			$this->_showassociation = false;
 		}
@@ -50,7 +51,7 @@
 				  `deny_login` enum('yes','no') NOT NULL default 'yes',
 				  PRIMARY KEY  (`id`),
 				  UNIQUE KEY `field_id` (`field_id`)
-				) ENGINE=MyISAM;
+				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 			");
 		}
 
@@ -65,8 +66,8 @@
 				  PRIMARY KEY  (`id`),
 				  KEY `entry_id` (`entry_id`),
 				  UNIQUE KEY `code` (`code`)
-				) ENGINE=MyISAM;"
-			);
+				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+			");
 		}
 
 	/*-------------------------------------------------------------------------
@@ -110,7 +111,6 @@
 		 * code generated is still valid by comparing it's generation timestamp
 		 * with the maximum code expiry time.
 		 *
-		 * @todo possibly return if the code didn't exist or if it was expired
 		 * @param integer $entry_id
 		 * @return array
 		 */
@@ -167,10 +167,10 @@
 			return array('yes' => __('Yes'), 'no' => __('No'));
 		}
 
-		public function toggleFieldData($data, $newState){
+		public function toggleFieldData(array $data, $newState, $entry_id = NULL){
 			$data['activated'] = $newState;
 
-			if($data['activated'] == "no") {
+			if($data['activated'] == 'no') {
 				$data = array_merge($data, $this->generateCode($entry_id));
 			}
 			else {
@@ -190,14 +190,15 @@
 			parent::setFromPOST($settings);
 		}
 
-		public function displaySettingsPanel(&$wrapper, $errors=NULL){
+		public function displaySettingsPanel(XMLElement &$wrapper, $errors = NULL){
 			Field::displaySettingsPanel($wrapper, $errors);
 
 			$group = new XMLElement('div');
-			$group->setAttribute('class', 'group');
+			$group->setAttribute('class', 'two columns');
 
 			// Add Activiation Code Expiry
 			$div = new XMLElement('div');
+			$div->setAttribute('class', 'column');
 
 			$label = Widget::Label(__('Activation Code Expiry'));
 			$label->appendChild(
@@ -207,18 +208,18 @@
 				"fields[{$this->get('sortorder')}][code_expiry]", $this->get('code_expiry')
 			));
 
-			$ul = new XMLElement('ul', NULL, array('class' => 'tags singular'));
+			$ul = new XMLElement('ul', null, array('class' => 'tags singular', 'data-interactive' => 'data-interactive'));
 			$tags = fieldMemberActivation::findCodeExpiry();
 			foreach($tags as $name => $time) {
 				$ul->appendChild(new XMLElement('li', $name, array('class' => $time)));
 			}
 
-			if (isset($errors['code_expiry'])) {
-				$label = Widget::wrapFormElementWithError($label, $errors['code_expiry']);
-			}
-
 			$div->appendChild($label);
 			$div->appendChild($ul);
+
+			if (isset($errors['code_expiry'])) {
+				$div = Widget::Error($div, $errors['code_expiry']);
+			}
 
 			// Get Roles in system
 			$roles = RoleManager::fetch();
@@ -230,6 +231,7 @@
 			}
 
 			$label = new XMlElement('label', __('Role for Members who are awaiting activation'));
+			$label->setAttribute('class', 'column');
 			$label->appendChild(Widget::Select(
 				"fields[{$this->get('sortorder')}][activation_role_id]", $options
 			));
@@ -240,13 +242,13 @@
 			$group->appendChild($div);
 			$wrapper->appendChild($group);
 
-			$div = new XMLElement('div', null, array('class' => 'compact'));
+			$div = new XMLElement('div', null, array('class' => 'two columns'));
 
 			// Add Deny Login
 			$div->appendChild(Widget::Input("fields[{$this->get('sortorder')}][deny_login]", 'no', 'hidden'));
 
 			$label = Widget::Label();
-			$label->setAttribute('class', 'meta');
+			$label->setAttribute('class', 'column');
 			$input = Widget::Input("fields[{$this->get('sortorder')}][deny_login]", 'yes', 'checkbox');
 
 			if ($this->get('deny_login') == 'yes') $input->setAttribute('checked', 'checked');
@@ -261,8 +263,8 @@
 			$wrapper->appendChild($div);
 		}
 
-		public function checkFields(&$errors, $checkForDuplicates=true) {
-			Field::checkFields(&$errors, $checkForDuplicates);
+		public function checkFields(array &$errors, $checkForDuplicates = true) {
+			Field::checkFields($errors, $checkForDuplicates);
 
 			if (trim($this->get('code_expiry')) == '') {
 				$errors['code_expiry'] = __('This is a required field.');
@@ -289,8 +291,7 @@
 				'deny_login' => $this->get('deny_login') == 'yes' ? 'yes' : 'no'
 			);
 
-			Symphony::Database()->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id' LIMIT 1");
-			return Symphony::Database()->insert($fields, 'tbl_fields_' . $this->handle());
+			return FieldManager::saveSettings($id, $fields);
 		}
 
 	/*-------------------------------------------------------------------------
@@ -310,12 +311,12 @@
 			$label = Widget::Label($this->get('label'));
 			if(!$isActivated) {
 				$label->appendChild(Widget::Select(
-					'fields'.$fieldnamePrefix.'['.$this->get('element_name').']'.$fieldnamePostfix, $options
+					'fields'.$prefix.'['.$this->get('element_name').']'.$postfix, $options
 				));
 			}
 			else {
 				$label->appendChild(Widget::Input(
-					'fields'.$fieldnamePrefix.'['.$this->get('element_name').']'.$fieldnamePostfix, 'yes', 'hidden'
+					'fields'.$prefix.'['.$this->get('element_name').']'.$postfix, 'yes', 'hidden'
 				));
 			}
 
@@ -354,32 +355,53 @@
 			}
 
 			if(!is_null($error)) {
-				$wrapper->appendChild(Widget::wrapFormElementWithError($label, $error));
+				$wrapper->appendChild(Widget::Error($label, $error));
 			}
 			else {
 				$wrapper->appendChild($label);
 			}
 		}
 
-		public function processRawFieldData($data, &$status, $simulate=false, $entry_id=NULL){
+		public function processRawFieldData($data, &$status, &$message=null, $simulate=false, $entry_id=NULL){
 			$status = self::__OK__;
 
-			if(is_null($data) && !is_null($entry_id)) {
-				$entryManager = new EntryManager(Symphony::Engine());
-				$entry = $entryManager->fetch($entry_id);
+			return $this->prepareImportValue($data, ImportableField::ARRAY_VALUE, $entry_id);
+		}
 
-				$data = $entry[0]->getData($this->get('id'));
-			}
-			else {
-				if(!is_array($data)) {
-					$data = array('activated' => $data);
-				}
+	/*-------------------------------------------------------------------------
+		Import:
+	-------------------------------------------------------------------------*/
 
-				if($data['activated'] == "no") {
-					$data = array_merge($data, $this->generateCode($entry_id));
+		public function getImportModes() {
+			return array(
+				'getPostdata' =>	ImportableField::ARRAY_VALUE
+			);
+		}
+
+		public function prepareImportValue($data, $mode, $entry_id = null) {
+			$modes = (object)$this->getImportModes();
+
+			if($mode === $modes->getPostdata) {
+				if(is_null($data) && !is_null($entry_id)) {
+					$entry = EntryManager::fetch($entry_id);
+
+					$data = $entry[0]->getData($this->get('id'));
+					if(empty($data)) {
+						$data = $this->generateCode($entry_id);
+						$data['activated'] = 'no';
+					}
 				}
 				else {
-					$data['timestamp'] = DateTimeObj::get('Y-m-d H:i:s', time());
+					if(!is_array($data)) {
+						$data = array('activated' => $data);
+					}
+
+					if($data['activated'] == 'no') {
+						$data = array_merge($data, $this->generateCode($entry_id));
+					}
+					else {
+						$data['timestamp'] = DateTimeObj::get('Y-m-d H:i:s', time());
+					}
 				}
 			}
 
@@ -390,8 +412,8 @@
 		Output:
 	-------------------------------------------------------------------------*/
 
-		public function appendFormattedElement(&$wrapper, $data, $encode=false){
-			if (!is_array($data) or is_null($data['activated'])) return;
+		public function appendFormattedElement(XMLElement &$wrapper, $data, $encode = false, $mode = null, $entry_id = null){
+			if (!is_array($data) or !isset($data['activated'])) return;
 
 			$el = new XMLElement($this->get('element_name'));
 			$el->setAttribute('activated', $data['activated']);
@@ -417,10 +439,14 @@
 			$wrapper->appendChild($el);
 		}
 
-		public function prepareTableValue($data, XMLElement $link=NULL) {
+		public function prepareTableValue($data, XMLElement $link=NULL, $entry_id = null) {
 			return parent::prepareTableValue(array(
 				'value' => ($data['activated'] == 'yes') ? __('Activated') : __('Not Activated')
-			), $link);
+			), $link, $entry_id);
+		}
+
+		public function getParameterPoolValue(array $data, $entry_id = NULL) {
+			return $data['activated'];
 		}
 
 	/*-------------------------------------------------------------------------
@@ -428,8 +454,21 @@
 	-------------------------------------------------------------------------*/
 
 		public function buildSortingSQL(&$joins, &$where, &$sort, $order='ASC') {
-			$joins .= "INNER JOIN `tbl_entries_data_".$this->get('id')."` AS `ed` ON (`e`.`id` = `ed`.`entry_id`) ";
-			$sort .= 'ORDER BY ' . (strtolower($order) == 'random' ? 'RAND()' : "`ed`.`activated` $order");
+			if(in_array(strtolower($order), array('random', 'rand'))) {
+				$sort = 'ORDER BY RAND()';
+			}
+			else {
+				$sort = sprintf(
+					'ORDER BY (
+						SELECT %s
+						FROM tbl_entries_data_%d AS `ed`
+						WHERE entry_id = e.id
+					) %s',
+					'`ed`.activated',
+					$this->get('id'),
+					$order
+				);
+			}
 		}
 
 	/*-------------------------------------------------------------------------
@@ -443,6 +482,7 @@
 			// Filter has + in it.
 			if($andOperation) {
 				foreach($data as $key => $bit){
+					$bit = Symphony::Database()->cleanValue($bit);
 					$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id$key` ON (`e`.`id` = `t$field_id$key`.entry_id) ";
 					$where .= " AND `t$field_id$key`.activated = '$bit' ";
 				}
@@ -453,7 +493,7 @@
 				if(!is_array($data)) {
 					$data = array($data);
 				}
-
+				$data = array_map(array(Symphony::Database(), 'cleanValue'), $data);
 				$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id` ON (`e`.`id` = `t$field_id`.entry_id) ";
 				$where .= " AND `t$field_id`.activated IN ('".implode("', '", $data)."') ";
 			}

@@ -1,15 +1,17 @@
 <?php
 
-    require_once(EXTENSIONS . '/members/lib/class.identity.php');
+    require_once EXTENSIONS . '/members/lib/class.identity.php';
+	require_once FACE . '/interface.exportablefield.php';
+	require_once FACE . '/interface.importablefield.php';
 
-	Class fieldMemberUsername extends Identity {
+	Class fieldMemberUsername extends Identity implements ExportableField, ImportableField {
 
 	/*-------------------------------------------------------------------------
 		Definition:
 	-------------------------------------------------------------------------*/
 
-		public function __construct(&$parent){
-			parent::__construct($parent);
+		public function __construct(){
+			parent::__construct();
 			$this->_name = __('Member: Username');
 			$this->set('required', 'yes');
 		}
@@ -30,7 +32,7 @@
 				  `validator` varchar(255) DEFAULT NULL,
 				  PRIMARY KEY  (`id`),
 				  UNIQUE KEY `field_id` (`field_id`)
-				) ENGINE=MyISAM;
+				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 			");
 		}
 
@@ -40,10 +42,12 @@
 				  `id` int(11) unsigned NOT NULL auto_increment,
 				  `entry_id` int(11) unsigned NOT NULL,
 				  `value` varchar(255) default NULL,
+				  `handle` varchar(255) default NULL,
 				  PRIMARY KEY  (`id`),
 				  KEY `entry_id` (`entry_id`),
-				  UNIQUE KEY `username` (`value`)
-				) ENGINE=MyISAM;
+				  KEY `value` (`value`),
+				  UNIQUE KEY `username` (`handle`)
+				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 			");
 		}
 
@@ -59,17 +63,18 @@
 		 * @param string|array $needle
 		 * @return Entry
 		 */
-		public function fetchMemberIDBy($needle) {
-			if(is_array($needle)) {
-				extract($needle);
-			}
-			else {
+		public function fetchMemberIDBy($needle, $member_id = null) {
+			$username = null;
+			if (is_array($needle) && !empty($needle['username'])) {
+				$username = $needle['username'];
+			} else {
 				$username = $needle;
 			}
 
 			if(empty($username)) {
 				extension_Members::$_errors[$this->get('element_name')] = array(
-					'message' => __('%s is a required field.', array($this->get('label'))),
+					'message' => __('\'%s\' is a required field.', array($this->get('label'))),
+					'message-id' => EventMessages::FIELD_MISSING,
 					'type' => 'missing',
 					'label' => $this->get('label')
 				);
@@ -77,13 +82,14 @@
 			}
 
 			$member_id = Symphony::Database()->fetchVar('entry_id', 0, sprintf(
-				"SELECT `entry_id` FROM `tbl_entries_data_%d` WHERE `value` = '%s' LIMIT 1",
-				$this->get('id'), Symphony::Database()->cleanValue($username)
+				"SELECT `entry_id` FROM `tbl_entries_data_%d` WHERE `handle` = '%s' LIMIT 1",
+				$this->get('id'), Lang::createHandle($username)
 			));
 
 			if(is_null($member_id)) {
 				extension_Members::$_errors[$this->get('element_name')] = array(
 					'message' => __("Member not found."),
+					'message-id' => MemberEventMessages::MEMBER_INVALID,
 					'type' => 'invalid',
 					'label' => $this->get('label')
 				);
@@ -96,18 +102,12 @@
 		Settings:
 	-------------------------------------------------------------------------*/
 
-		public function displaySettingsPanel(&$wrapper, $errors=NULL){
+		public function displaySettingsPanel(XMLElement &$wrapper, $errors = NULL){
 			parent::displaySettingsPanel($wrapper, $errors);
 
-			$group = new XMLElement('div', null, array('class' => 'group'));
+			$this->buildValidationSelect($wrapper, $this->get('validator'), 'fields['.$this->get('sortorder').'][validator]');
 
-			$div = new XMLElement('div');
-			$this->buildValidationSelect($div, $this->get('validator'), 'fields['.$this->get('sortorder').'][validator]');
-			$group->appendChild($div);
-
-			$wrapper->appendChild($group);
-
-			$div = new XMLElement('div', null, array('class' => 'compact'));
+			$div = new XMLElement('div', null, array('class' => 'two columns'));
 			$this->appendRequiredCheckbox($div);
 			$this->appendShowColumnCheckbox($div);
 			$wrapper->appendChild($div);
@@ -127,12 +127,11 @@
 				'validator' => $this->get('validator')
 			);
 
-			Symphony::Database()->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id' LIMIT 1");
-			return Symphony::Database()->insert($fields, 'tbl_fields_' . $this->handle());
+			return FieldManager::saveSettings($id, $fields);
 		}
 
-		public function setFromPOST($postdata){
-			parent::setFromPOST($postdata);
+		public function setFromPOST(array $settings = array()){
+			parent::setFromPOST($settings);
 			if($this->get('validator') == '') $this->remove('validator');
 		}
 
@@ -175,14 +174,56 @@
 		Output:
 	-------------------------------------------------------------------------*/
 
-		public function appendFormattedElement(&$wrapper, $data, $encode=false){
+		public function appendFormattedElement(XMLElement &$wrapper, $data, $encode = false, $mode = null, $entry_id = null){
 			if(!isset($data['value'])) return;
 
 			$wrapper->appendChild(
-				new XMLElement(
-					$this->get('element_name'),
-					General::sanitize($data['value'])
-			));
+				new XMLElement($this->get('element_name'), General::sanitize($data['value']), array(
+					'handle' => $data['handle']
+				))
+			);
 		}
 
+	/*-------------------------------------------------------------------------
+		Import:
+	-------------------------------------------------------------------------*/
+
+		public function getImportModes() {
+			return array(
+				'getValue' =>		ImportableField::STRING_VALUE,
+				'getPostdata' =>	ImportableField::ARRAY_VALUE
+			);
+		}
+
+		public function prepareImportValue($data, $mode, $entry_id = null) {
+			$message = $status = null;
+			$modes = (object)$this->getImportModes();
+
+			if($mode === $modes->getValue) {
+				return $data;
+			}
+			else if($mode === $modes->getPostdata) {
+				return $this->processRawFieldData($data, $status, $message, true, $entry_id);
+			}
+
+			return null;
+		}
+
+	/*-------------------------------------------------------------------------
+		Export:
+	-------------------------------------------------------------------------*/
+
+		public function getExportModes() {
+			return array(
+				ExportableField::POSTDATA
+			);
+		}
+
+		public function prepareExportValue($data, $mode, $entry_id = null) {
+			if (isset($data['value'])) {
+				return $data['value'];
+			}
+
+			return null;
+		}
 	}

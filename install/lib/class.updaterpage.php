@@ -1,148 +1,154 @@
 <?php
 
-	/**
-	 * @package content
-	 */
+    /**
+     * @package content
+     */
 
-	require_once(INSTALL . '/lib/class.installerpage.php');
+    class UpdaterPage extends InstallerPage
+    {
+        public function __construct($template, $params = array())
+        {
+            parent::__construct($template, $params);
 
-	Class UpdaterPage extends InstallerPage {
+            $this->_template = $template;
+            $this->_page_title = __('Update Symphony');
+        }
 
-		public function __construct($template, $params = array()) {
-			parent::__construct($template, $params);
+        protected function __build($version = VERSION, XMLElement $extra = null)
+        {
+            parent::__build(
+                // Replace the installed version with the updated version
+                isset($this->_params['version'])
+                    ? $this->_params['version']
+                    : Symphony::Configuration()->get('version', 'symphony')
+            );
 
-			$this->_template = $template;
-			$this->_page_title = __('Update Symphony');
-		}
+            // Add Release Notes for the latest migration
+            if (isset($this->_params['release-notes'])) {
+                $nodeset = $this->Form->getChildrenByName('h1');
+                $h1 = end($nodeset);
+                if ($h1 instanceof XMLElement) {
+                    $h1->appendChild(
+                        new XMLElement(
+                            'em',
+                            Widget::Anchor(__('Release Notes'), $this->_params['release-notes'])
+                        )
+                    );
+                }
+            }
+        }
 
-		protected function __build($version = VERSION, XMLElement $extra = null) {
-			parent::__build(
-				// Replace the installed version with the updated version
-				isset($this->_params['version'])
-					? $this->_params['version']
-					: Symphony::Configuration()->get('version', 'symphony')
-			);
+        protected function viewUptodate()
+        {
+            $h2 = new XMLElement('h2', __('Symphony is already up-to-date'));
+            $p = new XMLElement('p', __('It appears that Symphony has already been installed at this location and is up to date.'));
 
-			// Add Release Notes for the latest migration
-			if(isset($this->_params['release-notes'])){
-				$nodeset = $this->Form->getChildrenByName('h1');
-				$h1 = end($nodeset);
-				if($h1 instanceof XMLElement) {
-					$h1->appendChild(
-						new XMLElement(
-							'em',
-							Widget::Anchor(__('Release Notes'), $this->_params['release-notes'])
-						)
-					);
-				}
-			}
-		}
+            $this->Form->appendChild($h2);
+            $this->Form->appendChild($p);
+        }
 
-		protected function viewUptodate() {
-			$h2 = new XMLElement('h2', __('Symphony is already up-to-date'));
-			$p = new XMLElement('p', __('It appears that Symphony has already been installed at this location and is up to date.'));
+        protected function viewReady()
+        {
+            $h2 = new XMLElement('h2', __('Updating Symphony'));
+            $p = new XMLElement('p', __('This script will update your existing Symphony installation to version %s.', array('<code>' . $this->_params['version'] . '</code>')));
 
-			$this->Form->appendChild($h2);
-			$this->Form->appendChild($p);
-		}
+            $this->Form->appendChild($h2);
+            $this->Form->appendChild($p);
 
-		protected function viewReady() {
-			$h2 = new XMLElement('h2', __('Updating Symphony'));
-			$p = new XMLElement('p', __('This script will update your existing Symphony installation to version %s.', array('<code>' . $this->_params['version'] . '</code>')));
+            if (!is_writable(CONFIG)) {
+                $this->Form->appendChild(
+                    new XMLElement('p', __('Please check that your configuration file is writable before proceeding'), array('class' => 'warning'))
+                );
+            }
 
-			$this->Form->appendChild($h2);
-			$this->Form->appendChild($p);
+            if (!empty($this->_params['pre-notes'])) {
+                $h2 = new XMLElement('h2', __('Pre-Installation Notes:'));
+                $dl = new XMLElement('dl');
 
-			if(!is_writable(CONFIG)) {
-				$this->Form->appendChild(
-					new XMLElement('p', __('Please check that your configuration file is writable before proceeding'), array('class' => 'warning'))
-				);
-			}
+                foreach ($this->_params['pre-notes'] as $version => $notes) {
+                    $dl->appendChild(new XMLElement('dt', $version));
+                    foreach ($notes as $note) {
+                        $dl->appendChild(new XMLElement('dd', $note));
+                    }
+                }
 
-			if(!empty($this->_params['pre-notes'])){
-				$h2 = new XMLElement('h2', __('Pre-Installation Notes:'));
-				$dl = new XMLElement('dl');
+                $this->Form->appendChild($h2);
+                $this->Form->appendChild($dl);
+            }
 
-				foreach($this->_params['pre-notes'] as $version => $notes){
-					$dl->appendChild(new XMLElement('dt', $version));
-					foreach($notes as $note) {
-						$dl->appendChild(new XMLElement('dd', $note));
-					}
-				}
+            $submit = new XMLElement('div', null, array('class' => 'submit'));
+            $submit->appendChild(Widget::input('action[update]', __('Update Symphony'), 'submit'));
 
-				$this->Form->appendChild($h2);
-				$this->Form->appendChild($dl);
-			}
+            $this->Form->appendChild($submit);
+        }
 
-			$submit = new XMLElement('div', null, array('class' => 'submit'));
-			$submit->appendChild(Widget::input('action[update]', __('Update Symphony'), 'submit'));
+        protected function viewFailure()
+        {
+            $h2 = new XMLElement('h2', __('Updating Failure'));
+            $p = new XMLElement('p', __('An error occurred while updating Symphony.'));
 
-			$this->Form->appendChild($submit);
-		}
+            // Attempt to get update information from the log file
+            try {
+                $log = file_get_contents(INSTALL_LOGS . '/update');
+            } catch (Exception $ex) {
+                $log_entry = Symphony::Log()->popFromLog();
+                if (isset($log_entry['message'])) {
+                    $log = $log_entry['message'];
+                } else {
+                    $log = 'Unknown error occurred when reading the update log';
+                }
+            }
 
-		protected function viewFailure() {
-			$h2 = new XMLElement('h2', __('Updating Failure'));
-			$p = new XMLElement('p', __('An error occurred while updating Symphony.'));
+            $code = new XMLElement('code', $log);
 
-			// Attempt to get update information from the log file
-			try {
-				$log = file_get_contents(INSTALL_LOGS . '/update');
-			}
-			catch (Exception $ex) {
-				$log_entry = Symphony::Log()->popFromLog();
-				if(isset($log_entry['message'])) {
-					$log = $log_entry['message'];
-				}
-				else {
-					$log = 'Unknown error occurred when reading the update log';
-				}
-			}
+            $this->Form->appendChild($h2);
+            $this->Form->appendChild($p);
+            $this->Form->appendChild(
+                new XMLElement('pre', $code)
+            );
+        }
 
-			$code = new XMLElement('code', $log);
+        protected function viewSuccess()
+        {
+            $this->Form->setAttribute('action', SYMPHONY_URL);
 
-			$this->Form->appendChild($h2);
-			$this->Form->appendChild($p);
-			$this->Form->appendChild(
-				new XMLElement('pre', $code)
-			);
-		}
+            $h2 = new XMLElement('h2', __('Updating Complete'));
+            $this->Form->appendChild($h2);
 
-		protected function viewSuccess() {
-			$this->Form->setAttribute('action', SYMPHONY_URL);
+            if (!empty($this->_params['post-notes'])) {
+                $dl = new XMLElement('dl');
 
-			$h2 = new XMLElement('h2', __('Updating Complete'));
-			$this->Form->appendChild($h2);
+                foreach ($this->_params['post-notes'] as $version => $notes) {
+                    if ($notes) {
+                        $dl->appendChild(new XMLElement('dt', $version));
+                        foreach ($notes as $note) {
+                            $dl->appendChild(new XMLElement('dd', $note));
+                        }
+                    }
+                }
 
-			if(!empty($this->_params['post-notes'])){
-				$dl = new XMLElement('dl');
+                $this->Form->appendChild($dl);
+            }
 
-				foreach($this->_params['post-notes'] as $version => $notes){
-					if($notes) {
-						$dl->appendChild(new XMLElement('dt', $version));
-						foreach($notes as $note) {
-							$dl->appendChild(new XMLElement('dd', $note));
-						}
-					}
-				}
+            $this->Form->appendChild(
+                new XMLElement('p',
+                    __('And the crowd goes wild! A victory dance is in order; and look, your mum is watching. She\'s proud.', array(Symphony::Configuration()->get('sitename', 'general')))
+                )
+            );
+            $this->Form->appendChild(
+                new XMLElement('p',
+                    __('Your mum is also nagging you about %s before you log in.', array(
+                            '<a href="' . URL . '/install/?action=remove">' .
+                            __('removing that %s directory', array('<code>' . basename(INSTALL_URL) . '</code>')) .
+                            '</a>'
+                        )
+                    )
+                )
+            );
 
-				$this->Form->appendChild($dl);
-			}
+            $submit = new XMLElement('div', null, array('class' => 'submit'));
+            $submit->appendChild(Widget::input('submit', __('Complete'), 'submit'));
 
-			$this->Form->appendChild(
-				new XMLElement('p',
-					__('And the crowd goes wild! A victory dance is in order; and look, your mum is watching. She\'s proud.', array(Symphony::Configuration()->get('sitename', 'general')))
-				)
-			);
-			$this->Form->appendChild(
-				new XMLElement('p',
-					__('Your mum is also nagging you about removing that %s directory before you log in.', array('<code>' . basename(INSTALL_URL) . '</code>'))
-				)
-			);
-
-			$submit = new XMLElement('div', null, array('class' => 'submit'));
-			$submit->appendChild(Widget::input('submit', __('Complete'), 'submit'));
-
-			$this->Form->appendChild($submit);
-		}
-
-	}
+            $this->Form->appendChild($submit);
+        }
+    }

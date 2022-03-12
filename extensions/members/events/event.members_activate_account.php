@@ -12,9 +12,9 @@
 				'name' => 'Members: Activate Account',
 				'author' => array(
 					'name' => 'Symphony CMS',
-					'website' => 'http://symphony-cms.com',
-					'email' => 'team@symphony-cms.com'),
-				'version' => '1.0',
+					'website' => 'http://getsymphony.com',
+					'email' => 'team@getsymphony.com'),
+				'version' => 'Members 1.0',
 				'release-date' => '2011-05-10'
 			);
 		}
@@ -27,6 +27,7 @@
 			// Fetch all the Email Templates available and add to the end of the documentation
 			$templates = extension_Members::fetchEmailTemplates();
 			$div = new XMLElement('div');
+
 			if(!empty($templates)) {
 				// Template
 				$label = new XMLElement('label', __('Activate Account Email Template'));
@@ -51,11 +52,12 @@
 
 			// Add Save Changes
 			$div->appendChild(Widget::Input('members[event]', 'activate-account', 'hidden'));
-			$div->appendChild(Widget::Input(null, __('Save Changes'), 'submit', array('accesskey' => 's')));
+			$div->appendChild(Widget::Input('action[save]', __('Save Changes'), 'submit', array('accesskey' => 's')));
 
 			return '
 				<p>This event takes an activation code and an identifier for the Member (either Email or Username) to activate their account.
-				An activation code is available by outputting your Activation field in a Datasource after the registration event has executed.</p>
+				An activation code is available by including the Members: Activation field in a data source on the same page as this event, or by using
+				the event\'s result.</p>
 				<h3>Example Front-end Form Markup</h3>
 				<p>This is an example of the form markup you can use on your front end. An input field
 				accepts the member\'s activation code and either the member\'s email address or username.</p>
@@ -65,6 +67,7 @@
 					or
 					&lt;label&gt;Email: &lt;input name="fields[email]" type="text" value="{$email}"/&gt;&lt;/label&gt;
 					&lt;label&gt;Activation: &lt;input name="fields[activation]" type="text" value="{$code}"/&gt;&lt;/label&gt;
+					&lt;input type="hidden" name="members-section-id" value="{$your-section-id}"/&gt;
 					&lt;input type="submit" name="action['.self::ROOTELEMENT.']" value="Activate Account"/&gt;
 					&lt;input type="hidden" name="redirect" value="{$root}/"/&gt;
 				&lt;/form&gt;
@@ -79,6 +82,7 @@
 		protected function __trigger(){
 			$result = new XMLElement(self::ROOTELEMENT);
 			$fields = $_POST['fields'];
+			$this->driver = Symphony::ExtensionManager()->create('members');
 
 			// Add POST values to the Event XML
 			$post_values = new XMLElement('post-values');
@@ -86,6 +90,13 @@
 			// Create the post data cookie element
 			if (is_array($fields) && !empty($fields)) {
 				General::array_to_xml($post_values, $fields, true);
+			}
+
+			// Set the section ID
+			$result = $this->setMembersSection($result, $_REQUEST['members-section-id']);
+			if($result->getAttribute('result') === 'error') {
+				$result->appendChild($post_values);
+				return $result;
 			}
 
 			// Trigger the EventPreSaveFilter delegate. We are using this to make
@@ -97,13 +108,12 @@
 			$this->addEmailTemplates('activate-account-template');
 
 			// Do sanity checks on the incoming data
-			$activation = extension_Members::getField('activation');
+			$activation = $this->driver->getMemberDriver()->section->getField('activation');
 			if(!$activation instanceof fieldMemberActivation) {
 				$result->setAttribute('result', 'error');
 				$result->appendChild(
-					new XMLElement('error', null, array(
-						'type' => 'invalid',
-						'message' => __('No Activation field found.')
+					new XMLElement('message', __('No Activation field found.'), array(
+						'message-id' => MemberEventMessages::MEMBER_ERRORS
 					))
 				);
 				$result->appendChild($post_values);
@@ -111,13 +121,12 @@
 			}
 
 			// Check that either a Member: Username or Member: Email field has been detected
-			$identity = SymphonyMember::setIdentityField($fields, false);
+			$identity = $this->driver->getMemberDriver()->setIdentityField($fields, false);
 			if(!$identity instanceof Identity) {
 				$result->setAttribute('result', 'error');
 				$result->appendChild(
-					new XMLElement('error', null, array(
-						'type' => 'invalid',
-						'message' => __('No Identity field found.')
+					new XMLElement('message', __('No Identity field found.'), array(
+						'message-id' => MemberEventMessages::MEMBER_ERRORS
 					))
 				);
 				$result->appendChild($post_values);
@@ -128,10 +137,16 @@
 			if(!isset($fields[$activation->get('element_name')]) or empty($fields[$activation->get('element_name')])) {
 				$result->setAttribute('result', 'error');
 				$result->appendChild(
+					new XMLElement('message', __('Member event encountered errors when processing.'), array(
+						'message-id' => MemberEventMessages::MEMBER_ERRORS
+					))
+				);
+				$result->appendChild(
 					new XMLElement($activation->get('element_name'), null, array(
+						'label' => $activation->get('label'),
 						'type' => 'missing',
+						'message-id' => EventMessages::FIELD_MISSING,
 						'message' => __('%s is a required field.', array($activation->get('label'))),
-						'label' => $activation->get('label')
 					))
 				);
 				$result->appendChild($post_values);
@@ -146,27 +161,37 @@
 			if(is_null($member_id)) {
 				$result->setAttribute('result', 'error');
 				$result->appendChild(
-					new XMLElement($identity->get('element_name'), null, array(
-						'type' => 'invalid',
-						'message' => __('Member not found.'),
-						'label' => $identity->get('label')
+					new XMLElement('message', __('Member event encountered errors when processing.'), array(
+						'message-id' => MemberEventMessages::MEMBER_ERRORS
 					))
+				);
+				$result->appendChild(
+					new XMLElement(
+						$identity->get('element_name'),
+						null,
+						extension_Members::$_errors[$identity->get('element_name')]
+					)
 				);
 				$result->appendChild($post_values);
 				return $result;
 			}
 
 			// Retrieve Member's entry
-			$driver = Symphony::ExtensionManager()->create('members');
-			$entry = $driver->getMemberDriver()->fetchMemberFromID($member_id);
+			$entry = $this->driver->getMemberDriver()->fetchMemberFromID($member_id);
 
 			if($entry->getData($activation->get('id'), true)->activated == 'yes') {
 				$result->setAttribute('result', 'error');
 				$result->appendChild(
+					new XMLElement('message', __('Member event encountered errors when processing.'), array(
+						'message-id' => MemberEventMessages::MEMBER_ERRORS
+					))
+				);
+				$result->appendChild(
 					new XMLElement($activation->get('element_name'), null, array(
+						'label' => $activation->get('label'),
 						'type' => 'invalid',
+						'message-id' => MemberEventMessages::ACTIVATION_PRE_COMPLETED,
 						'message' => __('Member is already activated.'),
-						'label' => $activation->get('label')
 					))
 				);
 				$result->appendChild($post_values);
@@ -180,10 +205,16 @@
 			if($code['code'] != $fields[$activation->get('element_name')]) {
 				$result->setAttribute('result', 'error');
 				$result->appendChild(
+					new XMLElement('message', __('Member event encountered errors when processing.'), array(
+						'message-id' => MemberEventMessages::MEMBER_ERRORS
+					))
+				);
+				$result->appendChild(
 					new XMLElement($activation->get('element_name'), null, array(
+						'label' => $activation->get('label'),
 						'type' => 'invalid',
+						'message-id' => MemberEventMessages::ACTIVATION_CODE_INVALID,
 						'message' => __('Activation error. Code was invalid or has expired.'),
-						'label' => $activation->get('label')
 					))
 				);
 				$result->appendChild($post_values);
@@ -198,19 +229,40 @@
 				'code' => null
 			), $status);
 
-			// Update the database setting activation to yes.
-			Symphony::Database()->update($data, 'tbl_entries_data_' . $activation->get('id'), ' `entry_id` = ' . $member_id);
+			// If the Member has entry data for the Activation field, update it to yes
+			if(array_key_exists((int)$activation->get('id'), $entry->getData())) {
+				Symphony::Database()->update($data, 'tbl_entries_data_' . $activation->get('id'), ' `entry_id` = ' . $member_id);
+			}
+			else {
+				$data['entry_id'] = $member_id;
+				Symphony::Database()->insert($data, 'tbl_entries_data_' . $activation->get('id'));
+			}
 
 			// Update our `$entry` object with the new activation data
 			$entry->setData($activation->get('id'), $data);
 
 			// Simulate an array to login with.
 			$data_fields = array_merge($fields, array(
-				extension_Members::getFieldHandle('authentication') => $entry->getData(extension_Members::getField('authentication')->get('id'), true)->password
+				$this->driver->getMemberDriver()->section->getFieldHandle('authentication') => $entry->getData($this->driver->getMemberDriver()->section->getField('authentication')->get('id'), true)->password
+			));
+
+			/**
+			 * Fired just after a Member has successfully activated their
+			 * account. This delegate is fired just before the user is logged
+			 * in (if the auto login setting is truthy)
+			 *
+			 * @delegate MembersPostActivation
+			 * @param string $context
+			 *  '/frontend/'
+			 * @param integer $member_id
+			 *  The Member ID of the member who just activated their account
+			 */
+			Symphony::ExtensionManager()->notifyMembers('MembersPostActivation', '/frontend/', array(
+				'member_id' => $member_id
 			));
 
 			// Only login if the Activation field allows auto login.
-			if(extension_Members::getSetting('activate-account-auto-login') == 'no' || $driver->getMemberDriver()->login($data_fields, true)) {
+			if(extension_Members::getSetting('activate-account-auto-login') == 'no' || $this->driver->getMemberDriver()->login($data_fields, true)) {
 				// Trigger the EventFinalSaveFilter delegate. The Email Template Filter
 				// and Email Template Manager extensions use this delegate to send any
 				// emails attached to this event

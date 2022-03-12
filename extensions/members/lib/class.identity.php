@@ -22,14 +22,10 @@
 		Definition:
 	-------------------------------------------------------------------------*/
 
-		public function __construct(&$parent){
-			parent::__construct($parent);
+		public function __construct(){
+			parent::__construct();
 			$this->_required = true;
 			$this->set('required', 'yes');
-
-			if(!(self::$driver instanceof Extension)){
-				self::$driver = Symphony::ExtensionManager()->create('members');
-			}
 		}
 
 		public function mustBeUnique() {
@@ -59,10 +55,14 @@
 		 * @return Entry
 		 */
 		public function fetchMemberFromID($member_id){
+			if(!(Identity::$driver instanceof Extension)){
+				Identity::$driver = Symphony::ExtensionManager()->create('members');
+			}
+
 			return Identity::$driver->getMemberDriver()->initialiseMemberObject($member_id);
 		}
 
-		abstract public function fetchMemberIDBy($needle);
+		abstract public function fetchMemberIDBy($needle, $member_id = null);
 
 	/*-------------------------------------------------------------------------
 		Publish:
@@ -82,7 +82,7 @@
 
 			// Error?
 			if(!is_null($error)) {
-				$wrapper->appendChild(Widget::wrapFormElementWithError($label, $error));
+				$wrapper->appendChild(Widget::Error($label, $error));
 			}
 			else {
 				$wrapper->appendChild($label);
@@ -93,13 +93,14 @@
 		Input:
 	-------------------------------------------------------------------------*/
 
-		public function processRawFieldData($data, &$status, $simulate=false, $entry_id = null){
+		public function processRawFieldData($data, &$status, &$message=null, $simulate=false, $entry_id=null){
 			$status = self::__OK__;
 
 			if(empty($data)) return array();
 
 			return array(
 				'value' => trim($data),
+				'handle' => Lang::createHandle(trim($data))
 			);
 		}
 
@@ -107,10 +108,14 @@
 		Output:
 	-------------------------------------------------------------------------*/
 
-		public function prepareTableValue($data, XMLElement $link=NULL){
+		public function prepareTableValue($data, XMLElement $link = null, $entry_id = null){
 			if(empty($data)) return __('None');
 
 			return parent::prepareTableValue(array('value' => General::sanitize($data['value'])), $link);
+		}
+
+		public function getParameterPoolValue(array $data, $entry_id = null) {
+			return $data['value'];
 		}
 
 	/*-------------------------------------------------------------------------
@@ -123,16 +128,19 @@
 
 			// Filter is an regexp.
 			if(self::isFilterRegex($data[0])) {
-				$pattern = str_replace('regexp:', '', $data[0]);
-				$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id` ON (`e`.`id` = `t$field_id`.entry_id) ";
-				$where .= " AND (`t$field_id`.value REGEXP '$pattern' OR `t$field_id`.entry_id REGEXP '$pattern') ";
+				$this->buildRegexSQL($data[0], array('value', 'handle', 'entry_id'), $joins, $where);
 			}
 
 			// Filter has + in it.
 			else if($andOperation) {
 				foreach($data as $key => $bit){
+					$bit = Symphony::Database()->cleanValue($bit);
 					$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id$key` ON (`e`.`id` = `t$field_id$key`.entry_id) ";
-					$where .= " AND (`t$field_id$key`.value = '$bit' OR `t$field_id`.entry_id = '$bit') ";
+					$where .= " AND (
+									`t$field_id$key`.value = '$bit'
+									OR `t$field_id$key`.handle = '$bit'
+									OR `t$field_id$key`.entry_id = '$bit'
+								) ";
 				}
 			}
 
@@ -141,11 +149,12 @@
 				if(!is_array($data)) {
 					$data = array($data);
 				}
-
+				$data = array_map(array(Symphony::Database(), 'cleanValue'), $data);
 				$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id` ON (`e`.`id` = `t$field_id`.entry_id) ";
 				$where .= " AND (
-							`t$field_id`.value IN ('".implode("', '", $data)."')
-							OR `t$field_id`.entry_id IN ('".implode("', '", $data)."')
+								`t$field_id`.value IN ('".implode("', '", $data)."')
+								OR `t$field_id`.handle IN ('".implode("', '", $data)."')
+								OR `t$field_id`.entry_id IN ('".implode("', '", $data)."')
 							) ";
 			}
 

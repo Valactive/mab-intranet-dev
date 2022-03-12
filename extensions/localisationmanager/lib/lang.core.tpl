@@ -15,24 +15,46 @@
 	 */
 	$dictionary = array(
 
-<!-- $strings --><!-- $obsolete --><!-- $missing -->	);
+<!-- $strings --><!-- $obsolete --><!-- $missing --><!-- $namespaces -->	);
 
 	/**
 	 * Transliterations
 	 */
-	$transliterations = array(
+	$straight = array(
 
-		// Alphabetical
+		// Uppercase letters
 		
-<!-- $alphabetical uppercase -->
-<!-- $alphabetical lowercase -->
+	<!-- $uppercase -->
+
+		// Lowercase letters
+		
+	<!-- $lowercase -->
 
 		// Symbolic
 		
-<!-- $symbolic -->
+	<!-- $symbolic -->
 
+		// Special characters
+		
+	<!-- $special -->
+
+		// Other characters
+		
+	<!-- $otherstraight -->
+	);
+	
+	$regexp = array(
+	
 		// Ampersands
 		
-<!-- $ampersands -->
+	<!-- $ampersands -->
 
+		// Other characters
+		
+	<!-- $otherregexp -->
+	);
+
+	$transliterations = array(
+		'straight' => $straight,
+		'regexp' => $regexp
 	);

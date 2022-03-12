@@ -193,40 +193,40 @@
 		'sa',
 		
 		'January' => 
-		'Janvier',
+		'janvier',
 		
 		'February' => 
-		'Février',
+		'février',
 		
 		'March' => 
-		'Mars',
+		'mars',
 		
 		'April' => 
-		'Avril',
+		'avril',
 		
 		'May' => 
-		'Mai',
+		'mai',
 		
 		'June' => 
-		'Juin',
+		'juin',
 		
 		'July' => 
-		'Juillet',
+		'juillet',
 		
 		'August' => 
-		'Août',
+		'août',
 		
 		'September' => 
-		'Septembre',
+		'septembre',
 		
 		'October' => 
-		'Octobre',
+		'octobre',
 		
 		'November' => 
-		'Novembre',
+		'novembre',
 		
 		'December' => 
-		'Décembre',
+		'décembre',
 		
 		'Jan' => 
 		'jan',

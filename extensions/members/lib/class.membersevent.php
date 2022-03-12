@@ -8,6 +8,9 @@
 		public $filter_results = array();
 		public $filter_errors = array();
 
+		// Instance of the Members extension
+		public $driver = null;
+
 		// Don't allow a user to set permissions for any Members event
 		// in the Roles interface.
 		public function ignoreRolePermissions() {
@@ -52,6 +55,20 @@
 			}
 		}
 
+		protected function setMembersSection(XMLElement $result, $member_section_id = null) {
+			// Set the section ID
+			if(isset($member_section_id) && $this->driver->setMembersSection($member_section_id) === false) {
+				$result->setAttribute('result', 'error');
+				$result->appendChild(
+					new XMLElement('message', __('Invalid Members section ID given.'), array(
+						'message-id' => MemberEventMessages::MEMBER_ERRORS
+					))
+				);
+			}
+
+			return $result;
+		}
+
 	/*-------------------------------------------------------------------------
 		Delegates:
 	-------------------------------------------------------------------------*/
@@ -83,7 +100,7 @@
 				$can_proceed = true;
 
 				foreach ($this->filter_results as $fr) {
-					list($name, $status, $message, $attributes) = $fr;
+					list($name, $status, $message, $attributes) = array_pad($fr, 4, null);
 
 					$result->appendChild(
 						MembersEvent::buildFilterElement($name, ($status ? 'passed' : 'failed'), $message, $attributes)
@@ -95,6 +112,9 @@
 				if ($can_proceed !== true) {
 					$result->setAttribute('result', 'error');
 					$result->appendChild($post_values);
+	                $result->appendChild(new XMLElement('message', __('Member event encountered errors when processing.'), array(
+	                    'message-id' => MemberEventMessages::FILTER_FAILED
+	                )));
 					return $result;
 				}
 			}
@@ -126,7 +146,7 @@
 			// Take the logic from `event.section.php` to append `$this->filter_errors`
 			if(is_array($this->filter_errors) && !empty($this->filter_errors)){
 				foreach($this->filter_errors as $fr){
-					list($name, $status, $message, $attributes) = $fr;
+					list($name, $status, $message, $attributes) = array_pad($fr, 4, null);
 
 					$result->appendChild(
 						MembersEvent::buildFilterElement($name, ($status ? 'passed' : 'failed'), $message, $attributes)
@@ -135,4 +155,45 @@
 			}
 		}
 
+		protected function notifyMembersPasswordResetFailure($username) {
+			/**
+			 * A failed password reset attempt
+			 *
+			 * @delegate MembersPasswordResetFailure
+			 * @param string $context
+			 *  '/frontend/'
+			 * @param string $username
+			 *  Should be the value of the identity field for which the password reset has been attempted
+			 */
+			Symphony::ExtensionManager()->notifyMembers(
+				'MembersPasswordResetFailure',
+				'/frontend/',
+				array(
+					'username' => Symphony::Database()->cleanValue($username)
+				)
+			);
+		}
 	}
+
+/**
+ * Basic lookup class for Event messages, allows for frontend developers
+ * to localise and change event messages without relying on string
+ * comparision.
+ *
+ * @since Symphony 2.4
+ */
+class MemberEventMessages extends EventMessages
+{
+    const MEMBER_ERRORS = 104;
+    const MEMBER_INVALID = 105;
+    const UNAUTHORIZED = 106;
+
+    const SECTION_INVALID = 201;
+
+    const ACTIVATION_PRE_COMPLETED = 303;
+    const ACTIVATION_CODE_INVALID = 304;
+    const RECOVERY_CODE_INVALID = 305;
+    const AUTHENTICATION_INVALID = 306;
+
+    const ALREADY_LOGGED_IN = 501;
+}

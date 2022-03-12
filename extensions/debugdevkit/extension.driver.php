@@ -7,19 +7,6 @@
 
 		public static $active = false;
 
-		public function about() {
-			return array(
-				'name'			=> 'Debug DevKit',
-				'version'		=> '1.1',
-				'release-date'	=> '2011-01-29',
-				'author'		=> array(
-					'name'			=> 'Rowan Lewis',
-					'website'		=> 'http://rowanlewis.com/',
-					'email'			=> 'me@rowanlewis.com'
-				)
-			);
-		}
-
 		public function getSubscribedDelegates() {
 			return array(
 				array(
@@ -42,14 +29,6 @@
 				$context['devkit'] = new Content_DebugDevKit_Debug();
 				self::$active = true;
 			}
-
-			else if (false and isset($_GET['debug-edit'])) {
-				require_once(EXTENSIONS . '/debugdevkit/content/content.debug.php');
-				require_once(EXTENSIONS . '/debugdevkit/content/content.edit.php');
-
-				$context['devkit'] = new Content_DebugDevKit_Edit();
-				self::$active = true;
-			}
 		}
 
 		public function manipulateDevKitNavigation($context) {
@@ -70,5 +49,3 @@
 			}
 		}
 	}
-
-?>

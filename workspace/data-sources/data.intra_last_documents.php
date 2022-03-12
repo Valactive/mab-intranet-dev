@@ -1,80 +1,88 @@
 <?php
 
-	require_once(TOOLKIT . '/class.datasource.php');
+class datasourceintra_last_documents extends SectionDatasource
+{
+    public $dsParamROOTELEMENT = 'intra-last-documents';
+    public $dsParamORDER = 'desc';
+    public $dsParamPAGINATERESULTS = 'yes';
+    public $dsParamLIMIT = '10';
+    public $dsParamSTARTPAGE = '1';
+    public $dsParamREDIRECTONEMPTY = 'no';
+    public $dsParamREDIRECTONFORBIDDEN = 'no';
+    public $dsParamREDIRECTONREQUIRED = 'no';
+    public $dsParamSORT = 'date';
+    public $dsParamHTMLENCODE = 'no';
+    public $dsParamASSOCIATEDENTRYCOUNTS = 'no';
 
-	Class datasourceintra_last_documents extends Datasource{
+    public $dsParamFILTERS = array(
+        '142' => '{$ds-intra-categories-filtre-par-sous-rubrique}',
+        '157' => 'yes',
+    );
 
-		public $dsParamROOTELEMENT = 'intra-last-documents';
-		public $dsParamORDER = 'desc';
-		public $dsParamPAGINATERESULTS = 'yes';
-		public $dsParamLIMIT = '10';
-		public $dsParamSTARTPAGE = '1';
-		public $dsParamREDIRECTONEMPTY = 'no';
-		public $dsParamSORT = 'date';
-		public $dsParamASSOCIATEDENTRYCOUNTS = 'no';
+    public $dsParamINCLUDEDELEMENTS = array(
+        'nom-du-document',
+        'date',
+        'publie',
+        'document',
+        'categorie',
+        'auteur',
+        'actif'
+    );
 
-		public $dsParamFILTERS = array(
-				'142' => '{$ds-intra-categories-filtre-par-sous-rubrique}',
-				'157' => 'yes',
-		);
+    public function __construct($env = null, $process_params = true)
+    {
+        parent::__construct($env, $process_params);
+        $this->_dependencies = array('$ds-intra-categories-filtre-par-sous-rubrique');
+    }
 
-		public $dsParamINCLUDEDELEMENTS = array(
-				'nom-du-document',
-				'date',
-				'publie',
-				'document',
-				'categorie',
-				'auteur',
-				'actif'
-		);
+    public function about()
+    {
+        return array(
+            'name' => 'Intra last documents',
+            'author' => array(
+                'name' => 'Valéry Frisch',
+                'website' => 'http://mab-intranet.localhost',
+                'email' => 'valery.frisch@gmail.com'),
+            'version' => 'Symphony 2.7.10',
+            'release-date' => '2022-03-07T21:39:26+00:00'
+        );
+    }
 
+    public function getSource()
+    {
+        return '28';
+    }
 
-		public function __construct(&$parent, $env=NULL, $process_params=true){
-			parent::__construct($parent, $env, $process_params);
-			$this->_dependencies = array('$ds-intra-categories-filtre-par-sous-rubrique');
-		}
+    public function allowEditorToParse()
+    {
+        return true;
+    }
 
-		public function about(){
-			return array(
-				'name' => 'Intra last documents',
-				'author' => array(
-					'name' => 'Valéry Frisch',
-					'website' => 'http://mab-france.valactive.net',
-					'email' => 'valery@valactive.com'),
-				'version' => 'Symphony 2.2.5',
-				'release-date' => '2013-01-28T22:01:47+00:00'
-			);
-		}
+    public function execute(array &$param_pool = null)
+    {
+        $result = new XMLElement($this->dsParamROOTELEMENT);
 
-		public function getSource(){
-			return '28';
-		}
+        try {
+            $result = parent::execute($param_pool);
+        } catch (FrontendPageNotFoundException $e) {
+            // Work around. This ensures the 404 page is displayed and
+            // is not picked up by the default catch() statement below
+            FrontendPageNotFoundExceptionHandler::render($e);
+        } catch (Exception $e) {
+            $result->appendChild(new XMLElement('error',
+                General::wrapInCDATA($e->getMessage() . ' on ' . $e->getLine() . ' of file ' . $e->getFile())
+            ));
+            return $result;
+        }
 
-		public function allowEditorToParse(){
-			return true;
-		}
+        if ($this->_force_empty_result) {
+            $result = $this->emptyXMLSet();
+        }
 
-		public function grab(&$param_pool=NULL){
-			$result = new XMLElement($this->dsParamROOTELEMENT);
+        if ($this->_negate_result) {
+            $result = $this->negateXMLSet();
+        }
 
-			try{
-				include(TOOLKIT . '/data-sources/datasource.section.php');
-			}
-			catch(FrontendPageNotFoundException $e){
-				// Work around. This ensures the 404 page is displayed and
-				// is not picked up by the default catch() statement below
-				FrontendPageNotFoundExceptionHandler::render($e);
-			}
-			catch(Exception $e){
-				$result->appendChild(new XMLElement('error', $e->getMessage()));
-				return $result;
-			}
-
-			if($this->_force_empty_result) $result = $this->emptyXMLSet();
-
-			
-
-			return $result;
-		}
-
-	}
+        return $result;
+    }
+}

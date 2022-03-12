@@ -12,9 +12,9 @@
 				'name' => 'Members: Regenerate Activation Code',
 				'author' => array(
 					'name' => 'Symphony CMS',
-					'website' => 'http://symphony-cms.com',
-					'email' => 'team@symphony-cms.com'),
-				'version' => '1.0',
+					'website' => 'http://getsymphony.com',
+					'email' => 'team@getsymphony.com'),
+				'version' => 'Members 1.0',
 				'release-date' => '2011-05-10'
 			);
 		}
@@ -35,11 +35,11 @@
 				$div->appendChild($label);
 
 				$div->appendChild(Widget::Input('members[event]', 'reset-password', 'hidden'));
-				$div->appendChild(Widget::Input(null, __('Save Changes'), 'submit', array('accesskey' => 's')));
+				$div->appendChild(Widget::Input('action[save]', __('Save Changes'), 'submit', array('accesskey' => 's')));
 			}
 
 			return '
-				<p>This event will regenerate an activation code for a user and is useful if their current
+				<p>This event will regenerate an activation code for a user if their current
 				activation code has expired. The activation code can be sent to a Member\'s email after
 				this event has executed.</p>
 				<h3>Example Front-end Form Markup</h3>
@@ -50,6 +50,7 @@
 					&lt;label&gt;Username: &lt;input name="fields[username]" type="text" value="{$username}"/&gt;&lt;/label&gt;
 					or
 					&lt;label&gt;Email: &lt;input name="fields[email]" type="text" value="{$email}"/&gt;&lt;/label&gt;
+					&lt;input type="hidden" name="members-section-id" value="{$your-section-id}"/&gt;
 					&lt;input type="submit" name="action['.self::ROOTELEMENT.']" value="Regenerate Activation Code"/&gt;
 					&lt;input type="hidden" name="redirect" value="{$root}/"/&gt;
 				&lt;/form&gt;
@@ -64,6 +65,7 @@
 		protected function __trigger(){
 			$result = new XMLElement(self::ROOTELEMENT);
 			$fields = $_POST['fields'];
+			$this->driver = Symphony::ExtensionManager()->create('members');
 
 			// Add POST values to the Event XML
 			$post_values = new XMLElement('post-values');
@@ -71,6 +73,13 @@
 			// Create the post data cookie element
 			if (is_array($fields) && !empty($fields)) {
 				General::array_to_xml($post_values, $fields, true);
+			}
+
+			// Set the section ID
+			$result = $this->setMembersSection($result, $_REQUEST['members-section-id']);
+			if($result->getAttribute('result') === 'error') {
+				$result->appendChild($post_values);
+				return $result;
 			}
 
 			// Trigger the EventPreSaveFilter delegate. We are using this to make
@@ -81,13 +90,12 @@
 			// Add any Email Templates for this event
 			$this->addEmailTemplates('regenerate-activation-code-template');
 
-			$activation = extension_Members::getField('activation');
+			$activation = $this->driver->getMemberDriver()->section->getField('activation');
 			if(!$activation instanceof fieldMemberActivation) {
 				$result->setAttribute('result', 'error');
 				$result->appendChild(
-					new XMLElement('error', null, array(
-						'type' => 'invalid',
-						'message' => __('No Activation field found.')
+					new XMLElement('message', __('No Activation field found.'), array(
+						'message-id' => MemberEventMessages::MEMBER_ERRORS
 					))
 				);
 				$result->appendChild($post_values);
@@ -96,13 +104,12 @@
 
 			// Check that either a Member: Username or Member: Password field
 			// has been detected
-			$identity = SymphonyMember::setIdentityField($fields, false);
+			$identity = $this->driver->getMemberDriver()->setIdentityField($fields, false);
 			if(!$identity instanceof Identity) {
 				$result->setAttribute('result', 'error');
 				$result->appendChild(
-					new XMLElement('error', null, array(
-						'type' => 'invalid',
-						'message' => __('No Identity field found.')
+					new XMLElement('message', __('No Identity field found.'), array(
+						'message-id' => MemberEventMessages::MEMBER_ERRORS
 					))
 				);
 				$result->appendChild($post_values);
@@ -112,10 +119,16 @@
 			if(!isset($fields[$identity->get('element_name')]) or empty($fields[$identity->get('element_name')])) {
 				$result->setAttribute('result', 'error');
 				$result->appendChild(
+					new XMLElement('message', __('Member event encountered errors when processing.'), array(
+						'message-id' => MemberEventMessages::MEMBER_ERRORS
+					))
+				);
+				$result->appendChild(
 					new XMLElement($identity->get('element_name'), null, array(
+						'label' => $identity->get('label'),
 						'type' => 'missing',
+						'message-id' => EventMessages::FIELD_MISSING,
 						'message' => __('%s is a required field.', array($identity->get('label'))),
-						'label' => $identity->get('label')
 					))
 				);
 				$result->appendChild($post_values);
@@ -127,15 +140,19 @@
 
 			// Check that a member exists first before proceeding.
 			$member_id = $identity->fetchMemberIDBy($fields[$identity->get('element_name')]);
-
 			if(is_null($member_id)) {
 				$result->setAttribute('result', 'error');
 				$result->appendChild(
-					new XMLElement($identity->get('element_name'), null, array(
-						'type' => 'invalid',
-						'message' => __('Member not found.'),
-						'label' => $identity->get('label')
+					new XMLElement('message', __('Member event encountered errors when processing.'), array(
+						'message-id' => MemberEventMessages::MEMBER_ERRORS
 					))
+				);
+				$result->appendChild(
+					new XMLElement(
+						$identity->get('element_name'),
+						null,
+						extension_Members::$_errors[$identity->get('element_name')]
+					)
 				);
 				$result->appendChild($post_values);
 				return $result;
@@ -143,16 +160,21 @@
 
 			// Check that the current member isn't already activated. If they
 			// are, no point in regenerating the code.
-			$driver = Symphony::ExtensionManager()->create('members');
-			$entry = $driver->getMemberDriver()->fetchMemberFromID($member_id);
+			$entry = $this->driver->getMemberDriver()->fetchMemberFromID($member_id);
 
 			if($entry->getData($activation->get('id'), true)->activated == 'yes') {
 				$result->setAttribute('result', 'error');
 				$result->appendChild(
+					new XMLElement('message', __('Member event encountered errors when processing.'), array(
+						'message-id' => MemberEventMessages::MEMBER_ERRORS
+					))
+				);
+				$result->appendChild(
 					new XMLElement($activation->get('element_name'), null, array(
+						'label' => $activation->get('label'),
 						'type' => 'invalid',
+						'message-id' => MemberEventMessages::ACTIVATION_PRE_COMPLETED,
 						'message' => __('Member is already activated.'),
-						'label' => $activation->get('label')
 					))
 				);
 				$result->appendChild($post_values);
@@ -165,8 +187,31 @@
 				'activated' => 'no',
 			), $status);
 
-			// Update the database setting activation to yes.
-			Symphony::Database()->update($data, 'tbl_entries_data_' . $activation->get('id'), ' `entry_id` = ' . $member_id);
+			// If the Member has entry data for the Activation field, update it to yes
+			if(array_key_exists((int)$activation->get('id'), $entry->getData())) {
+				Symphony::Database()->update($data, 'tbl_entries_data_' . $activation->get('id'), ' `entry_id` = ' . $member_id);
+			}
+			else {
+				$data['entry_id'] = $member_id;
+				Symphony::Database()->insert($data, 'tbl_entries_data_' . $activation->get('id'));
+			}
+
+			/**
+			 * Fired just after a Member has regenerated their activation code
+			 * for their account.
+			 *
+			 * @delegate MembersPostRegenerateActivationCode
+			 * @param string $context
+			 *  '/frontend/'
+			 * @param integer $member_id
+			 *  The Member ID of the member who just requested a new activation code
+			 * @param string $activation_code
+			 *  The new activation code for this Member
+			 */
+			Symphony::ExtensionManager()->notifyMembers('MembersPostRegenerateActivationCode', '/frontend/', array(
+				'member_id' => $member_id,
+				'activation_code' => $data['code']
+			));
 
 			// Trigger the EventFinalSaveFilter delegate. The Email Template Filter
 			// and Email Template Manager extensions use this delegate to send any

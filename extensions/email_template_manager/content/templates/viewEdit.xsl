@@ -5,15 +5,9 @@
 <xsl:output method="xml"
 	omit-xml-declaration="yes"
 	encoding="UTF-8"
-	indent="yes" />
+	indent="yes"/>
 
 <xsl:template match="/">
-	<h2>	
-		<span><xsl:choose><xsl:when test="/data/templates/entry/name"><xsl:value-of select="/data/templates/entry/name" /></xsl:when><xsl:otherwise>New Template</xsl:otherwise></xsl:choose></span>
-		<xsl:for-each select="/data/templates/entry/layouts/*">
-			<a href="{concat($root, '/symphony/extension/email_template_manager/templates/edit/', ../../handle, '/', local-name())}" class="button">Edit <xsl:value-of select="translate(local-name(),'abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/> layout</a>
-		</xsl:for-each>
-	</h2>
 	<form method="post" action="{$current-url}">
 		<fieldset class="settings">
 			<legend>Template Settings</legend>
@@ -27,12 +21,14 @@
 					Name
 					<input type="text" name="fields[name]">
 						<xsl:attribute name="value">
-							<xsl:if test="/data/fields">
-								<xsl:value-of select="/data/fields/name"/>
-							</xsl:if>
-							<xsl:if test="not(/data/fields)">
-								<xsl:value-of select="/data/templates/entry/name"/>
-							</xsl:if>
+							<xsl:choose>
+								<xsl:when test="/data/fields">
+									<xsl:value-of select="/data/fields/name"/>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:value-of select="/data/templates/entry/name"/>
+								</xsl:otherwise>
+							</xsl:choose>
 						</xsl:attribute>
 					</input>
 				</label>
@@ -46,16 +42,18 @@
 				<select multiple="multiple" name="fields[datasources][]">
 					<xsl:for-each select="/data/datasources/entry">
 						<option value="{handle}">
-							<xsl:if test="/data/fields">
-								<xsl:if test="/data/fields/datasources/item = handle">
-									<xsl:attribute name="selected" select="'selected'"/>
-								</xsl:if>
-							</xsl:if>
-							<xsl:if test="not(/data/fields)">
-								<xsl:if test="/data/templates/entry/datasources/item = handle">
-									<xsl:attribute name="selected" select="'selected'"/>
-								</xsl:if>
-							</xsl:if>
+							<xsl:choose>
+								<xsl:when test="/data/fields">
+									<xsl:if test="/data/fields/datasources/item = handle">
+										<xsl:attribute name="selected" select="'selected'"/>
+									</xsl:if>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:if test="/data/templates/entry/datasources/item = handle">
+										<xsl:attribute name="selected" select="'selected'"/>
+									</xsl:if>
+								</xsl:otherwise>
+							</xsl:choose>
 							<xsl:value-of select="name"/>
 						</option>
 					</xsl:for-each>
@@ -82,9 +80,7 @@
 					</option>
 					<option value="plain">
 						<xsl:if test="not(/data/templates/entry/layouts/html) and (/data/templates/entry/layouts/plain)">
-							<xsl:attribute name="selected">
-								1
-							</xsl:attribute>
+							<xsl:attribute name="selected">1</xsl:attribute>
 						</xsl:if>
 						Plain only
 					</option>
@@ -101,17 +97,18 @@
 						<xsl:text>invalid</xsl:text>
 					</xsl:attribute>
 				</xsl:if>
-				<label>	
+				<label>
 					Subject
 					<input type="text" name="fields[subject]">
-						
 						<xsl:attribute name="value">
-							<xsl:if test="/data/fields">
-								<xsl:value-of select="/data/fields/subject"/>
-							</xsl:if>
-							<xsl:if test="not(/data/fields)">
-								<xsl:value-of select="/data/templates/entry/subject"/>
-							</xsl:if>
+							<xsl:choose>
+								<xsl:when test="/data/fields">
+									<xsl:value-of select="/data/fields/subject"/>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:value-of select="/data/templates/entry/subject"/>
+								</xsl:otherwise>
+							</xsl:choose>
 						</xsl:attribute>
 					</input>
 				</label>
@@ -128,17 +125,19 @@
 						<xsl:text>invalid</xsl:text>
 					</xsl:attribute>
 				</xsl:if>
-				<label>	
+				<label>
 					Recipients
 					<i>optional</i>
 					<input type="text" name="fields[recipients]">
 						<xsl:attribute name="value">
-							<xsl:if test="/data/fields">
-								<xsl:value-of select="/data/fields/recipients"/>
-							</xsl:if>
-							<xsl:if test="not(/data/fields)">
-								<xsl:value-of select="/data/templates/entry/recipients"/>
-							</xsl:if>
+							<xsl:choose>
+								<xsl:when test="/data/fields">
+									<xsl:value-of select="/data/fields/recipients"/>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:value-of select="/data/templates/entry/recipients"/>
+								</xsl:otherwise>
+							</xsl:choose>
 						</xsl:attribute>
 					</input>
 				</label>
@@ -146,27 +145,86 @@
 					<p><xsl:value-of select="/data/errors/recipients"/></p>
 				</xsl:if>
 				<xsl:if test="not(/data/errors/recipients)">
-					<p class="help">Select multiple recipients by seperating them with commas. This is also possible dynamically: <code>{/data/authors/name} &lt;{/data/authors/email}&gt;</code> will return: <code>name &lt;email@domain.com&gt;, name2 &lt;email2@domain.com&gt;</code></p>
+					<p class="help">Select multiple recipients by separating them with commas. This is also possible dynamically: <code>{/data/authors/author/name} &lt;{/data/authors/author/email}&gt;</code> will return: <code>name &lt;email@domain.com&gt;, name2 &lt;email2@domain.com&gt;</code></p>
 				</xsl:if>
 			</div>
 			<div class="group">
 				<div>
-					<xsl:if test="/data/errors/sender-name">
+					<xsl:if test="/data/errors/from-name">
 						<xsl:attribute name="class">
 							<xsl:text>invalid</xsl:text>
 						</xsl:attribute>
 					</xsl:if>
-					<label>	
+					<label>
+						From Name
+						<i>optional</i>
+						<input type="text" name="fields[from-name]">
+							<xsl:attribute name="value">
+								<xsl:choose>
+									<xsl:when test="/data/fields">
+										<xsl:value-of select="/data/fields/from-name"/>
+									</xsl:when>
+									<xsl:otherwise>
+										<xsl:value-of select="/data/templates/entry/from-name"/>
+									</xsl:otherwise>
+								</xsl:choose>
+							</xsl:attribute>
+						</input>
+					</label>
+					<xsl:if test="/data/errors/from-name">
+						<p><xsl:value-of select="/data/errors/from-name"/></p>
+					</xsl:if>
+				</div>
+				<div>
+					<xsl:if test="/data/errors/from-email-address">
+						<xsl:attribute name="class">
+							<xsl:text>invalid</xsl:text>
+						</xsl:attribute>
+					</xsl:if>
+					<label>
+						From Email Address
+						<i>optional</i>
+						<input type="text" name="fields[from-email-address]">
+							<xsl:attribute name="value">
+								<xsl:choose>
+									<xsl:when test="/data/fields">
+										<xsl:value-of select="/data/fields/from-email-address"/>
+									</xsl:when>
+									<xsl:otherwise>
+										<xsl:value-of select="/data/templates/entry/from-email-address"/>
+									</xsl:otherwise>
+								</xsl:choose>
+							</xsl:attribute>
+						</input>
+					</label>
+					<xsl:if test="/data/errors/from-email-address">
+						<p><xsl:value-of select="/data/errors/from-email-address"/></p>
+					</xsl:if>
+					<xsl:if test="not(/data/errors/from-email-address)">
+						<p class="help">Faking this address is dangerous. It may cause issues with spam filters and even break sending, especially via SMTP.</p>
+					</xsl:if>
+				</div>
+			</div>
+			<div class="group">
+				<div>
+					<xsl:if test="/data/errors/reply-to-name">
+						<xsl:attribute name="class">
+							<xsl:text>invalid</xsl:text>
+						</xsl:attribute>
+					</xsl:if>
+					<label>
 						Reply-To Name
 						<i>optional</i>
 						<input type="text" name="fields[reply-to-name]">
 							<xsl:attribute name="value">
-								<xsl:if test="/data/fields">
-									<xsl:value-of select="/data/fields/reply-to-name"/>
-								</xsl:if>
-								<xsl:if test="not(/data/fields) and /data/templates/entry/reply-to-name">
-									<xsl:value-of select="/data/templates/entry/reply-to-name"/>
-								</xsl:if>
+								<xsl:choose>
+									<xsl:when test="/data/fields">
+										<xsl:value-of select="/data/fields/reply-to-name"/>
+									</xsl:when>
+									<xsl:otherwise>
+										<xsl:value-of select="/data/templates/entry/reply-to-name"/>
+									</xsl:otherwise>
+								</xsl:choose>
 							</xsl:attribute>
 						</input>
 					</label>
@@ -175,22 +233,24 @@
 					</xsl:if>
 				</div>
 				<div>
-					<xsl:if test="/data/errors/sender-email-address">
+					<xsl:if test="/data/errors/reply-to-email-address">
 						<xsl:attribute name="class">
 							<xsl:text>invalid</xsl:text>
 						</xsl:attribute>
 					</xsl:if>
-					<label>	
+					<label>
 						Reply-To Email Address
 						<i>optional</i>
 						<input type="text" name="fields[reply-to-email-address]">
 							<xsl:attribute name="value">
-								<xsl:if test="/data/fields">
-									<xsl:value-of select="/data/fields/reply-to-email-address"/>
-								</xsl:if>
-								<xsl:if test="not(/data/fields) and /data/templates/entry/reply-to-email-address">
-									<xsl:value-of select="/data/templates/entry/reply-to-email-address"/>
-								</xsl:if>
+								<xsl:choose>
+									<xsl:when test="/data/fields">
+										<xsl:value-of select="/data/fields/reply-to-email-address"/>
+									</xsl:when>
+									<xsl:otherwise>
+										<xsl:value-of select="/data/templates/entry/reply-to-email-address"/>
+									</xsl:otherwise>
+								</xsl:choose>
 							</xsl:attribute>
 						</input>
 					</label>
@@ -199,8 +259,67 @@
 					</xsl:if>
 				</div>
 			</div>
+			<div>
+				<xsl:if test="/data/errors/attachments">
+					<xsl:attribute name="class">
+						<xsl:text>invalid</xsl:text>
+					</xsl:attribute>
+				</xsl:if>
+				<label>
+					Attachments
+					<i>optional</i>
+					<input type="text" name="fields[attachments]">
+						<xsl:attribute name="value">
+							<xsl:choose>
+								<xsl:when test="/data/fields">
+									<xsl:value-of select="/data/fields/attachments"/>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:value-of select="/data/templates/entry/attachments"/>
+								</xsl:otherwise>
+							</xsl:choose>
+						</xsl:attribute>
+					</input>
+				</label>
+				<xsl:if test="/data/errors/attachments">
+					<p><xsl:value-of select="/data/errors/attachments"/></p>
+				</xsl:if>
+				<xsl:if test="not(/data/errors/attachments)">
+					<p class="help">Select multiple attachments by separating them with commas. For each file define either a URL or a local path starting from the DOCROOT, e.g. <code>/workspace/media/foo.pdf</code>. It is also possible to include dynamic parts. URLs and local paths must not contain commas.</p>
+				</xsl:if>
+			</div>
+			<div>
+				<xsl:if test="/data/errors/ignore-attachment-errors">
+					<xsl:attribute name="class">
+						<xsl:text>invalid</xsl:text>
+					</xsl:attribute>
+				</xsl:if>
+				<label>
+					<input type="checkbox" name="fields[ignore-attachment-errors]">
+						<xsl:choose>
+							<xsl:when test="/data/fields/ignore-attachment-errors">
+								<xsl:attribute name="checked">checked</xsl:attribute>
+							</xsl:when>
+							<xsl:when test="/data/templates/entry/ignore-attachment-errors">
+								<xsl:attribute name="checked">checked</xsl:attribute>
+							</xsl:when>
+						</xsl:choose>
+					</input>
+					<xsl:text> </xsl:text>
+					<xsl:text>Ignore attachment errors</xsl:text>
+				</label>
+				<xsl:if test="/data/errors/attachments">
+					<p><xsl:value-of select="/data/errors/attachments"/></p>
+				</xsl:if>
+				<xsl:if test="not(/data/errors/attachments)">
+					<p class="help">With the above option an email will be sent even if an attachment can not be loaded.</p>
+				</xsl:if>
+			</div>
 		</fieldset>
 		<div class="actions">
+			<xsl:if test="/data/xsrf_input">
+				<xsl:copy-of select="/data/xsrf_input/*"/>
+			</xsl:if>
 			<input type="submit" accesskey="s" name="action[save]">
 				<xsl:attribute name="value">
 					<xsl:choose>
@@ -215,4 +334,5 @@
 		</div>
 		</form>
 </xsl:template>
+
 </xsl:stylesheet>

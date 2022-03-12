@@ -69,7 +69,7 @@
 				'blueprintsutilities' => 'extension/edui/utilities/',
 			);
 
-			$callback = $this->_Parent->getPageCallback();
+			$callback = Symphony::Engine()->getPageCallback();
 
 			if ($callback['driver'] == 'blueprintscomponents') {
 				foreach ($links as $key => $value) {

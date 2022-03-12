@@ -1,170 +1,195 @@
 <?php
 
-	/**
-	 * @package core
-	 */
+/**
+ * @package core
+ */
 
-	/**
-	 * The Frontend class is the renderer that is used to display FrontendPage's.
-	 * A `FrontendPage` is one that is setup in Symphony and it's output is generated
-	 * by using XML and XSLT
-	 */
+/**
+ * The Frontend class is the renderer that is used to display FrontendPage's.
+ * A `FrontendPage` is one that is setup in Symphony and it's output is generated
+ * by using XML and XSLT
+ */
+class Frontend extends Symphony
+{
+    /**
+     * An instance of the FrontendPage class
+     * @var FrontendPage
+     */
+    private static $_page;
 
-	require_once(CORE . '/class.symphony.php');
-	require_once(TOOLKIT . '/class.frontendpage.php');
+    /**
+     * This function returns an instance of the Frontend
+     * class. It is the only way to create a new Frontend, as
+     * it implements the Singleton interface
+     *
+     * @return Frontend
+     */
+    public static function instance()
+    {
+        if (!(self::$_instance instanceof Frontend)) {
+            self::$_instance = new Frontend;
+        }
 
-	Class Frontend extends Symphony {
+        return self::$_instance;
+    }
 
-		/**
-		 * An instance of the FrontendPage class
-		 * @var FrontendPage
-		 */
-		private static $_page;
+    /**
+     * The constructor for Frontend calls the parent Symphony constructor.
+     *
+     * @see core.Symphony#__construct()
+     */
+    protected function __construct()
+    {
+        parent::__construct();
 
-		/**
-		 * This function returns an instance of the Frontend
-		 * class. It is the only way to create a new Frontend, as
-		 * it implements the Singleton interface
-		 *
-		 * @return Frontend
-		 */
-		public static function instance() {
-			if (!(self::$_instance instanceof Frontend)) {
-				self::$_instance = new Frontend;
-			}
+        $this->_env = array();
+    }
 
-			return self::$_instance;
-		}
+    /**
+     * Accessor for `$_page`
+     *
+     * @return FrontendPage
+     */
+    public static function Page()
+    {
+        return self::$_page;
+    }
 
-		/**
-		 * The constructor for Frontend calls the parent Symphony constructor.
-		 *
-		 * @see core.Symphony#__construct()
-		 * @deprecated The constructor creates backwards compatible references
-		 *  to `$this->Database`, `$this->ExtensionManager` and `$this->Configuration`
-		 *  that act as alias for `Symphony::Database()`, `Symphony::ExtensionManager()`
-		 *  and `Symphony::Configuration()`. These will be removed in the
-		 *  next Symphony release
-		 */
-		protected function __construct() {
-			parent::__construct();
+    /**
+     * Overrides the Symphony `isLoggedIn()` function to allow Authors
+     * to become logged into the frontend when `$_REQUEST['auth-token']`
+     * is present. This logs an Author in using the loginFromToken function.
+     * This function allows the use of 'admin' type pages, where a Frontend
+     * page requires that the viewer be a Symphony Author
+     *
+     * @see core.Symphony#loginFromToken()
+     * @see core.Symphony#isLoggedIn()
+     * @return boolean
+     */
+    public static function isLoggedIn()
+    {
+        if (isset($_REQUEST['auth-token']) && $_REQUEST['auth-token'] && strlen($_REQUEST['auth-token']) == 8) {
+            return self::loginFromToken($_REQUEST['auth-token']);
+        }
 
-			$this->_env = array();
+        return Symphony::isLoggedIn();
+    }
 
-			// Need this part for backwards compatiblity
-			$this->Database = Symphony::Database();
-			$this->Configuration = Symphony::Configuration();
-			$this->ExtensionManager = Symphony::ExtensionManager();
-		}
+    /**
+     * Called by index.php, this function is responsible for rendering the current
+     * page on the Frontend. One delegate is fired, `FrontendInitialised`
+     *
+     * @uses FrontendInitialised
+     * @see boot.getCurrentPage()
+     * @param string $page
+     *  The result of getCurrentPage, which returns the `$_GET['symphony-page']`
+     * @throws FrontendPageNotFoundException
+     * @throws SymphonyErrorPage
+     * @return string
+     *  The HTML of the page to return
+     */
+    public function display($page)
+    {
+        self::$_page = new FrontendPage;
 
-		/**
-		 * Accessor for `$_page`
-		 *
-		 * @return FrontendPage
-		 */
-		public static function Page() {
-			return self::$_page;
-		}
+        /**
+         * `FrontendInitialised` is fired just after the `$_page` variable has been
+         * created with an instance of the `FrontendPage` class. This delegate is
+         * fired just before the `FrontendPage->generate()`.
+         *
+         * @delegate FrontendInitialised
+         * @param string $context
+         *  '/frontend/'
+         */
+        Symphony::ExtensionManager()->notifyMembers('FrontendInitialised', '/frontend/');
 
-		/**
-		 * Overrides the Symphony `isLoggedIn()` function to allow Authors
-		 * to become logged into the frontend when `$_REQUEST['auth-token']`
-		 * is present. This logs an Author in using the loginFromToken function.
-		 * This function allows the use of 'admin' type pages, where a Frontend
-		 * page requires that the viewer be a Symphony Author
-		 *
-		 * @see core.Symphony#loginFromToken()
-		 * @see core.Symphony#isLoggedIn()
-		 * @return boolean
-		 */
-		public function isLoggedIn() {
-			if (isset($_REQUEST['auth-token']) && $_REQUEST['auth-token'] && strlen($_REQUEST['auth-token']) == 8) {
-				return $this->loginFromToken($_REQUEST['auth-token']);
-			}
+        $output = self::$_page->generate($page);
 
-			return parent::isLoggedIn();
-		}
+        return $output;
+    }
+}
 
-		/**
-		 * Called by index.php, this function is responsible for rendering the current
-		 * page on the Frontend. One delegate is fired, `FrontendInitialised`
-		 *
-		 * @uses FrontendInitialised
-		 * @see boot.getCurrentPage()
-		 * @param string $page
-		 *  The result of getCurrentPage, which returns the `$_GET['symphony-page']`
-		 * @return string
-		 *  The HTML of the page to return
-		 */
-		public function display($page) {
-			self::$_page = new FrontendPage($this);
+/**
+ * `FrontendPageNotFoundException` extends a default Exception, it adds nothing
+ * but allows a different Handler to be used to render the Exception
+ *
+ * @see core.FrontendPageNotFoundExceptionHandler
+ */
+class FrontendPageNotFoundException extends Exception
+{
+    /**
+     * The constructor for `FrontendPageNotFoundException` sets the default
+     * error message and code for Logging purposes
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $pagename = getCurrentPage();
 
-			/**
-			 * `FrontendInitialised` is fired just after the `$_page` variable has been
-			 * created with an instance of the `FrontendPage` class. This delegate is
-			 * fired just before the `FrontendPage->generate()`.
-			 *
-			 * @delegate FrontendInitialised
-			 */
-			Frontend::instance()->ExtensionManager->notifyMembers('FrontendInitialised', '/frontend/');
-			//Symphony::ExtensionManager()->notifyMembers('FrontendInitialised', '/frontend/');
-			$output = self::$_page->generate($page);
+        if (empty($pagename)) {
+            $this->message = __('The page you requested does not exist.');
+        } else {
+            $this->message = __('The page you requested, %s, does not exist.', array('<code>' . $pagename . '</code>'));
+        }
 
-			return $output;
-		}
-	}
+        $this->code = E_USER_NOTICE;
+    }
+}
 
-	/**
-	 * `FrontendPageNotFoundException` extends a default Exception, it adds nothing
-	 * but allows a different Handler to be used to render the Exception
-	 *
-	 * @see core.FrontendPageNotFoundExceptionHandler
-	 */
-	Class FrontendPageNotFoundException extends Exception{
+/**
+ * The `FrontendPageNotFoundExceptionHandler` attempts to find a Symphony
+ * page that has been given the '404' page type to render the SymphonyErrorPage
+ * error, instead of using the Symphony default.
+ */
+class FrontendPageNotFoundExceptionHandler extends SymphonyErrorPageHandler
+{
+    /**
+     * The render function will take a `FrontendPageNotFoundException` Exception and
+     * output a HTML page. This function first checks to see if their is a page in Symphony
+     * that has been given the '404' page type, otherwise it will just use the default
+     * Symphony error page template to output the exception
+     *
+     * @param Throwable $e
+     *  The Throwable object
+     * @throws FrontendPageNotFoundException
+     * @throws SymphonyErrorPage
+     * @return string
+     *  An HTML string
+     */
+    public static function render($e)
+    {
+        $page = PageManager::fetchPageByType('404');
+        $previous_exception = Frontend::instance()->getException();
 
-		/**
-		 * The constructor for `FrontendPageNotFoundException` sets the default
-		 * error message and code for Logging purposes
-		 */
-		public function __construct() {
-			parent::__construct();
-			$this->message = __('The page you requested, %s, does not exist.', array('<code>' . getCurrentPage() . '</code>'));
-			$this->code = E_USER_NOTICE;
-		}
+        // No 404 detected, throw default Symphony error page
+        if (is_null($page['id'])) {
+            parent::render(new SymphonyErrorPage(
+                $e->getMessage(),
+                __('Page Not Found'),
+                'generic',
+                array(),
+                Page::HTTP_STATUS_NOT_FOUND
+            ));
 
-	}
+            // Recursive 404
+        } elseif (isset($previous_exception)) {
+            parent::render(new SymphonyErrorPage(
+                __('This error occurred whilst attempting to resolve the 404 page for the original request.') . ' ' . $e->getMessage(),
+                __('Page Not Found'),
+                'generic',
+                array(),
+                Page::HTTP_STATUS_NOT_FOUND
+            ));
 
-	/**
-	 * The `FrontendPageNotFoundExceptionHandler` attempts to find a Symphony
-	 * page that has been given the '404' page type to render the SymphonyErrorPage
-	 * error, instead of using the Symphony default.
-	 */
-	Class FrontendPageNotFoundExceptionHandler extends SymphonyErrorPageHandler{
+            // Handle 404 page
+        } else {
+            $url = '/' . PageManager::resolvePagePath($page['id']) . '/';
 
-		/**
-		 * The render function will take a `FrontendPageNotFoundException` Exception and
-		 * output a HTML page. This function first checks to see if their is a page in Symphony
-		 * that has been given the '404' page type, otherwise it will just use the default
-		 * Symphony error page template to output the exception
-		 *
-		 * @param FrontendPageNotFoundException $e
-		 *  The Exception object
-		 * @return string
-		 *  An HTML string
-		 */
-		public static function render($e){
-			$page_id = Symphony::Database()->fetchVar('page_id', 0, "SELECT `page_id` FROM `tbl_pages_types` WHERE `type` = '404' LIMIT 1");
+            Frontend::instance()->setException($e);
+            $output = Frontend::instance()->display($url);
+            echo $output;
 
-			if(is_null($page_id)){
-				parent::render(new SymphonyErrorPage($e->getMessage(), __('Page Not Found'), 'error', array('header' => 'HTTP/1.0 404 Not Found')));
-			}
-			else{
-				$url = '/' . Frontend::instance()->resolvePagePath($page_id) . '/';
-
-				$output = Frontend::instance()->display($url);
-				header(sprintf('Content-Length: %d', strlen($output)));
-				echo $output;
-				exit;
-			}
-		}
-	}
+            exit;
+        }
+    }
+}

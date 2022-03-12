@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension id="localisationmanager" status="released" xmlns="http://symphony-cms.com/schemas/extension/1.0">
+	<name>Localisation Manager</name>
+	<description>Create and export localisation files to aid translation of Symphony and extensions.</description>
+	<repo type="github">https://github.com/symphonists/localisationmanager</repo>
+	<url type="discuss">http://symphony-cms.com/discuss/thread/29602/</url>
+	<types>
+		<type>Multilingual</type>
+	</types>
+	<authors>
+		<author>
+			<name github="symphonists" symphony="community">Symphony Community</name>
+			<website>https://github.com/symphonists</website>
+		</author>
+		<author>
+			<name github="nilshoerrmann" symphony="Nils">Nils Hörrmann</name>
+			<website>http://nilshoerrmann.de</website>
+		</author>
+	</authors>
+	<releases>
+		<release version="2.2.0" date="2015-01-09" min="2.6.0">
+			- Symphony 2.6 compatibility
+		</release>
+		<release version="2.1.0" date="2014-03-18" min="2.4.0">
+			- Symphony 2.4 compatibility
+		</release>
+		<release version="2.0.2" date="2012-03-16" min="2.3.0">
+			- Improved titles for namespaces
+		</release>
+		<release version="2.0.1" date="2012-03-15" min="2.3.0">
+			- Added German translations
+			- Refined language strings
+		</release>
+		<release version="2.0.0" date="2012-03-14" min="2.3.0">
+			- Symphony 2.3 compatibility
+		</release>
+		<release version="1.6.0" date="2011-06-07" min="2.2" max="2.2.5">
+			- Fix apostrophe handling in strings (thanks Simone!)
+		</release>
+		<release version="1.5.0" date="2011-01-30">
+			- Make sure that files on the first folder level are also parsed
+			- Fix link for new dictionaries
+		</release>
+		<release version="1.4.0" date="2011-01-30" min="2.0.7">
+			- Symphony 2.2 compatibility
+		</release>
+	</releases>
+</extension>

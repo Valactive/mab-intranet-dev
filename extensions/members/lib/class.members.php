@@ -1,19 +1,24 @@
 <?php
 
-	function __autoload($name) {
+	function loadMemberImplementations($name) {
 		if(preg_match('/Member$/', $name)) {
 			require_once EXTENSIONS . '/members/lib/member.' . strtolower(preg_replace('/Member$/', '', $name)) . '.php';
 		}
 	}
+	spl_autoload_register('loadMemberImplementations');
 
 	Interface Member {
+		// Utilities
+		public function setMemberSectionID(MemberSection $section);
+		public function getMemberSectionID();
+		public function setIdentityField(array $credentials, $simplified = true);
+
 		// Authentication
 		public function login(array $credentials);
 		public function logout();
 		public function isLoggedIn();
 
 		// Finding
-		public static function setIdentityField(array $credentials, $simplified = true);
 		public function findMemberIDFromCredentials(array $credentials);
 		public function fetchMemberFromID($member_id = null);
 
@@ -24,27 +29,35 @@
 
 	Abstract Class Members implements Member {
 
-		protected static $driver = null;
 		protected static $member_id = 0;
 		protected static $isLoggedIn = false;
 
 		public $Member = null;
 		public $cookie = null;
-
-		public function __construct($driver) {
-			self::$driver = $driver;
-		}
+		public $section_id = null;
+		public $section = null;
 
 	/*-------------------------------------------------------------------------
 		Utilities:
 	-------------------------------------------------------------------------*/
 
+		public function getMember() {
+			return $this->Member;
+		}
+
 		public function getMemberID() {
 			return self::$member_id;
 		}
 
-		public function getMember() {
-			return $this->Member;
+		public function setMemberSectionID(MemberSection $section) {
+			$this->section = $section;
+			$this->section_id = (int)$section->getData()->id;
+		}
+
+		public function getMemberSectionID() {
+			if(is_null($this->cookie)) $this->initialiseCookie();
+
+			return $this->cookie->get('members-section-id');
 		}
 
 	/*-------------------------------------------------------------------------
@@ -67,18 +80,44 @@
 			return $this->Member;
 		}
 
+		/**
+		 * This function will adjust the locale for the currently logged in
+		 * user if the active Member section has a Member: Timezone field.
+		 *
+		 * @param integer $member_id
+		 * @return void
+		 */
+		public function updateSystemTimezoneOffset() {
+			if(is_null($this->Member)) return;
+
+			$timezone = $this->section->getField('timezone');
+
+			if(!$timezone instanceof fieldMemberTimezone) return;
+
+			$tz = $timezone->getMemberTimezone($this->getMemberID());
+
+			if(is_null($tz)) return;
+
+			try {
+				DateTimeObj::setDefaultTimezone($tz);
+			}
+			catch(Exception $ex) {
+				Symphony::Log()->pushToLog(__('Members Timezone') . ': ' . $ex->getMessage(), $ex->getCode(), true);
+			}
+		}
+
 	/*-------------------------------------------------------------------------
 		Finding:
 	-------------------------------------------------------------------------*/
 
 		public function fetchMemberFromID($member_id = null) {
 			if(!is_null($member_id)) {
-				$Member = extension_Members::$entryManager->fetch($member_id, NULL, NULL, NULL, NULL, NULL, false, true);
+				$Member = EntryManager::fetch($member_id, NULL, NULL, NULL, NULL, NULL, false, true);
 				return $Member[0];
 			}
 
 			else if(self::$member_id !== 0) {
-				$Member = extension_Members::$entryManager->fetch(self::$member_id, NULL, NULL, NULL, NULL, NULL, false, true);
+				$Member = EntryManager::fetch(self::$member_id, NULL, NULL, NULL, NULL, NULL, false, true);
 				return $Member[0];
 			}
 
@@ -96,7 +135,7 @@
 		public function findMemberIDFromIdentity($needle = null){
 			if(is_null($needle)) return null;
 
-			$identity = extension_Members::getField('identity');
+			$identity = $this->section->getField('identity');
 
 			return $identity->fetchMemberIDBy($needle);
 		}
@@ -121,17 +160,22 @@
 			$this->initialiseMemberObject();
 
 			$context['params']['member-id'] = $this->getMemberID();
+			$context['params']['member-section-id'] = $this->getMemberSectionID();
 
-			if(!is_null(extension_Members::getFieldHandle('role'))) {
-				$role_data = $this->getMember()->getData(extension_Members::getField('role')->get('id'));
+			if (!$this->getMember()) {
+				return;
+			}
+
+			if(!is_null($this->section->getFieldHandle('role'))) {
+				$role_data = $this->getMember()->getData($this->section->getField('role')->get('id'));
 				$role = RoleManager::fetch($role_data['role_id']);
 				if($role instanceof Role) {
 					$context['params']['member-role'] = $role->get('name');
 				}
 			}
 
-			if(!is_null(extension_Members::getFieldHandle('activation'))) {
-				if($this->getMember()->getData(extension_Members::getField('activation')->get('id'), true)->activated != "yes") {
+			if(!is_null($this->section->getFieldHandle('activation'))) {
+				if($this->getMember()->getData($this->section->getField('activation')->get('id'), true)->activated != "yes") {
 					$context['params']['member-activated'] = 'no';
 				}
 			}
@@ -141,10 +185,10 @@
 			$result = new XMLElement('member-login-info');
 
 			if($this->isLoggedIn()) {
-				self::$driver->__updateSystemTimezoneOffset($this->getMemberID());
 				$result->setAttributearray(array(
 					'logged-in' => 'yes',
 					'id' => $this->getMemberID(),
+					'section-id' => $this->getMemberSectionID(),
 					'result' => 'success'
 				));
 			}
@@ -154,11 +198,20 @@
 				// Append error messages
 				if(is_array(extension_Members::$_errors) && !empty(extension_Members::$_errors)) {
 					foreach(extension_Members::$_errors as $type => $error) {
+						if (!is_array($error)) {
+							$error = array(
+								'label' => $type,
+								'type' => 'error',
+								'message' => General::sanitize((string)$error),
+								'message-id' => MemberEventMessages::MEMBER_ERRORS,
+							);
+						}
 						$result->appendChild(
 							new XMLElement($type, null, array(
+								'label' => General::sanitize($error['label']),
 								'type' => $error['type'],
 								'message' => $error['message'],
-								'label' => General::sanitize($error['label'])
+								'message-id' => $error['message-id'],
 							))
 						);
 					}
@@ -191,6 +244,10 @@
 		}
 
 		public function filter_LockActivation(array &$context) {
+			return true;
+		}
+
+		public function filter_ValidatePassword(array &$context) {
 			return true;
 		}
 

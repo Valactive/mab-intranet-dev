@@ -10,11 +10,9 @@
 
 	class LocalisationManager {
 
-		private $_Parent;
 		private $_Sort;
 
-		function __construct(&$parent) {
-			$this->_Parent = $parent;
+		function __construct() {
 			if(isset($_GET['sort'])) $this->_Sort = true;
 		}
 		
@@ -26,10 +24,10 @@
 			if(empty($current)) {
 				$current = array(
 					'about' => array(
-						'name' => $name,
+						'name' => ($name ? $name : 'New translation'),
 						'author' => array(
-							'name' => $this->_Parent->Author->getFullName(),
-							'email' => $this->_Parent->Author->get('email'),
+							'name' => Administration::instance()->Author()->getFullName(),
+							'email' => Administration::instance()->Author()->get('email'),
 							'website' => ''
 						),
 					),
@@ -48,33 +46,49 @@
 			$strings = $this->getStrings($context);
 			
 			// Get transliterations
-			$alphabetical = array();
-			$symbolic = array();
-			$ampersand = array();
+			$straight = array();
+			$regexp = array();
 			if($context == 'symphony') {
 				$transliterations = $this->getTransliterations($current['transliterations']);
-				$type = 'alphabeticalUC';
 				
-				// Group tranliterations by type
-				foreach($transliterations as $key => $transliteration) {
-					if($type == 'alphabeticalUC') {
-						$alphabetical['uppercase'][$key] = $transliteration;
-						if($key == '/Þ/') $type = 'alphabeticalLC';
-						continue;
-					}
-					if($type == 'alphabeticalLC') {
-						$alphabetical['lowercase'][$key] = $transliteration;
-						if($key == '/ŉ/') $type = 'symbolic';
-						continue;
-					}
-					elseif($type == 'symbolic') {
-						$symbolic[$key] = $transliteration;
-						if($key == '/¡/') $type = 'ampersand';
-						continue;
-					}
-					elseif($type == 'ampersand') {
-						$ampersand[$key] = $transliteration;
-					}				
+				// Group straight transliterations by type
+				$type = null;
+				foreach($transliterations['straight'] as $key => $transliteration) {
+					switch($type) {
+						case 'lowercase':
+							$straight['lowercase'][$key] = $transliteration;
+							if($key == 'ŉ') $type = 'symbolic';
+							break;
+						case 'symbolic':
+							$straight['symbolic'][$key] = $transliteration;
+							if($key == '»') $type = 'special';
+							break;
+						case 'special':
+							$straight['special'][$key] = $transliteration;
+							if($key == 'º') $type = 'other';
+							break;
+						case 'other':
+							$straight['other'][$key] = $transliteration;
+							break;
+						default:
+							$straight['uppercase'][$key] = $transliteration;
+							if($key == 'Þ') $type = 'lowercase';
+							break;
+					}	
+				}
+				
+				// Regular expression based transliterations – no grouping needed so far
+				$type = null;
+				foreach($transliterations['regexp'] as $key => $transliteration) {
+					switch($type) {
+						case 'other':
+							$regexp['other'][$key] = $transliteration;
+							break;
+						default:
+							$regexp['ampersands'][$key] = $transliteration;
+							if($key == '/&(?!&)/') $type = 'other';
+							break;
+					}	
 				}
 			}
 			
@@ -101,6 +115,20 @@
 				}
 			}
 			
+			// Extract namespaces
+			$namespaces = array();
+			foreach($current['dictionary'] as $namespace => $translations) {
+				if(is_array($translations)) {
+					
+					// Check for existence of strings
+					$namespaces[$namespace]['strings'] = array_intersect_key($translations, $current['dictionary']);
+					$namespaces[$namespace]['obsolete'] = array_diff_ukey($translations, $current['dictionary'], "key_compare_func");
+					
+					// Remove namespaces from list of plain strings
+					unset($current['dictionary'][$namespace]); 
+				}
+			}
+			
 			// Return new dictionary
 			return array(
 				'about' => array(
@@ -115,12 +143,12 @@
 				'dictionary' => array(
 					'strings' => array_intersect_key($current['dictionary'], $strings),
 					'obsolete' => array_diff_ukey($current['dictionary'], $strings, "key_compare_func"),
-					'missing' => array_diff_ukey($strings, $current['dictionary'], "key_compare_func")
+					'missing' => array_diff_ukey($strings, $current['dictionary'], "key_compare_func"),
+					'namespaces' => $namespaces
 				),
 				'transliterations' => array(
-					'alphabetical' => $alphabetical,
-					'symbolic' => $symbolic,
-					'ampersands' => $ampersand
+					'straight' => $straight,
+					'regexp' => $regexp
 				)
 			);
 		}
@@ -168,7 +196,7 @@
 		public function getFiles($folder, $strings) {
 
 			// Get files
-			$files = General::listStructure($folder, array('php', 'tpl', 'js'), false, 'asc');
+			$files = General::listStructure(preg_replace('{/$}', '', $folder), array('php', 'tpl', 'js'), false, 'asc', false);
 			if(empty($files['filelist'])) {
 				return $strings;
 			}
@@ -176,10 +204,10 @@
 			// Find strings
 			foreach($files['filelist'] as $file) {
 				if(pathinfo($file, PATHINFO_EXTENSION) == 'js') {
-					$strings = array_merge($strings, $this->__findJavaScriptStrings($folder . '/' . $file));
+					$strings = array_merge($strings, $this->__findJavaScriptStrings($file));
 				}
 				else {
-					$strings = array_merge($strings, $this->__findStrings($folder . '/' . $file));
+					$strings = array_merge($strings, $this->__findStrings($file));
 				}
 			}
 			return $strings;
@@ -189,7 +217,10 @@
 		
 			// Get file
 			if($context == 'symphony') {
-				$file = Lang::$_languages[$lang]['path'];
+				$languages = Lang::Languages();
+				$file = vsprintf('%s/lang_%s/lang/lang.%s.php', array(
+					EXTENSIONS, $languages[$lang]['handle'], $lang
+				));
 			}
 			else {
 				$file = EXTENSIONS . '/' . $context . '/lang/lang.' . $lang . '.php';
@@ -209,12 +240,10 @@
 		}
 		
 		public function getTransliterations($current) {
-		
-			// Get source
-			include(LANG . '/lang.en.php');
+			include(LANG . '/transliterations.php');
 			
 			// Return transliterations
-			if(!$current) {
+			if(!$current['straight']) {
 				return $transliterations;
 			}
 			else {
@@ -243,7 +272,7 @@
 		
 			// Get source
 			$doc = new DOMDocument();
-			$xml = $doc->load(ASSETS . '/navigation.xml');
+			$xml = $doc->load(ASSETS . '/xml/navigation.xml');
 			
 			// Find navigation elements
 			$xpath = new DOMXPath($doc);
@@ -276,7 +305,10 @@
 		}
 		
 		private function __getDateStrings() {
-			return array_keys(Lang::$_dates);
+			include(LANG . '/datetime.php');
+			
+			// Return date and time strings
+			return $datetime_strings;
 		}
 		
 	}

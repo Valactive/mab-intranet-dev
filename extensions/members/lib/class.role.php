@@ -16,7 +16,7 @@
 		 * @return integer
 		 *  The newly created Role's ID
 		 */
-		public function add(array $data) {
+		public static function add(array $data) {
 			Symphony::Database()->insert($data['roles'], 'tbl_members_roles');
 			$role_id = Symphony::Database()->getInsertID();
 
@@ -56,12 +56,12 @@
 		 * @param array $data
 		 * @return boolean
 		 */
-		public function edit($role_id, array $data) {
+		public static function edit($role_id, array $data) {
 			if(is_null($role_id)) return false;
 
 			Symphony::Database()->update($data['roles'], 'tbl_members_roles', "`id` = " . $role_id);
 
-			Symphony::Database()->delete("`tbl_members_roles_forbidden_pages`", "`role_id` = " . $role_id);
+			Symphony::Database()->delete("tbl_members_roles_forbidden_pages", "`role_id` = " . $role_id);
 			$page_access = $data['roles_forbidden_pages']['page_access'];
 			if(is_array($page_access) && !empty($page_access)) {
 				foreach($page_access as $page_id){
@@ -74,7 +74,7 @@
 				}
 			}
 
-			Symphony::Database()->delete("`tbl_members_roles_event_permissions`", "`role_id` = " . $role_id);
+			Symphony::Database()->delete("tbl_members_roles_event_permissions", "`role_id` = " . $role_id);
 			$permissions = $data['roles_event_permissions']['permissions'];
 			if(is_array($permissions) && !empty($permissions)){
 				$sql = "INSERT INTO `tbl_members_roles_event_permissions` VALUES ";
@@ -104,31 +104,51 @@
 		 * @param boolean $purge_members
 		 * @return boolean
 		 */
-		public function delete($role_id, $purge_members = false) {
-			Symphony::Database()->delete("`tbl_members_roles_forbidden_pages`", " `role_id` = " . $role_id);
-			Symphony::Database()->delete("`tbl_members_roles_event_permissions`", " `role_id` = " . $role_id);
-			Symphony::Database()->delete("`tbl_members_roles`", " `id` = " . $role_id);
+		public static function delete($role_id, $purge_members = false) {
+			Symphony::Database()->delete("tbl_members_roles_forbidden_pages", " `role_id` = " . $role_id);
+			Symphony::Database()->delete("tbl_members_roles_event_permissions", " `role_id` = " . $role_id);
+			Symphony::Database()->delete("tbl_members_roles", " `id` = " . $role_id);
+
+			$role_fields = FieldManager::fetch(null, null, 'ASC', 'sortorder', extension_Members::getFieldType('role'));
 
 			if($purge_members) {
-				$members = Symphony::Database()->fetchCol('entry_id', sprintf(
-					"SELECT `entry_id` FROM `tbl_entries_data_%d` WHERE `role_id` = %d",
-					extension_Members::getField('role')->get('id'), $role_id
-				));
+				$members = array();
+				foreach($role_fields as $role_field) {
+					$members_of_role = Symphony::Database()->fetchCol('entry_id', sprintf(
+						"SELECT `entry_id` FROM `tbl_entries_data_%d` WHERE `role_id` = %d",
+						$role_field->get('id'), $role_id
+					));
+
+					$members = array_merge($members, $members_of_role);
+				}
 
 				/**
-				 * Prior to deletion of entries. Array of Entry ID's is provided.
-				 * The array can be manipulated
+				 * Prior to deletion of entries. An array of Entry ID's is provided which
+				 * can be manipulated. This delegate was renamed from `Delete` to `EntryPreDelete`
+				 * in Symphony 2.3.
 				 *
-				 * @delegate Delete
+				 * @delegate EntryPreDelete
 				 * @param string $context
 				 * '/publish/'
-				 * @param array $checked
+				 * @param array $entry_id
 				 *  An array of Entry ID's passed by reference
 				 */
-				Symphony::ExtensionManager()->notifyMembers('Delete', '/publish/', array('entry_id' => &$checked));
+				Symphony::ExtensionManager()->notifyMembers('EntryPreDelete', '/publish/', array('entry_id' => &$members));
 
-				$entryManager = new EntryManager(Symphony::Engine());
-				$entryManager->delete($members);
+				EntryManager::delete($members);
+
+				/**
+				 * After the deletion of entries, this delegate provides an array of Entry ID's
+				 * that were deleted.
+				 *
+				 * @since Symphony 2.3
+				 * @delegate EntryPostDelete
+				 * @param string $context
+				 * '/publish/'
+				 * @param array $entry_id
+				 *  An array of Entry ID's that were deleted.
+				 */
+				Symphony::ExtensionManager()->notifyMembers('EntryPostDelete', '/publish/', array('entry_id' => $members));
 			}
 
 			return true;
@@ -240,7 +260,7 @@
 
 		/**
 		 * Sets the permissions for the current Role by loading them from
-		 * `tbl_member_roles_forbidden_pages` and `tbl_member_roles_event_permissions`.
+		 * `tbl_members_roles_forbidden_pages` and `tbl_members_roles_event_permissions`.
 		 * The permissions are set under `forbidden_pages` and `event_permissions` keys
 		 * that can be accessed via `Role->get('event_permissions')`.
 		 */
@@ -300,6 +320,10 @@
 		 * `EventPermissions` constants, `NO_PERMISSIONS`, `OWN_ENTRIES`, `ALL_ENTRIES`
 		 * or `CREATE`.
 		 *
+		 * @since Symphony 2.4
+		 *  This function defaults to false (`NO_PERMISSIONS`) if there are no matches.
+		 *  This means the Role must be updated with all the event permissions before the
+		 *  event can be used.
 		 * @param string $event_handle
 		 * @param string $action
 		 * @param integer $required_level
@@ -312,8 +336,9 @@
 				return ($event_permissions[$event_handle][$action] >= $required_level);
 			}
 
-			// If the event wasn't in the array, then assume it's ok.
-			return true;
+			// If the event wasn't in the array, then assume it's not ok.
+			// Note this a change since Members 1.4. RE: #242.
+			return false;
 		}
 	}
 

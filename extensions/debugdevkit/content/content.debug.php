@@ -45,7 +45,7 @@
 			return parent::build();
 		}
 
-		protected function buildJump($wrapper) {
+		protected function buildJump(XMLElement $wrapper) {
 			$list = new XMLElement('ul');
 
 			$list->appendChild($this->buildJumpItem(
@@ -85,11 +85,11 @@
 			$wrapper->appendChild($list);
 		}
 
-		public function buildContent($wrapper) {
-			$this->addStylesheetToHead(URL . '/extensions/debugdevkit/assets/devkit.css', 'screen', 9126343);
-			$this->addScriptToHead(URL . '/symphony/assets/jquery.js', 9126342);
-			$this->addScriptToHead(URL . '/extensions/debugdevkit/assets/jquery.scrollto.js', 9126344);
-			$this->addScriptToHead(URL . '/extensions/debugdevkit/assets/devkit.js', 9126344);
+		public function buildContent(XMLElement $wrapper) {
+			$this->addStylesheetToHead(URL . '/extensions/debugdevkit/assets/devkit.css', 'screen', 10);
+			$this->addScriptToHead(APPLICATION_URL . '/assets/js/lib/jquery.js', 20);
+			$this->addScriptToHead(URL . '/extensions/debugdevkit/assets/jquery.scrollto.js', 30);
+			$this->addScriptToHead(URL . '/extensions/debugdevkit/assets/devkit.js', 40);
 
 			if ($this->_view == 'params') {
 				$wrapper->appendChild($this->__buildParams($this->_param));
@@ -100,11 +100,17 @@
 			} else if ($this->_view == 'result') {
 				$this->appendSource($wrapper, $this->_output, 'xml');
 
+			} else if ($this->_view == 'raw') {
+				header('Content-Type: application/xml');
+				echo $this->_xml;
+				die();
+
 			} else {
 				if ($_GET['debug'] == $this->__relativePath($this->_pagedata['filelocation'])) {
 					$this->appendSource($wrapper, @file_get_contents($this->_pagedata['filelocation']), 'xsl');
 
-				} else if (is_array($this->_full_utility_list) && !empty($this->_full_utility_list)) {
+				}
+				else if (is_array($this->_full_utility_list) && !empty($this->_full_utility_list)) {
 					foreach ($this->_full_utility_list as $u) {
 						if ($_GET['debug'] != $this->__relativePath($u)) continue;
 
@@ -115,7 +121,7 @@
 			}
 		}
 
-		protected function appendSource($wrapper, $source, $language = 'xml') {
+		protected function appendSource(XMLElement $wrapper, $source, $language = 'xml') {
 			$bitter = new Bitter();
 			$bitter->loadFormat('symphony');
 			$bitter->loadLanguage($language);
@@ -124,18 +130,27 @@
 				'div', $bitter->process($source)
 			);
 			$inner->setAttribute('id', 'source');
-
 			$wrapper->appendChild($inner);
+
+			if($this->_view == 'xml') {
+				$viewRaw = Widget::Anchor('','?debug=raw');
+				$viewRaw->setAttribute('id', 'type');
+				$viewRaw->appendChild(new XMLElement('span',__('Plain XML')));
+				$wrapper->appendChild($viewRaw);
+			}
 		}
 
 		protected function __buildParams($params) {
 			if (!is_array($params) || empty($params)) return;
+			$params = General::array_map_recursive(array('General', 'sanitize'), $params);
 
 			$wrapper = new XMLElement('div');
 			$wrapper->setAttribute('id', 'params');
 			$table = new XMLElement('table');
 
 			foreach ($params as $key => $value) {
+				$value = is_array($value) ? implode(', ', $value) : $value;
+
 				$row = new XMLElement('tr');
 				$row->appendChild(new XMLElement('th', "\${$key}"));
 				$row->appendChild(new XMLElement('td', "'{$value}'"));
@@ -174,24 +189,21 @@
 		}
 
 		protected function __findUtilitiesInFile($filename) {
-			try {
-				$xsl = @file_get_contents($filename);
+			if(file_exists($filename) && is_readable($filename)) {
+				$xsl = file_get_contents($filename);
 			}
-			catch(Exception $e) {
-				return;
-			}
-			
+
 			if ($xsl == '') return;
 
 			$utilities = array();
-			
+
 			try {
 				$xsl = @new SimpleXMLElement($xsl);
 			}
 			catch(Exception $e) { // simply abort recursion in this branch if XSL file contains invalid XML
 				return $utilities;
 			}
-			
+
 			$matches = $xsl->xpath("*[local-name()='import' or local-name()='include']");
 
 			foreach($matches AS $match) {
@@ -210,11 +222,10 @@
 
 			return $utilities;
 		}
-		
+
 		private function __relativePath($filename) {
 			// remove path to DOCROOT from absolute path. the realpath mess is necessary to cope with Windows paths (realpath always returns C:\Programs\... instead of /Programs/...)
 			return str_replace('\\','/',str_replace(realpath(DOCROOT),'',realpath($filename)));
 		}
 	}
 
-?>

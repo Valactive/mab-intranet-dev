@@ -7,7 +7,7 @@
 			'email' => 'post@nilshoerrmann.de',
 			'website' => 'http://www.nilshoerrmann.de'
 		),
-		'release-date' => '2011-01-08',
+		'release-date' => '2012-03-15'
 	);
 
 	/**
@@ -15,8 +15,14 @@
 	 */
 	$dictionary = array(
 
-		'Action' => 
-		'Aktion',
+		'Add language' => 
+		'Sprache hinzufügen',
+
+		'Create dictionary' => 
+		'Wörterbuch erstellen',
+
+		'Export dictionary' => 
+		'Wörterbuch exportieren',
 
 		'Language Manager' => 
 		'Übersicht der Übersetzungen',
@@ -24,13 +30,13 @@
 		'Localisation Manager' => 
 		'Lokalisierungsverwaltung',
 
-		'Sort output naturally' => 
-		'Ausgabe natürlich sortieren',
+		'Localisations' => 
+		'Übersetzungen',
 
-		'Available dictionaries' => 
-		'Verfügbare Wörterbücher',
+		'Sort strings alphabetically' => 
+		'Übersetzungen alphabetisch sortieren',
 
-		'Create new dictionary' => 
-		'Neues Wörterbuch anlegen',
+		'No language available' => 
+		'Keine Sprache verfügbar',
 
 	);

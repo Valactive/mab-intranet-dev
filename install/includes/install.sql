@@ -7,7 +7,7 @@ CREATE TABLE `tbl_authors` (
   `first_name` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
   `last_name` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
   `email` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `last_seen` datetime DEFAULT '0000-00-00 00:00:00',
+  `last_seen` datetime DEFAULT '1000-01-01 00:00:00',
   `user_type` enum('author','manager','developer') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'author',
   `primary` enum('yes','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
   `default_area` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -23,12 +23,13 @@ DROP TABLE IF EXISTS `tbl_cache`;
 CREATE TABLE `tbl_cache` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `hash` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `namespace` VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `creation` int(14) NOT NULL DEFAULT '0',
   `expiry` int(14) unsigned DEFAULT NULL,
   `data` longtext COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `expiry` (`expiry`),
-  KEY `hash` (`hash`)
+  UNIQUE KEY `hash` (`hash`),
+  KEY `expiry` (`expiry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- *** STRUCTURE: `tbl_entries` ***
@@ -37,10 +38,11 @@ CREATE TABLE `tbl_entries` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `section_id` int(11) unsigned NOT NULL,
   `author_id` int(11) unsigned NOT NULL,
-  `creation_date` datetime NOT NULL,
-  `creation_date_gmt` datetime NOT NULL,
-  `modification_date` datetime NOT NULL,
-  `modification_date_gmt` datetime NOT NULL,
+  `modification_author_id` int(11) unsigned NOT NULL DEFAULT 1,
+  `creation_date` datetime NOT NULL DEFAULT '1000-01-01 00:00:00',
+  `creation_date_gmt` datetime NOT NULL DEFAULT '1000-01-01 00:00:00',
+  `modification_date` datetime NOT NULL DEFAULT '1000-01-01 00:00:00',
+  `modification_date_gmt` datetime NOT NULL DEFAULT '1000-01-01 00:00:00',
   PRIMARY KEY (`id`),
   KEY `section_id` (`section_id`),
   KEY `author_id` (`author_id`),
@@ -120,6 +122,8 @@ CREATE TABLE `tbl_fields_date` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `field_id` int(11) unsigned NOT NULL,
   `pre_populate` varchar(80) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `calendar` enum('yes','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+  `time` enum('yes','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'yes',
   PRIMARY KEY (`id`),
   KEY `field_id` (`field_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -226,8 +230,18 @@ CREATE TABLE `tbl_sections` (
   `hidden` enum('yes','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
   `filter` enum('yes','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'yes',
   `navigation_group` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'Content',
+  `author_id` int(11) unsigned NOT NULL DEFAULT 1,
+  `modification_author_id` int(11) unsigned NOT NULL DEFAULT 1,
+  `creation_date` datetime NOT NULL DEFAULT '1000-01-01 00:00:00',
+  `creation_date_gmt` datetime NOT NULL DEFAULT '1000-01-01 00:00:00',
+  `modification_date` datetime NOT NULL DEFAULT '1000-01-01 00:00:00',
+  `modification_date_gmt` datetime NOT NULL DEFAULT '1000-01-01 00:00:00',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `handle` (`handle`)
+  UNIQUE KEY `handle` (`handle`),
+  KEY `creation_date` (`creation_date`),
+  KEY `creation_date_gmt` (`creation_date_gmt`),
+  KEY `modification_date` (`modification_date`),
+  KEY `modification_date_gmt` (`modification_date_gmt`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- *** STRUCTURE: `tbl_sections_association` ***

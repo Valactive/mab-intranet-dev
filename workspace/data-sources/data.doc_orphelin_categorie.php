@@ -1,80 +1,90 @@
 <?php
 
-	require_once(TOOLKIT . '/class.datasource.php');
+class datasourcedoc_orphelin_categorie extends SectionDatasource
+{
+    public $dsParamROOTELEMENT = 'doc-orphelin-categorie';
+    public $dsParamORDER = 'desc';
+    public $dsParamPAGINATERESULTS = 'yes';
+    public $dsParamLIMIT = '20';
+    public $dsParamSTARTPAGE = '1';
+    public $dsParamREDIRECTONEMPTY = 'no';
+    public $dsParamREDIRECTONFORBIDDEN = 'no';
+    public $dsParamREDIRECTONREQUIRED = 'no';
+    public $dsParamPARAMOUTPUT = array(
+        'categorie'
+    );
+    public $dsParamSORT = 'system:id';
+    public $dsParamHTMLENCODE = 'no';
+    public $dsParamASSOCIATEDENTRYCOUNTS = 'no';
 
-	Class datasourcedoc_orphelin_categorie extends Datasource{
+    public $dsParamFILTERS = array(
+        '142' => '{$ds-categorie-inactive}',
+        '157' => 'yes',
+    );
 
-		public $dsParamROOTELEMENT = 'doc-orphelin-categorie';
-		public $dsParamORDER = 'desc';
-		public $dsParamPAGINATERESULTS = 'yes';
-		public $dsParamLIMIT = '20';
-		public $dsParamSTARTPAGE = '1';
-		public $dsParamREDIRECTONEMPTY = 'no';
-		public $dsParamPARAMOUTPUT = 'categorie';
-		public $dsParamSORT = 'system:id';
-		public $dsParamASSOCIATEDENTRYCOUNTS = 'no';
+    public $dsParamINCLUDEDELEMENTS = array(
+        'nom-du-document',
+        'date',
+        'publie',
+        'document',
+        'categorie',
+        'auteur'
+    );
 
-		public $dsParamFILTERS = array(
-				'142' => '{$ds-categorie-inactive}',
-				'157' => 'yes',
-		);
+    public function __construct($env = null, $process_params = true)
+    {
+        parent::__construct($env, $process_params);
+        $this->_dependencies = array('$ds-categorie-inactive');
+    }
 
-		public $dsParamINCLUDEDELEMENTS = array(
-				'nom-du-document',
-				'date',
-				'publie',
-				'document',
-				'categorie',
-				'auteur'
-		);
+    public function about()
+    {
+        return array(
+            'name' => 'doc-orphelin-categorie',
+            'author' => array(
+                'name' => 'Valéry Frisch',
+                'website' => 'http://mab-intranet.localhost',
+                'email' => 'valery.frisch@gmail.com'),
+            'version' => 'Symphony 2.7.10',
+            'release-date' => '2022-03-07T21:38:14+00:00'
+        );
+    }
 
+    public function getSource()
+    {
+        return '28';
+    }
 
-		public function __construct(&$parent, $env=NULL, $process_params=true){
-			parent::__construct($parent, $env, $process_params);
-			$this->_dependencies = array('$ds-categorie-inactive');
-		}
+    public function allowEditorToParse()
+    {
+        return true;
+    }
 
-		public function about(){
-			return array(
-				'name' => 'doc-orphelin-categorie',
-				'author' => array(
-					'name' => 'Sophie STMadmin',
-					'website' => 'http://mab-intranet.localhost',
-					'email' => 'staminh@valactive.com'),
-				'version' => 'Symphony 2.2.5',
-				'release-date' => '2020-08-31T20:33:18+00:00'
-			);
-		}
+    public function execute(array &$param_pool = null)
+    {
+        $result = new XMLElement($this->dsParamROOTELEMENT);
 
-		public function getSource(){
-			return '28';
-		}
+        try {
+            $result = parent::execute($param_pool);
+        } catch (FrontendPageNotFoundException $e) {
+            // Work around. This ensures the 404 page is displayed and
+            // is not picked up by the default catch() statement below
+            FrontendPageNotFoundExceptionHandler::render($e);
+        } catch (Exception $e) {
+            $result->appendChild(new XMLElement('error',
+                General::wrapInCDATA($e->getMessage() . ' on ' . $e->getLine() . ' of file ' . $e->getFile())
+            ));
+            return $result;
+        }
 
-		public function allowEditorToParse(){
-			return true;
-		}
+        if ($this->_force_empty_result) {
+            $result = $this->emptyXMLSet();
+        }
 
-		public function grab(&$param_pool=NULL){
-			$result = new XMLElement($this->dsParamROOTELEMENT);
+        if ($this->_negate_result) {
+            $result = $this->negateXMLSet();
+        }
 
-			try{
-				include(TOOLKIT . '/data-sources/datasource.section.php');
-			}
-			catch(FrontendPageNotFoundException $e){
-				// Work around. This ensures the 404 page is displayed and
-				// is not picked up by the default catch() statement below
-				FrontendPageNotFoundExceptionHandler::render($e);
-			}
-			catch(Exception $e){
-				$result->appendChild(new XMLElement('error', $e->getMessage()));
-				return $result;
-			}
-
-			if($this->_force_empty_result) $result = $this->emptyXMLSet();
-
-			
-
-			return $result;
-		}
-
-	}
+        return $result;
+    }
+}

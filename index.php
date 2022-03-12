@@ -1,29 +1,20 @@
 <?php
 
-	define('DOCROOT', rtrim(dirname(__FILE__), '\\/'));
-	define('DOMAIN', rtrim(rtrim($_SERVER['HTTP_HOST'], '\\/') . dirname($_SERVER['PHP_SELF']), '\\/'));
+    // Find out where we are:
+    define('DOCROOT', __DIR__);
 
-	require(DOCROOT . '/symphony/lib/boot/bundle.php');
+    // Propagate this change to all executables:
+    chdir(DOCROOT);
 
-	function renderer($mode='frontend'){
-		if(!in_array($mode, array('frontend', 'administration'))){
-			throw new Exception('Invalid Symphony Renderer mode specified. Must be either "frontend" or "administration".');
-		}
-		require_once(CORE . "/class.{$mode}.php");
-		return ($mode == 'administration' ? Administration::instance() : Frontend::instance());
-	}
+    // Include autoloader:
+    require_once DOCROOT . '/vendor/autoload.php';
 
-	$renderer = (isset($_GET['mode']) && strtolower($_GET['mode']) == 'administration'
-			? 'administration'
-			: 'frontend');
+    // Include the boot script:
+    require_once DOCROOT . '/symphony/lib/boot/bundle.php';
 
-	header('Expires: Mon, 12 Dec 1982 06:14:00 GMT');
-	header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
-	header('Cache-Control: no-cache, must-revalidate, max-age=0');
-	header('Pragma: no-cache');
-
-	$output = renderer($renderer)->display(getCurrentPage());
-
-	echo $output;
-
-	exit;
+    // Begin Symphony proper:
+    symphony(
+        isset($_GET['mode'])
+            ? $_GET['mode']
+            : null
+    );
