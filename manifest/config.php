@@ -70,6 +70,7 @@
             'password'   => $dbpass,
             'db'         => $dbname,
             'tbl_prefix' => 'sym_',
+            'query_logging' => 'off',
         ),
         ########
 

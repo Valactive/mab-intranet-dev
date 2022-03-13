@@ -57,7 +57,7 @@
 					<login>Mot de passe <br/><small>(<a href="/intranet/membres/mot-de-passe-oublie/">Mot de passe oublié ?</a>)</small></login>
 				</label>
 				<errors>
-					<password type="missing" message="Le Mot de passé est obligatoire."/>
+					<password type="missing" message="Le Mot de passe est obligatoire."/>
 					<password type="invalid" message="Le mot de passe est trop court. Il doit contenir au minimum 6 caractères."/>
 					<password type="invalid" message="Le mot de passe n'est pas assez fort."/>
 					<password type="invalid" message="Mot de passe invalide."/>

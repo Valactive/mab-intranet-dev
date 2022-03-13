@@ -9,7 +9,7 @@
 	Configuration: Load the (language) configuration file and specify the
 	class which should be added to invalid form elements.
 -->
-<xsl:import href="../members.config.xsl"/>
+<xsl:import href="../members.config.fr.xsl"/>
 <xsl:param name="members:invalid-class" select="'invalid'"/>
 
 <!-- Changing anything below this line is at your own risk. -->
