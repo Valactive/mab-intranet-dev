@@ -1,4 +1,22 @@
 <?php
+    $domaine = $_SERVER['SERVER_NAME'];
+    switch ($domaine) {
+        case 'mab-intranet.localhost':
+            $dbname = 'mab-intranet';
+            $dbuser = 'root';
+            $dbpass = 'root';
+            break;
+        case 'intranet.mab-france.org':
+            $dbname = 'mab-france_intra';
+            $dbuser = 'mab-france';
+            $dbpass = 'valactiveBio11';
+            break;
+        default:
+        $dbname = 'mab-france_intra';
+        $dbuser = 'mab-france';
+        $dbpass = 'valactiveBio11';
+            break;
+    }
     $settings = array(
 
 
@@ -48,9 +66,9 @@
             'driver' => 'mysql',
             'host' => 'localhost',
             'port' => '3306',
-            'user' => 'root',
-            'password' => 'root',
-            'db' => 'mab-intranet',
+            'user'       => $dbuser,
+            'password'   => $dbpass,
+            'db'         => $dbname,
             'tbl_prefix' => 'sym_',
         ),
         ########
